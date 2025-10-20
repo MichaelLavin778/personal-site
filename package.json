@@ -40,5 +40,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@eslint/config-helpers": "^0.4.1",
+    "eslint": "^9.38.0",
+    "eslint-config-personal": "^0.0.0"
   }
 }
