@@ -42,8 +42,5 @@
     ]
   },
   "devDependencies": {
-    "@eslint/config-helpers": "^0.4.1",
-    "eslint": "^8.57.1",
-    "eslint-config-personal": "^0.0.0"
   }
 }
