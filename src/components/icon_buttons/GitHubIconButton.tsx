@@ -1,5 +1,5 @@
 import { IconButton, type SvgIconProps } from "@mui/material";
-import GithubIcon from "@mui/icons-material/Github";
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 const GithubIconButton = (props: SvgIconProps) => {
 	return (
@@ -9,7 +9,7 @@ const GithubIconButton = (props: SvgIconProps) => {
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<GithubIcon {...props} />
+			<GitHubIcon {...props} />
 		</IconButton>
 	);
 };
