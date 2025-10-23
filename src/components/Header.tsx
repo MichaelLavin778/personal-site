@@ -1,13 +1,17 @@
 import { makeStyles } from '@material-ui/core';
-import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar } from "@mui/material";
+import { AppBar, Container, Link, Stack } from "@mui/material";
 
 const useStyles = makeStyles(() => ({
 	header: {
-		display: 'flex',
-		flexWrap: 'nowrap',
-		backgroundColor: "#1a1a1a",
-		color: "#fff"
+		height: "6vh"
+	},
+	container: {
+		height: "100%"
+	},
+	stack: {
+		justifyContent: "space-around",
+		alignItems: "center",
+		height: '100%'
 	}
 }));
 
@@ -15,10 +19,19 @@ const Header = () => {
 	const classes = useStyles();
 
 	return (
-		<AppBar component="header" className={classes.header}>
-			<MenuIcon />
+		<AppBar component="header" enableColorOnDark={true} className={classes.header}>
+			<Container className={classes.container}>
+				<Stack direction="row" className={classes.stack}>
+					<Link href="/skill" color="inherit" underline="hover">
+						My Skill
+					</Link>
+					<Link href="/resume" color="inherit" underline="hover">
+						Resume
+					</Link>
+				</Stack>
+			</Container>
 		</AppBar>
 	);
 };
 
-export default Header
+export default Header;

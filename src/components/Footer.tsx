@@ -1,4 +1,3 @@
-import React from "react";
 import { makeStyles } from "@material-ui/core";
 import { Box, Container, Typography, Stack } from "@mui/material";
 import LinkedInIconButton from "./icon_buttons/LinkedInIconButton";
@@ -33,7 +32,7 @@ const useStyles = makeStyles(() => ({
 	}
 }));
 
-const Footer: React.FC = () => {
+const Footer = () => {
 	const classes = useStyles();
 
 	return (
@@ -56,20 +55,9 @@ const Footer: React.FC = () => {
 						<ViteIconButton />
 						<ReactIconButton />
 					</Stack>
-					{/* <Stack direction="row" spacing={2}>
-						<Link href="/about" color="inherit" underline="hover">
-							About
-						</Link>
-						<Link href="/contact" color="inherit" underline="hover">
-							Contact
-						</Link>
-						<Link href="/privacy" color="inherit" underline="hover">
-							Privacy Policy
-						</Link>
-					</Stack> */}
 					<Stack direction="row" spacing={1}>
-						<LinkedInIconButton sx={{ color: "#fff" }} />
-						<GithubIconButton sx={{ color: "#fff" }} />
+						<LinkedInIconButton className={classes.icon} />
+						<GithubIconButton className={classes.icon} />
 					</Stack>
 				</Stack>
 			</Container>

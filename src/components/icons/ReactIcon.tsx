@@ -9,4 +9,4 @@ const ReactIcon = (props: IconProps) => {
 	);
 };
 
-export default ReactIcon
+export default ReactIcon;

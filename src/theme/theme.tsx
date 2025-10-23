@@ -8,6 +8,13 @@ const theme = createTheme({
 				useFlexGap: true,
 			},
 		},
+		MuiAppBar: {
+			styleOverrides: {
+				root: {
+					backgroundColor: "#1a1a1a"
+				}
+			}
+		}
 	},
 	palette: {
 		background: {
@@ -22,4 +29,4 @@ const theme = createTheme({
 	},
 });
 
-export default theme
+export default theme;

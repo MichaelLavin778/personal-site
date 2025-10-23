@@ -1,16 +1,16 @@
 import Footer from './components/Footer';
-// import Header from './components/Header';
-import MainPage from './components/MainPage';
+import Header from './components/Header';
+import Home from './pages/Home';
 
 
 const App = () => {
 	return (
 		<>
-			{/* <Header /> */}
-			<MainPage />
+			<Header />
+			<Home />
 			<Footer />
 		</>
 	);
 };
 
-export default App
+export default App;

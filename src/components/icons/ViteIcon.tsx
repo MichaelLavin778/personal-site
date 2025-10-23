@@ -9,4 +9,4 @@ const ViteIcon = (props: IconProps) => {
 	);
 };
 
-export default ViteIcon
+export default ViteIcon;

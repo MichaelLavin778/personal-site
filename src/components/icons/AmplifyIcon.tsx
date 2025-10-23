@@ -9,4 +9,4 @@ const AmplifyIcon = (props: IconProps) => {
 	);
 };
 
-export default AmplifyIcon
+export default AmplifyIcon;

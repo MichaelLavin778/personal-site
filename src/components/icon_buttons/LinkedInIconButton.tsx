@@ -1,18 +1,17 @@
-import { IconButton, type IconButtonOwnProps } from "@mui/material";
+import { IconButton, type SvgIconProps } from "@mui/material";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 
-const LinkedInIconButton = (props: IconButtonOwnProps) => {
+const LinkedInIconButton = (props: SvgIconProps) => {
 	return (
 		<IconButton
 			aria-label="LinkedIn"
 			href="https://www.linkedin.com/in/michael-lavin-2373b7198"
 			target="_blank"
 			rel="noopener noreferrer"
-			{...props}
 		>
-			<LinkedInIcon />
+			<LinkedInIcon {...props} />
 		</IconButton>
 	);
 };
 
-export default LinkedInIconButton
+export default LinkedInIconButton;
