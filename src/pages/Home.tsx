@@ -1,5 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
+import self_portrait from '../assets/self_portrait.jpg'
+// import useS3FileDownloader from "../loaders/S3FileDownloader";
 
 
 const useStyles = makeStyles(() => ({
@@ -7,22 +9,20 @@ const useStyles = makeStyles(() => ({
         display: 'flex',
         flex: 1,
         width: '100vw',
-        height: '92vh', // 100 0 (header - padded) - 6 (footer) - 1 (comfort)
+        height: '92vh',
         paddingTop: '6vh',
         alignItems: 'center',
         justifyContent: 'center'
     },
     stack: {
-        textAlign: 'center'
-    },
-    avatar: {
-        width: 56,
-        height: 56
+        textAlign: 'center',
+        alignItems: 'center'
     }
 }));
 
 const Home = () => {
     const classes = useStyles();
+    // const file = useS3FileDownloader({ destFilename: 'self_portrait.jpg' });
 
     return (
         <Container className={classes.container}>
@@ -31,7 +31,7 @@ const Home = () => {
                     <Typography variant="h2">Michael Lavin</Typography>
                     <Typography variant="h6">FULL-STACK DEVELOPER</Typography>
                 </Box>
-                <Avatar src="src/assets/self_portrait.jpg" alt="Michael Lavin" sx={{ width: 500, height: 500 }} />
+                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '40vw', height: '40vh', minHeight: '40vw', minWidth: '40vh' }} />
             </Stack>
         </Container>
     );

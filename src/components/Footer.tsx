@@ -9,10 +9,12 @@ import ReactIconButton from "./icon_buttons/ReactIconButton";
 const useStyles = makeStyles(() => ({
 	footer: {
 		display: 'flex',
+		flex: 1,
 		flexWrap: 'nowrap',
 		backgroundColor: "#1a1a1a",
 		color: "#fff",
-		height: '6vh'
+		height: 50,
+		overflow: 'hidden'
 	},
 	icon: {
 		color: "#fff"
@@ -22,13 +24,13 @@ const useStyles = makeStyles(() => ({
 		alignItems: "center",
 		display: 'flex',
 		flex: 1,
-		height: '100%',
+		height: '100%'
 	},
-	powerRow: {
+	poweredRow: {
 		alignItems: "center",
 		display: 'flex',
 		flex: 1,
-		height: '100%',
+		height: '100%'
 	}
 }));
 
@@ -48,7 +50,7 @@ const Footer = () => {
 					<Stack
 						direction={{ xs: "column", sm: "row" }}
 						spacing={1}
-						className={classes.powerRow}
+						className={classes.poweredRow}
 					>
 						<Typography variant="body2">Powered by</Typography>
 						<AmplifyIconButton />
