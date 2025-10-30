@@ -31,7 +31,7 @@ const Home = () => {
                     <Typography variant="h2">Michael Lavin</Typography>
                     <Typography variant="h6">FULL-STACK DEVELOPER</Typography>
                 </Box>
-                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '40vw', height: '40vh', minHeight: '40vw', minWidth: '40vh' }} />
+                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '50vh', height: '50vh' }} />
             </Stack>
         </Container>
     );
