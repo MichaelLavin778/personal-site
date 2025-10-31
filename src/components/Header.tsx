@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core';
-import { AppBar, Container, Link, Stack } from "@mui/material";
+import { AppBar, Container, Stack } from "@mui/material";
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(() => ({
 	header: {
@@ -12,20 +13,31 @@ const useStyles = makeStyles(() => ({
 		justifyContent: "space-around",
 		alignItems: "center",
 		height: '100%'
+	},
+	link: {
+		color: "#fff",
+		textDecoration: 'none',
+		'&:hover': {
+			textDecoration: 'underline',
+		},
 	}
 }));
 
 const Header = () => {
 	const classes = useStyles();
+	const toHome = "/";
+	const toResume = "/resume"
+
+	const onClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname == to && e.preventDefault();
 
 	return (
 		<AppBar component="header" enableColorOnDark={true} className={classes.header}>
 			<Container className={classes.container}>
 				<Stack direction="row" className={classes.stack}>
-					<Link href="/skill" color="inherit" underline="hover">
-						My Skill
+					<Link to={toHome} onClick={(e) => onClick(e, toHome)} className={classes.link}>
+						Home
 					</Link>
-					<Link href="/resume" color="inherit" underline="hover">
+					<Link to={toResume} onClick={(e) => onClick(e, toResume)} className={classes.link}>
 						Resume
 					</Link>
 				</Stack>
