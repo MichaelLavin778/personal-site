@@ -8,29 +8,27 @@ import ReactIconButton from "./icon_buttons/ReactIconButton";
 
 const useStyles = makeStyles(() => ({
 	footer: {
-		display: 'flex',
-		flex: 1,
-		flexWrap: 'nowrap',
+		position: 'fixed',
+		bottom: 0,
+		left: 0,
+		width: '100%',
 		backgroundColor: "#1a1a1a",
-		color: "#fff",
 		height: 50,
 		overflow: 'hidden'
 	},
-	icon: {
-		color: "#fff"
+	container: {
+		alignItems: "center",
+		height: '100%'
 	},
 	main: {
 		justifyContent: "space-between",
-		alignItems: "center",
-		display: 'flex',
-		flex: 1,
 		height: '100%'
 	},
 	poweredRow: {
-		alignItems: "center",
-		display: 'flex',
-		flex: 1,
-		height: '100%'
+		alignItems: "center"
+	},
+	icon: {
+		color: "#fff"
 	}
 }));
 
@@ -42,13 +40,13 @@ const Footer = () => {
 			component="footer"
 			className={classes.footer}
 		>
-			<Container>
+			<Container className={classes.container}>
 				<Stack
-					direction={{ xs: "column", sm: "row" }}
+					direction="row"
 					className={classes.main}
 				>
 					<Stack
-						direction={{ xs: "column", sm: "row" }}
+						direction="row"
 						spacing={1}
 						className={classes.poweredRow}
 					>

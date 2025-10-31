@@ -3,7 +3,7 @@ import { AppBar, Container, Link, Stack } from "@mui/material";
 
 const useStyles = makeStyles(() => ({
 	header: {
-		height: "6vh"
+		height: 50
 	},
 	container: {
 		height: "100%"

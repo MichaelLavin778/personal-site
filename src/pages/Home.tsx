@@ -8,9 +8,11 @@ const useStyles = makeStyles(() => ({
     container: {
         display: 'flex',
         flex: 1,
-        width: '100vw',
-        height: '92vh',
-        paddingTop: '6vh',
+        width: '100%',
+        height: '100%',
+        minHeight: '92vh',
+        paddingTop: 50, // header
+        paddingBottom: 50, // footer
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -28,10 +30,10 @@ const Home = () => {
         <Container className={classes.container}>
             <Stack spacing={4} className={classes.stack}>
                 <Box>
-                    <Typography variant="h2">Michael Lavin</Typography>
-                    <Typography variant="h6">FULL-STACK DEVELOPER</Typography>
+                    <Typography variant="h1" fontSize="max(min(6vw, 74px), 32px)">Michael Lavin</Typography>
+                    <Typography variant="subtitle2" fontSize="max(min(2vw, 24px), 12px)">FULL-STACK DEVELOPER</Typography>
                 </Box>
-                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '50vh', height: '50vh' }} />
+                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '40vw', height: '40vw', minWidth: 175, minHeight: 175, maxWidth: 450, maxHeight: 450 }} />
             </Stack>
         </Container>
     );
