@@ -1,7 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
 import self_portrait from '../assets/self_portrait.jpg'
-// import useS3FileDownloader from "../loaders/S3FileDownloader";
 
 
 const useStyles = makeStyles(() => ({
@@ -24,7 +23,6 @@ const useStyles = makeStyles(() => ({
 
 const Home = () => {
     const classes = useStyles();
-    // const file = useS3FileDownloader({ destFilename: 'self_portrait.jpg' });
 
     return (
         <Container className={classes.container}>

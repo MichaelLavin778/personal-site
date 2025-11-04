@@ -26,16 +26,20 @@ const useStyles = makeStyles(() => ({
 const Header = () => {
 	const classes = useStyles();
 	const toHome = "/";
+	const toShowcase = "/showcase"
 	const toResume = "/resume"
 
-	const onClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname == to && e.preventDefault();
+	const onClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname === to && e.preventDefault();
 
 	return (
-		<AppBar component="header" enableColorOnDark={true} className={classes.header}>
+		<AppBar className={classes.header}>
 			<Container className={classes.container}>
 				<Stack direction="row" className={classes.stack}>
 					<Link to={toHome} onClick={(e) => onClick(e, toHome)} className={classes.link}>
 						Home
+					</Link>
+					<Link to={toShowcase} onClick={(e) => onClick(e, toShowcase)} className={classes.link}>
+						Showcase
 					</Link>
 					<Link to={toResume} onClick={(e) => onClick(e, toResume)} className={classes.link}>
 						Resume
