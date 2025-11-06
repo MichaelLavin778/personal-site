@@ -30,14 +30,10 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
         );
     };
 
-    if (!abilities || abilities.length === 0) {
-        return null;
-    }
-
     return (
         <>
             <InputLabel>Abilities</InputLabel>
-            {renderAbilities(abilities)}
+            {abilities && abilities.length > 0 ? renderAbilities(abilities) : '-'}
         </>
     );
 };

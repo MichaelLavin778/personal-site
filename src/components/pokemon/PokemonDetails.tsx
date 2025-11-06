@@ -17,7 +17,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
 
     return (
         <Grid container={true} sx={{ alignItems: 'flex-start' }}>
-            <Grid size={12} sx={{ textAlign: 'center' }}>
+            <Grid size={12} sx={{ textAlign: 'center', alignContent: 'center', minHeight: 106 }}>
                 <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
                 {!!pokemon.sprites?.back_default && <img src={pokemon.sprites.back_default} />}
                 {!!pokemon.sprites?.front_female && <img src={pokemon.sprites.front_female} />}
@@ -30,14 +30,14 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
 
             <Grid container={true} size={6} spacing={2}>
                 <Grid size={12}>
-                    {pokemon.types && pokemon.types.length > 0 && (
-                        <>
-                            <InputLabel>Type</InputLabel>
+                    <>
+                        <InputLabel>Type</InputLabel>
+                        {pokemon.types && pokemon.types.length > 0 ? (
                             <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
                                 {pokemon.types.map(t => <Type key={t.type.name} typeName={t.type.name} />)}
                             </Stack>
-                        </>
-                    )}
+                        ) : '-'}
+                    </>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6 }}>
@@ -48,28 +48,22 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 4 }}>
-                    {!!pokemon.base_experience && (
-                        <>
-                            <InputLabel>Base Experience</InputLabel>
-                            <Typography>{pokemon.base_experience}</Typography>
-                        </>
-                    )}
+                    <>
+                        <InputLabel>Base Experience</InputLabel>
+                        <Typography>{pokemon.base_experience ?? '-'}</Typography>
+                    </>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                    {!!pokemon.height && (
-                        <>
-                            <InputLabel>Height</InputLabel>
-                            <Typography>{pokemon.height / 10} m</Typography>
-                        </>
-                    )}
+                    <>
+                        <InputLabel>Height</InputLabel>
+                        <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
+                    </>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                    {!!pokemon.weight && (
-                        <>
-                            <InputLabel>Weight</InputLabel>
-                            <Typography>{pokemon.weight / 10} kg</Typography>
-                        </>
-                    )}
+                    <>
+                        <InputLabel>Weight</InputLabel>
+                        <Typography>{pokemon.weight ? pokemon.weight / 10 : '-'} kg</Typography>
+                    </>
                 </Grid>
 
                 <Grid size={12}>

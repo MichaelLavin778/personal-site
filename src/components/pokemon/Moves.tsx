@@ -6,14 +6,11 @@ interface MovesProps {
 }
 
 const Moves = ({ moves }: MovesProps) => {
-    if (!moves || moves.length === 0) {
-        return null;
-    }
 
     return (
         <>
             <InputLabel>Moves</InputLabel>
-            <Typography>{moves.map(move => move.move.name).join(', ')}</Typography>
+            <Typography>{moves?.map(move => move.move.name).join(', ') || '-'}</Typography>
         </>
     );
 }
