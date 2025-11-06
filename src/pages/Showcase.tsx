@@ -22,8 +22,9 @@ const useStyles = makeStyles(() => ({
 		padding: 10
 	},
 	dropdown: {
-		paddingLeft: 400,
-		paddingRight: 400,
+		width: '100%',
+		maxWidth: 400,
+		justifySelf: 'center'
 	}
 }));
 
