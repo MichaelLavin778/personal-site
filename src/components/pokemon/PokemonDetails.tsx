@@ -1,60 +1,85 @@
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { IconButton, Typography } from "@mui/material";
-// import { makeStyles } from "@material-ui/core";
-import { useRef } from 'react';
+import { Grid, InputLabel, Stack, Typography } from "@mui/material";
 import type { Pokemon } from "../../model/Pokemon";
-
-// const useStyles = makeStyles(() => ({}));
+import Abilities from "./Abilities";
+import Cries from "./Cries";
+import Type from "./Type";
+import Moves from "./Moves";
+import Stats from "./Stats";
 
 type PokemonProps = {
-    pokemon: Pokemon
+    pokemon: Pokemon;
 }
 
 const PokemonDetails = ({ pokemon }: PokemonProps) => {
-    const audioLatestRef = useRef<HTMLAudioElement | null>(null);
-    const audioLegacyRef = useRef<HTMLAudioElement | null>(null);
-
     if (!pokemon) {
         return null;
     }
 
     return (
-        <>
-            <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
-            {pokemon.types && pokemon.types.length > 0 && (
-                <Typography>Type: {pokemon.types.map(t => t.type.name).join(', ')}</Typography>
-            )}
-            {pokemon.stats && pokemon.stats.length > 0 && (
-                <Typography>Stats: {pokemon.stats.map(s => `${s.stat.name} (${s.base_stat})`).join(', ')}</Typography>
-            )}
-            {(pokemon.cries?.latest || pokemon.cries?.legacy) && <Typography component="span">Cries: </Typography>}
-            {pokemon.cries?.latest && (
-                <>
-                    <audio ref={audioLatestRef} src={pokemon.cries.latest} preload="auto" />
-                    <IconButton onClick={() => audioLatestRef.current?.play()}>
-                        <PlayArrowIcon />
-                    </IconButton>
-                </>
-            )}
-            {pokemon.cries?.legacy && (
-                <>
-                    <audio ref={audioLegacyRef} src={pokemon.cries.legacy} preload="auto" />
-                    <IconButton onClick={() => audioLegacyRef.current?.play()}>
-                        <PlayArrowIcon />
-                    </IconButton>
-                </>
-            )}
-            {pokemon.abilities && pokemon.abilities.length > 0 && (
-                <Typography>Abilities: {pokemon.abilities.map(ability => `${ability.ability.name}${ability.is_hidden ? ' (hidden)' : ''}`).join(', ')}</Typography>
-            )}
-            {pokemon.base_experience && <Typography>Base Experience - {pokemon.base_experience}</Typography>}
-            {pokemon.species && <Typography>Species - {pokemon.species.name}</Typography>}
-            {pokemon.height && <Typography>Height - {pokemon.height}</Typography>}
-            {pokemon.weight && <Typography>Weight - {pokemon.weight}</Typography>}
-            {pokemon.moves && pokemon.moves.length > 0 && (
-                <Typography>Moves: {pokemon.moves.map(move => move.move.name).join(', ')}</Typography>
-            )}
-        </>
+        <Grid container={true} sx={{ alignItems: 'flex-start' }}>
+            <Grid size={12} sx={{ textAlign: 'center' }}>
+                <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
+                {!!pokemon.sprites?.back_default && <img src={pokemon.sprites.back_default} />}
+                {!!pokemon.sprites?.front_female && <img src={pokemon.sprites.front_female} />}
+                {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
+                {!!pokemon.sprites?.front_shiny && <img src={pokemon.sprites.front_shiny} />}
+                {!!pokemon.sprites?.back_shiny && <img src={pokemon.sprites.back_shiny} />}
+                {!!pokemon.sprites?.front_shiny_female && <img src={pokemon.sprites.front_shiny_female} />}
+                {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
+            </Grid>
+
+            <Grid container={true} size={6} spacing={2}>
+                <Grid size={12}>
+                    {pokemon.types && pokemon.types.length > 0 && (
+                        <>
+                            <InputLabel>Type</InputLabel>
+                            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                                {pokemon.types.map(t => <Type key={t.type.name} typeName={t.type.name} />)}
+                            </Stack>
+                        </>
+                    )}
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6 }}>
+                    <Stats stats={pokemon.stats} />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                    <Abilities abilities={pokemon.abilities} />
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 4 }}>
+                    {!!pokemon.base_experience && (
+                        <>
+                            <InputLabel>Base Experience</InputLabel>
+                            <Typography>{pokemon.base_experience}</Typography>
+                        </>
+                    )}
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                    {!!pokemon.height && (
+                        <>
+                            <InputLabel>Height</InputLabel>
+                            <Typography>{pokemon.height / 10} m</Typography>
+                        </>
+                    )}
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                    {!!pokemon.weight && (
+                        <>
+                            <InputLabel>Weight</InputLabel>
+                            <Typography>{pokemon.weight / 10} kg</Typography>
+                        </>
+                    )}
+                </Grid>
+
+                <Grid size={12}>
+                    <Cries cries={pokemon.cries} />
+                </Grid>
+            </Grid>
+            <Grid size={6}>
+                <Moves moves={pokemon.moves} />
+            </Grid>
+        </Grid>
     );
 };
 

@@ -43,23 +43,23 @@ export type PokemonType = {
 }
 
 export type Pokemon = PokemonItemSimple & {
-	abilities: PokemonAbility[]
-	base_experience: number
-	cries: PokemonCry
-	forms: PokemonItemSimple[]
+	abilities: PokemonAbility[] | undefined
+	base_experience: number | undefined
+	cries: PokemonCry | undefined
+	forms: PokemonItemSimple[] | undefined
 	// game_indices
-	height: number
+	height: number | undefined
 	// held_items
-	id: number
-	is_default: boolean
-	location_area_encounters: string
+	id: number | undefined
+	is_default: boolean | undefined
+	location_area_encounters: string | undefined
 	moves: PokemonMove[]
-	order: number
+	order: number | undefined
 	// past_abilities
 	// past_types
-	species: PokemonItemSimple
-	sprites: PokemonSprites
-	stats: PokemonStat[]
-	types: PokemonType[]
-	weight: number
+	species: PokemonItemSimple | undefined
+	sprites: PokemonSprites | undefined
+	stats: PokemonStat[] | undefined
+	types: PokemonType[] | undefined
+	weight: number | undefined
 }

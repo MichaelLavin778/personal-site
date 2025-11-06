@@ -1,11 +1,12 @@
 import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
 import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { loadPokemon, loadPokemonList, selectPokemonList  } from "../state/pokemonSlice";
-import type { RootState } from "../store";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
+import { toTitleCase } from "../helpers/text";
+import { useAppDispatch, useAppSelector } from "../hooks";
 import type { Pokemon } from "../model/Pokemon";
+import { loadPokemon, loadPokemonList, selectPokemonList } from "../state/pokemonSlice";
+import type { RootState } from "../store";
 
 const useStyles = makeStyles(() => ({
 	container: {
@@ -67,13 +68,6 @@ const Showcase = () => {
 		}
 	}, [currentPokemon, dispatch, pokemonList]);
 
-	const toTitleCase = (str: string) => {
-		return str.replace(
-			/\w\S*/g,
-			text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-		);
-	};
-
 	if (error) {
 		return (
 			<Container className={classes.container}>
@@ -84,22 +78,33 @@ const Showcase = () => {
 
 	return (
 		<Container className={classes.container}>
-			{loaded && pokemonList.length > 0 ?
-				<Paper elevation={12} className={classes.paper}>
-					<Autocomplete
-						options={pokemonList}
-						getOptionLabel={(option) => toTitleCase(option.name)}
-						renderInput={(params) => <TextField {...params} />}
-						value={currentPokemon}
-						disableClearable={true}
-						onChange={(_event, value) => setCurrentPokemonName(value.name)}
-						className={classes.dropdown}
-					/>
-					{currentPokemon && <PokemonDetails pokemon={currentPokemon} />}
-				</Paper>
-				:
-				<CircularProgress />
-			}
+			<Paper elevation={12} className={classes.paper}>
+				{loaded && pokemonList.length > 0 ?
+					<>
+						<Autocomplete
+							options={pokemonList}
+							getOptionLabel={(option) => toTitleCase(option.name)}
+							// getOptionLabel={(option) => {
+							// 	if (!!option.name && !!option.species?.name) {
+							// 		const splitName = option.name.split('-');
+							// 		if (splitName.length > 1 && splitName[0] === option.species.name) {
+							// 			return `${toTitleCase(option.species.name)} (${splitName.map(n => toTitleCase(n)).slice(1).join('-')})`;
+							// 		}
+							// 	}
+							// 	return toTitleCase(option.name);
+							// }}
+							renderInput={(params) => <TextField {...params} />}
+							value={currentPokemon}
+							disableClearable={true}
+							onChange={(_event, value) => setCurrentPokemonName(value.name)}
+							className={classes.dropdown}
+						/>
+						{currentPokemon && <PokemonDetails pokemon={currentPokemon} />}
+					</>
+					:
+					<CircularProgress />
+				}
+			</Paper>
 		</Container>
 	);
 };

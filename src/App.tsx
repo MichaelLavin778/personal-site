@@ -1,14 +1,22 @@
+import { useMemo, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import Header from './components/Header';
+import VolumeContext from './context/VolumeContext';
 import Home from './pages/Home';
 import Resume from './pages/Resume';
 import Showcase from './pages/Showcase';
 
 
 const App = () => {
+	const [volume, setVolume] = useState<number>(50);
+	const volumeContextValue = useMemo(() => ({
+		volume,
+		setVolume
+	}), [volume, setVolume]);
+
 	return (
-		<>
+		<VolumeContext.Provider value={volumeContextValue}>
 			<BrowserRouter>
 				<Header />
 				<Routes>
@@ -18,7 +26,7 @@ const App = () => {
 				</Routes>
 				<Footer />
 			</BrowserRouter>
-		</>
+		</VolumeContext.Provider>
 	);
 };
 
