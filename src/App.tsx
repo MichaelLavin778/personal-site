@@ -9,7 +9,8 @@ import Showcase from './pages/Showcase';
 
 
 const App = () => {
-	const [volume, setVolume] = useState<number>(50);
+	const storedVolume = localStorage.getItem('VOLUME');
+	const [volume, setVolume] = useState<number>(storedVolume ? Number(storedVolume) :50);
 	const volumeContextValue = useMemo(() => ({
 		volume,
 		setVolume

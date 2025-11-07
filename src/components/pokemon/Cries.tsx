@@ -36,6 +36,7 @@ const Cries = ({ cries }: CriesProps) => {
     const handleVolumeChange = (_event: Event, value: number) => {
         const newVolume = value;
         setVolume(newVolume);
+        localStorage.setItem('VOLUME', String(newVolume));
         if (audioLatestRef.current) {
             audioLatestRef.current.volume = newVolume / 100; // Volume range is 0.0 to 1.0
         }
