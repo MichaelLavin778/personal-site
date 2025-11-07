@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { HideSource } from "@mui/icons-material";
 import { toTitleCase } from "../../helpers/text";
 import type { PokemonAbility } from "../../model/Pokemon";
 
@@ -22,7 +21,7 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
             <>
                 {abilityLabels.filter(ability => !ability.is_hidden).map(ability => <Typography key={ability.ability.name}>{ability.ability.name}</Typography>)}
                 {!!hiddenAbility && (
-                    <Typography key={hiddenAbility.ability.name}><HideSource sx={{ fontSize: '1rem' }} />{`${hiddenAbility.ability.name} (hidden)`}</Typography>
+                    <Typography key={hiddenAbility.ability.name} variant="body2">{`${hiddenAbility.ability.name} (hidden)`}</Typography>
                 )}
             </>
         );

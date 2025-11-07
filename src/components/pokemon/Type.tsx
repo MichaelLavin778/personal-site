@@ -11,7 +11,11 @@ const useStyles = makeStyles(() => ({
         borderRadius: 4,
         color: 'white',
         textAlign: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        textTransform: 'uppercase',
+        fontSize: '.75rem',
+        lineHeight: '1.5rem',
+        textShadow: '1px 1px 2px rgba(0, 0, 0, .7)'
     }
 }));
 
@@ -101,8 +105,8 @@ const Type = ({ typeName }: TypeProps) => {
     }
 
     return (
-        <Box key={typeName} component="span" bgcolor={bgcolor} borderColor={borderColor} className={classes.typeBox}>
-            {typeName.toLocaleUpperCase()}
+        <Box key={typeName} bgcolor={bgcolor} borderColor={borderColor} className={classes.typeBox}>
+            {typeName}
         </Box>
     );
 };
