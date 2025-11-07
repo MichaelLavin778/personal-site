@@ -2,8 +2,8 @@ import { makeStyles } from "@material-ui/core";
 import { PlayArrow, VolumeDown, VolumeUp } from "@mui/icons-material";
 import { Box, Button, InputLabel, Slider, Stack } from "@mui/material";
 import { useContext, useEffect, useRef } from "react";
-import type { PokemonCry } from "../../model/Pokemon";
 import VolumeContext from "../../context/VolumeContext";
+import type { PokemonCry } from "../../model/Pokemon";
 
 const useStyles = makeStyles(() => ({
     volumeSlider: {

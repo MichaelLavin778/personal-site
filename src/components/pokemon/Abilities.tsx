@@ -1,4 +1,5 @@
-import { Divider, InputLabel, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { HideSource } from "@mui/icons-material";
 import { toTitleCase } from "../../helpers/text";
 import type { PokemonAbility } from "../../model/Pokemon";
 
@@ -21,10 +22,7 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
             <>
                 {abilityLabels.filter(ability => !ability.is_hidden).map(ability => <Typography key={ability.ability.name}>{ability.ability.name}</Typography>)}
                 {!!hiddenAbility && (
-                    <>
-                        <Divider variant="middle" sx={{ marginTop: 1, marginBottom: 1 }} />
-                        <Typography key={hiddenAbility.ability.name} variant="body2">{`${hiddenAbility.ability.name} (hidden)`}</Typography>
-                    </>
+                    <Typography key={hiddenAbility.ability.name}><HideSource sx={{ fontSize: '1rem' }} />{`${hiddenAbility.ability.name} (hidden)`}</Typography>
                 )}
             </>
         );
@@ -32,7 +30,9 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
 
     return (
         <>
-            <InputLabel>Abilities</InputLabel>
+            <Box>
+                <Typography component="label" variant="caption" color="textSecondary">Abilities</Typography>
+            </Box>
             {abilities && abilities.length > 0 ? renderAbilities(abilities) : '-'}
         </>
     );
