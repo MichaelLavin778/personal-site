@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { FormHelperText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, FormHelperText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import type { PokemonStat } from "../../model/Pokemon";
 
 const useStyles = makeStyles(() => ({
@@ -47,7 +47,9 @@ const Stats = ({ stats }: StatsProps) => {
 
     return (
         <>
-            <Typography component="label" variant="caption" color="textSecondary">Stats</Typography>
+            <Box>
+                <Typography component="label" variant="caption" color="textSecondary">Stats</Typography>
+            </Box>
             <TableContainer>
                 <Table size="small" aria-label="stats table">
                     <TableHead>

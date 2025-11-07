@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import type { PokemonMove } from "../../model/Pokemon";
 
 const useStyles = makeStyles(() => ({
@@ -23,14 +23,16 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
 
     const createData = (
         name: string,
-    ) => {        
+    ) => {
         return { name };
     }
     const rows = (moves || []).map(m => createData(m.move.name));
 
     return (
         <>
-            <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
+            <Box>
+                <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
+            </Box>
             <TableContainer sx={{ maxHeight: leftColumnHeight }}>
                 <Table aria-label="stats table">
                     <TableHead>

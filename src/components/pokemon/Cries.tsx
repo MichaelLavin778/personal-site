@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 import { PlayArrow, VolumeDown, VolumeUp } from "@mui/icons-material";
-import { Box, Button, InputLabel, Slider, Stack } from "@mui/material";
+import { Box, Button, Slider, Stack, Typography } from "@mui/material";
 import { useContext, useEffect, useRef } from "react";
 import VolumeContext from "../../context/VolumeContext";
 import type { PokemonCry } from "../../model/Pokemon";
@@ -51,7 +51,9 @@ const Cries = ({ cries }: CriesProps) => {
 
     return (
         <>
-            <InputLabel>Cries</InputLabel>
+            <Box>
+                <Typography component="label" variant="caption" color="textSecondary">Cries</Typography>
+            </Box>
             {cries?.latest && (
                 <Box component="span" sx={{ mr: cries?.legacy ? 1 : 0 }}>
                     <audio ref={audioLatestRef} src={cries.latest} preload="auto" />
