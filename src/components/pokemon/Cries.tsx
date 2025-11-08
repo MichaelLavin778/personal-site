@@ -1,9 +1,11 @@
 import { makeStyles } from "@material-ui/core";
-import { PlayArrow, VolumeDown, VolumeUp } from "@mui/icons-material";
-import { Box, Button, Slider, Stack, Typography } from "@mui/material";
+import { VolumeDown, VolumeUp } from "@mui/icons-material";
+import { Box, Slider, Stack, Typography } from "@mui/material";
 import { useContext, useEffect, useRef } from "react";
 import VolumeContext from "../../context/VolumeContext";
 import type { PokemonCry } from "../../model/Pokemon";
+import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.mp3"
+import CryAudio from "./CryAudio";
 
 const useStyles = makeStyles(() => ({
     volumeSlider: {
@@ -21,28 +23,34 @@ const Cries = ({ cries }: CriesProps) => {
     const { volume, setVolume } = useContext(VolumeContext);
     const audioLatestRef = useRef<HTMLAudioElement | null>(null);
     const audioLegacyRef = useRef<HTMLAudioElement | null>(null);
+    const audioDreadnawRef = useRef<HTMLAudioElement | null>(null);
+    const showDreadnawEasterEgg = cries?.latest?.includes("latest/834.ogg");
+
+    const setRefVolume = (ref: React.RefObject<HTMLAudioElement | null>, v: number) => {
+        const calcVolume = v / 100;
+        if (ref.current && ref.current.volume !== calcVolume) {
+            ref.current.volume = calcVolume; // Volume range is 0.0 to 1.0
+        }
+    }
+
+    const applyVolume = (newVolume: number) => {
+        setRefVolume(audioLatestRef, newVolume);
+        setRefVolume(audioLegacyRef, newVolume);
+        if (showDreadnawEasterEgg) {
+            setRefVolume(audioLegacyRef, volume);
+        }
+    }
 
     // workaround to keep volume consistent across pokemon changes
     useEffect(() => {
-        const calcVolume = volume / 100;
-        if (audioLatestRef.current && audioLatestRef.current.volume !== calcVolume) {
-            audioLatestRef.current.volume = calcVolume; // Volume range is 0.0 to 1.0
-        }   
-        if (audioLegacyRef.current && audioLegacyRef.current.volume !== calcVolume) {
-            audioLegacyRef.current.volume = calcVolume;
-        }
+        applyVolume(volume);
     });
 
     const handleVolumeChange = (_event: Event, value: number) => {
         const newVolume = value;
         setVolume(newVolume);
         localStorage.setItem('VOLUME', String(newVolume));
-        if (audioLatestRef.current) {
-            audioLatestRef.current.volume = newVolume / 100; // Volume range is 0.0 to 1.0
-        }
-        if (audioLegacyRef.current) {
-            audioLegacyRef.current.volume = newVolume / 100;
-        }
+        applyVolume(newVolume)
     };
 
     if (!cries?.latest && !cries?.legacy) {
@@ -55,20 +63,13 @@ const Cries = ({ cries }: CriesProps) => {
                 <Typography component="label" variant="caption" color="textSecondary">Cries</Typography>
             </Box>
             {cries?.latest && (
-                <Box component="span" sx={{ mr: cries?.legacy ? 1 : 0 }}>
-                    <audio ref={audioLatestRef} src={cries.latest} preload="auto" />
-                    <Button size="small" variant="outlined" startIcon={<PlayArrow />} onClick={() => audioLatestRef.current?.play()}>
-                        Latest
-                    </Button>
-                </Box>
+                <CryAudio ref={audioLatestRef} cry={cries.latest} label="Latest" sx={{ mr: cries?.legacy ? 1 : 0 }} />
             )}
             {cries?.legacy && (
-                <Box component="span">
-                    <audio ref={audioLegacyRef} src={cries.legacy} preload="auto" />
-                    <Button size="small" variant="outlined" startIcon={<PlayArrow />} onClick={() => audioLegacyRef.current?.play()}>
-                        Legacy
-                    </Button>
-                </Box>
+                <CryAudio ref={audioLegacyRef} cry={cries.legacy} label="Legacy" />
+            )}
+            {showDreadnawEasterEgg && (
+                <CryAudio ref={audioDreadnawRef} cry={dreadnaw} label="?" />
             )}
             <Stack spacing={2} direction="row" className={classes.volumeSlider}>
                 <VolumeDown fontSize="small" />

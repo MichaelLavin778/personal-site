@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
     spritesContainer: {
         textAlign: 'center',
         alignContent: 'center',
-        minHeight: 106
+        minHeight: 134
     }
 }));
 
@@ -54,14 +54,14 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
                 {!!pokemon.sprites?.back_default && <img src={pokemon.sprites.back_default} />}
                 {!!pokemon.sprites?.front_female && <img src={pokemon.sprites.front_female} />}
-                {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
+                {!!pokemon.sprites?.back_female && <img src={pokemon.sprites.back_female} />}
                 {!!pokemon.sprites?.front_shiny && <img src={pokemon.sprites.front_shiny} />}
                 {!!pokemon.sprites?.back_shiny && <img src={pokemon.sprites.back_shiny} />}
                 {!!pokemon.sprites?.front_shiny_female && <img src={pokemon.sprites.front_shiny_female} />}
                 {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
             </Grid>
 
-            <Grid container={true} size={6} spacing={3} ref={ref}>
+            <Grid container={true} size={{ xs: 12, sm: 6 }} spacing={3} ref={ref}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                     <>
                         <Box>
@@ -111,7 +111,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                     <Cries cries={pokemon.cries} />
                 </Grid>
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
                 <Moves moves={pokemon.moves} leftColumnHeight={height} />
             </Grid>
         </Grid>

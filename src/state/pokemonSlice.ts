@@ -1,15 +1,15 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createAction, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
 import type { Pokemon, PokemonItemSimple } from '../model/Pokemon'
 
-// Define item and slice state types
-interface PokemonState {
-	list: Pokemon[]
-}
+const initialState: Pokemon[] = [];
 
-const initialState: PokemonState = {
-	list: []
+type Payload = {
+	index: number;
+	pokemon: Pokemon
 }
+// Batched partial updates (apply many partial updates in a single dispatch)
+const updatePokemonBatch = createAction<Payload[]>('pokemon/partialUpdateBatch')
 
 // Async thunk to fetch pokemon list
 export const loadPokemonList = createAsyncThunk<
@@ -19,40 +19,12 @@ export const loadPokemonList = createAsyncThunk<
 		const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 		const res = await fetch(apiUrl);
 		if (!res.ok) {
-			const message = `Failed to fetch: ${res.status} ${res.statusText}`;
-			return thunkAPI.rejectWithValue(message);
+			throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
 		}
 		const json = await res.json();
 		const results: PokemonItemSimple[] = Array.isArray(json?.results)
 			? json.results.map((p: Record<string, unknown>) => ({ name: String(p['name'] ?? ''), url: String(p['url'] ?? '') }))
 			: [];
-
-		return results;
-	} catch (err: unknown) {
-		const message = (err as Error)?.message ?? String(err);
-		return thunkAPI.rejectWithValue(message);
-	}
-})
-
-export const loadAllPokemon = createAsyncThunk<
-	Pokemon[],
-	string[],
-	{ rejectValue: string }
->('pokemon/pokemonAll', async (names, thunkAPI) => {
-	try {
-		const promises: Promise<Response>[] = [];
-		names.forEach((name) => promises.push(fetch(`https://pokeapi.co/api/v2/pokemon/${name}`)));
-		const responses = await Promise.all(promises);
-		const invalidResponse = responses.find((res) => !res.ok);
-		if (invalidResponse) {
-			const message = `Failed to fetch: ${invalidResponse.status} ${invalidResponse.statusText}`;
-			return thunkAPI.rejectWithValue(message);
-		}
-		const results: Pokemon[] = [];
-		for (const res of responses) {
-			const json = await res.json();
-			results.push(json.results as Pokemon);
-		}
 
 		return results;
 	} catch (err: unknown) {
@@ -69,8 +41,7 @@ export const loadPokemon = createAsyncThunk<
 	try {
 		const res = await fetch(apiUrl);
 		if (!res.ok) {
-			const message = `Failed to fetch: ${res.status} ${res.statusText}`;
-			return thunkAPI.rejectWithValue(message);
+			throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
 		}
 		const json = await res.json();
 		const results: Pokemon = json;
@@ -82,26 +53,42 @@ export const loadPokemon = createAsyncThunk<
 	}
 })
 
-export const pokemonListSlice = createSlice({
+export const pokemonSlice = createSlice({
 	name: 'pokemon',
 	initialState,
 	reducers: {},
 	extraReducers: (builder) => {
 		builder
 			.addCase(loadPokemonList.fulfilled, (state, action: PayloadAction<PokemonItemSimple[]>) => {
-				state.list = action.payload as Pokemon[]
+				const payload = action.payload as Pokemon[];
+				for (const p of payload) {
+					state.push(p)
+				}
 			})
-			.addCase(loadAllPokemon.fulfilled, (state, action: PayloadAction<Pokemon[]>) => {
-				state.list = state.list.map((p, i) => { return { ...p, ...action.payload[i] } });
+			.addCase(updatePokemonBatch, (state, action: PayloadAction<Payload[]>) => {
+				// Apply many partial updates in a single pass. This reduces the number of
+				// times React will re-render because only one dispatch happens per batch.
+				for (const { index, pokemon } of action.payload) {
+					if (index >= 0 && index < state.length) {
+						state[index] = { ...state[index], ...pokemon }
+					} else if (index === state.length) {
+						state.push(pokemon)
+					} else {
+						while (state.length < index) {
+							state.push({ name: '', id: 0 } as unknown as Pokemon)
+						}
+						state[index] = pokemon
+					}
+				}
 			})
 			.addCase(loadPokemon.fulfilled, (state, action: PayloadAction<Pokemon>) => {
-				const index = state.list.findIndex(p => p.name === action.payload.name);
-				state.list[index] = { ...state.list[index], ...action.payload };
+				const index = state.findIndex(p => p.name === action.payload.name);
+				state[index] = { ...state[index], ...action.payload };
 			})
 	},
 })
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectPokemonList = (state: RootState) => state.pokemon.list
+export const selectPokemon = (state: RootState) => state.pokemon.pokemon
 
-export default pokemonListSlice.reducer
+export default pokemonSlice.reducer

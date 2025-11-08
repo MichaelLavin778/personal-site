@@ -1,15 +1,21 @@
 import { configureStore } from '@reduxjs/toolkit'
+import { combineReducers } from 'redux'
 import pokemonReducer from './state/pokemonSlice'
+import pokemonMovesReducer from './state/pokemonMovesSlice'
+
+const pokemonRootReducer = combineReducers({
+	pokemon: pokemonReducer,
+	moves: pokemonMovesReducer,
+})
 
 const store = configureStore({
-  reducer: {
-    pokemon: pokemonReducer,
-  },
+	reducer: {
+		pokemon: pokemonRootReducer,
+	},
+	devTools: false,
 })
 
 export default store
-// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>
-// Inferred type: { posts: PostsState, comments: CommentsState, users: UsersState }
 export type AppDispatch = typeof store.dispatch
 export type AppStore = typeof store

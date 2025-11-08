@@ -14,8 +14,18 @@ export type PokemonCry = {
 	legacy: string | null
 }
 
-export type PokemonMove = {
+export type VersionGroupDetails = {
+	level_learned_at: number
+	move_learn_method: PokemonItemSimple
+	// order
+	// version_group
+}
+
+// Pokemon's Move - from /pokemon/{pokemon}.moves
+// which is different from /moves/{move}, sadly
+export type PokemonsMove = {
 	move: PokemonItemSimple
+	version_group_details: VersionGroupDetails[]
 }
 
 export type PokemonSprites = {
@@ -53,7 +63,7 @@ export type Pokemon = PokemonItemSimple & {
 	id: number | undefined
 	is_default: boolean | undefined
 	location_area_encounters: string | undefined
-	moves: PokemonMove[]
+	moves: PokemonsMove[]
 	order: number | undefined
 	// past_abilities
 	// past_types

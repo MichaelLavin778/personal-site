@@ -54,7 +54,7 @@ const Stats = ({ stats }: StatsProps) => {
                 <Table size="small" aria-label="stats table">
                     <TableHead>
                         <TableRow>
-                            <TableCell></TableCell>
+                            <TableCell />
                             <TableCell align="right">Base</TableCell>
                             <TableCell align="right">Min*</TableCell>
                             <TableCell align="right">Max*</TableCell>
@@ -77,7 +77,7 @@ const Stats = ({ stats }: StatsProps) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <FormHelperText>* Calculated at level 100 with either max IVs and EVs and a beneficial or min IVs and EVs and a hindering nature.</FormHelperText>
+            <FormHelperText>* Calculated at level 100 with either max IVs, EVs and a beneficial nature or min IVs, EVs and a hindering nature.</FormHelperText>
         </>
     );
 }
