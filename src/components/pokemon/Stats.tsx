@@ -1,27 +1,23 @@
-import { makeStyles } from "@material-ui/core";
-import { Box, FormHelperText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+// import { makeStyles } from "@material-ui/core";
+import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
 import type { PokemonStat } from "../../model/Pokemon";
+import type { HighlightItemData } from "@mui/x-charts";
+import { useState } from "react";
 
-const useStyles = makeStyles(() => ({
-    lastRow: {
-        '&:last-child td': {
-            border: 0
-        },
-        '&:last-child th': {
-            border: 0
-        }
-    }
-}));
+// const useStyles = makeStyles(() => ({
+//     radarButton: {
+//         lineHeight: 1
+//     }
+// }));
 
 interface StatsProps {
     stats: PokemonStat[] | undefined;
 }
 
 const Stats = ({ stats }: StatsProps) => {
-    const classes = useStyles();
-
-    const statNames = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
-    const fallbackStats: PokemonStat[] = statNames.map((name, i) => ({ base_stat: 0, effort: 0, stat: { name, url: `https://pokeapi.co/api/v2/stat/${i + 1}/` } }));
+    // const classes = useStyles();
+    const [highlightedItem, setHighlightedItem] = useState<HighlightItemData | null>(null);
 
     const maxLevel = 100;
     const badNature = 0.9;
@@ -29,55 +25,109 @@ const Stats = ({ stats }: StatsProps) => {
     const maxEVs = 252;
     const maxIVs = 31;
 
-    const createData = (
-        name: string,
-        base: number,
-    ) => {
-        // other stats
-        let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
-        let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
+    const hpLabel = "HP";
+    const metrics = [
+        { name: hpLabel, max: 714 },
+        { name: 'Attack', max: 526 },
+        { name: 'Defense', max: 614 },
+        { name: 'Sp. Att', max: 535 },
+        { name: 'Sp. Def', max: 614 },
+        { name: 'Speed', max: 504 }
+    ];
+    const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({ base_stat: 0, effort: 0, stat: { name: metric.name, url: `https://pokeapi.co/api/v2/stat/${i + 1}/` } }));    
 
-        if (name === 'hp') {
+    const calcMinStat = (name: string, base: number) => {
+        let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
+        if (name === hpLabel) {
             min = Math.floor(2 * base * maxLevel / 100) + maxLevel + 10;
+        }
+        return min;
+    }
+
+    const calcMaxStat = (name: string, base: number) => {
+        let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
+        if (name === hpLabel) {
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
         }
-        return { name, base, min, max };
+        return max;
     }
-    const rows = (stats || fallbackStats).map(s => createData(s.stat.name, s.base_stat));
+
+    const baseData = (stats || fallbackStats).map(s => s.base_stat);
+    const minData = (stats || fallbackStats).map(s => calcMinStat(s.stat.name, s.base_stat));
+    const maxData = (stats || fallbackStats).map(s => calcMaxStat(s.stat.name, s.base_stat));
+
+    const series = [
+        {
+            id: 'base',
+            label: 'Base',
+            data: baseData
+        },
+        {
+            id: 'min',
+            label: 'Min',
+            data: minData
+        },
+        {
+            id: 'max',
+            label: 'Max',
+            data: maxData
+        },
+    ]
+
+    const withOptions = (series: RadarSeries[]) =>
+        series.map((item) => ({
+            ...item,
+            fillArea: true,
+            type: 'radar' as const,
+        }));
+
+    const handleHighLightedSeries = (_event: unknown, newHighLightedSeries: string) => {
+        if (newHighLightedSeries !== null) {
+            setHighlightedItem((prev) => ({
+                ...prev,
+                seriesId: newHighLightedSeries,
+            }));
+        }
+    };
 
     return (
         <>
             <Box>
                 <Typography component="label" variant="caption" color="textSecondary">Stats</Typography>
             </Box>
-            <TableContainer>
-                <Table size="small" aria-label="stats table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell />
-                            <TableCell align="right">Base</TableCell>
-                            <TableCell align="right">Min*</TableCell>
-                            <TableCell align="right">Max*</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.map((row) => (
-                            <TableRow
-                                key={row.name}
-                                className={classes.lastRow}
-                            >
-                                <TableCell component="th" scope="row">
-                                    {row.name}
-                                </TableCell>
-                                <TableCell align="right">{row.base}</TableCell>
-                                <TableCell align="right">{row.min}</TableCell>
-                                <TableCell align="right">{row.max}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <FormHelperText>* Calculated at level 100 with either max IVs, EVs and a beneficial nature or min IVs, EVs and a hindering nature.</FormHelperText>
+            <Stack spacing={1} alignItems={'center'}>
+                <ToggleButtonGroup
+                    value={highlightedItem?.seriesId ?? null}
+                    exclusive={true}
+                    onChange={handleHighLightedSeries}
+                    aria-label="highlighted series"
+                    fullWidth={true}
+                >
+                    {series.map((item) => (
+                        <ToggleButton
+                            key={item.id}
+                            value={item.id}
+                            aria-label={`series ${item.label}`}
+                            sx={{ lineHeight: 0.25 }}
+                        >
+                            {item.label}
+                        </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+                <Box sx={{ width: '100%' }}>
+                    <RadarChart
+                        height={250}
+                        highlight="series"
+                        highlightedItem={highlightedItem}
+                        onHighlightChange={setHighlightedItem}
+                        slotProps={{ tooltip: { trigger: 'axis' } }}
+                        series={withOptions(series)}
+                        radar={{ metrics }}
+                    />
+                </Box>
+            </Stack>
+
+            {/* <FormHelperText>* Calculated at level 100 with either max IVs, EVs and a beneficial nature or min IVs, EVs and a hindering nature.</FormHelperText> */}
         </>
     );
 }

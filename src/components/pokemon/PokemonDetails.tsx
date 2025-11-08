@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
     spritesContainer: {
         textAlign: 'center',
         alignContent: 'center',
-        minHeight: 134
+        // minHeight: 134
     }
 }));
 
@@ -63,8 +63,8 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
             </Grid>
 
-            <Grid container={true} size={{ xs: 12, sm: 6 }} spacing={2} ref={ref}>
-                <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid container={true} size={{ xs: 12, sm: 5 }} spacing={1} ref={ref}>
+                <Grid size={6}>
                     <>
                         <Box>
                             <Typography component="label" variant="caption" color="textSecondary">Type</Typography>
@@ -76,7 +76,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         ) : '-'}
                     </>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={6}>
                     <Abilities abilities={pokemon.abilities} />
                 </Grid>
 
@@ -84,7 +84,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                     <Stats stats={pokemon.stats} />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 4 }}>
+                <Grid size={4}>
                     <>
                         <Box>
                             <Typography component="label" variant="caption" color="textSecondary">Base Experience</Typography>
@@ -92,7 +92,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         <Typography>{pokemon.base_experience ?? '-'}</Typography>
                     </>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
+                <Grid size={4}>
                     <>
                         <Box>
                             <Typography component="label" variant="caption" color="textSecondary">Height</Typography>
@@ -100,7 +100,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
                     </>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
+                <Grid size={4}>
                     <>
                         <Box>
                             <Typography component="label" variant="caption" color="textSecondary">Weight</Typography>
@@ -113,7 +113,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                     <Cries cries={pokemon.cries} />
                 </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 7 }}>
                 <Moves moves={pokemon.moves} leftColumnHeight={height} />
             </Grid>
         </Grid>
