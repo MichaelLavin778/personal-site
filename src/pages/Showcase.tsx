@@ -26,7 +26,8 @@ const useStyles = makeStyles(() => ({
 	dropdown: {
 		width: '100%',
 		maxWidth: 400,
-		justifySelf: 'center'
+		justifySelf: 'center',
+		marginBottom: 4
 	}
 }));
 

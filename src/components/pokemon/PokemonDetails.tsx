@@ -51,7 +51,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     }
 
     return (
-        <Grid container={true} spacing={3} className={classes.gridContainer}>
+        <Grid container={true} spacing={2} className={classes.gridContainer}>
             <Grid size={12} className={classes.spritesContainer}>
                 <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
                 {!!pokemon.sprites?.back_default && <img src={pokemon.sprites.back_default} />}
@@ -63,14 +63,14 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
             </Grid>
 
-            <Grid container={true} size={{ xs: 12, sm: 6 }} spacing={3} ref={ref}>
+            <Grid container={true} size={{ xs: 12, sm: 6 }} spacing={2} ref={ref}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                     <>
                         <Box>
                             <Typography component="label" variant="caption" color="textSecondary">Type</Typography>
                         </Box>
                         {pokemon.types && pokemon.types.length > 0 ? (
-                            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                            <Stack direction="row" spacing={1}>
                                 {pokemon.types.map(t => <Type key={t.type.name} typeName={t.type.name} />)}
                             </Stack>
                         ) : '-'}

@@ -60,15 +60,17 @@ const Cries = ({ cries }: CriesProps) => {
             <Box>
                 <Typography component="label" variant="caption" color="textSecondary">Cries</Typography>
             </Box>
-            {cries?.latest && (
-                <CryAudio ref={audioLatestRef} cry={cries.latest} label="Latest" sx={{ mr: cries?.legacy ? 1 : 0 }} />
-            )}
-            {cries?.legacy && (
-                <CryAudio ref={audioLegacyRef} cry={cries.legacy} label="Legacy" />
-            )}
-            {showDreadnawEasterEgg && (
-                <CryAudio ref={audioDreadnawRef} cry={dreadnaw} label="?" />
-            )}
+            <Stack direction="row" spacing={1}>
+                {cries?.latest && (
+                    <CryAudio ref={audioLatestRef} cry={cries.latest} label="Latest" />
+                )}
+                {cries?.legacy && (
+                    <CryAudio ref={audioLegacyRef} cry={cries.legacy} label="Legacy" />
+                )}
+                {showDreadnawEasterEgg && (
+                    <CryAudio ref={audioDreadnawRef} cry={dreadnaw} label="?" />
+                )}
+            </Stack>
             <Stack spacing={2} direction="row" className={classes.volumeSlider}>
                 <VolumeDown fontSize="small" />
                 <Slider aria-label="Volume" value={volume} onChange={handleVolumeChange} size="small" />

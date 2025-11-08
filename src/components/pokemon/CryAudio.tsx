@@ -11,7 +11,7 @@ type CryAudioProps = BoxProps & {
 
 const CryAudio = ({ ref, cry, label, disabled, ...props } : CryAudioProps) => {
     return (
-        <Box component="span" sx={props}>
+        <Box component="span" {...props}>
             <audio ref={ref} src={cry} preload="auto" />
             <Button size="small" variant="outlined" startIcon={<PlayArrow />} onClick={() => ref.current?.play()} disabled={disabled}>
                 {label}
