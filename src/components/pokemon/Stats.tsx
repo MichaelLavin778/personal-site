@@ -1,22 +1,15 @@
-// import { makeStyles } from "@material-ui/core";
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
 import type { PokemonStat } from "../../model/Pokemon";
 import type { HighlightItemData } from "@mui/x-charts";
 import { useState } from "react";
 
-// const useStyles = makeStyles(() => ({
-//     radarButton: {
-//         lineHeight: 1
-//     }
-// }));
 
 interface StatsProps {
     stats: PokemonStat[] | undefined;
 }
 
 const Stats = ({ stats }: StatsProps) => {
-    // const classes = useStyles();
     const [highlightedItem, setHighlightedItem] = useState<HighlightItemData | null>(null);
 
     const maxLevel = 100;

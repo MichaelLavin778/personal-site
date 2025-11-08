@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core";
 import { useMemo } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { toTitleCase } from "../../helpers/text";
-import { useAppSelector } from "../../hooks";
+import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove } from "../../model/Pokemon";
 import type { PokemonMove } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";

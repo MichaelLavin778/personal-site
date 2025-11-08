@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
 import resume from '../assets/resume.pdf'
+import { useEffect } from "react";
 
 const useStyles = makeStyles(() => ({
     container: {
@@ -14,6 +15,11 @@ const useStyles = makeStyles(() => ({
 
 const Resume = () => {
     const classes = useStyles();
+
+    // Set the tab name
+    useEffect(() => {
+        document.title = "Resume";
+    }, []);
 
     return (
         <Box className={classes.container}>

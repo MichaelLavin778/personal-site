@@ -8,6 +8,7 @@ import Moves from "./Moves";
 import Stats from "./Stats";
 import Type from "./Type";
 
+
 const useStyles = makeStyles(() => ({
     gridContainer: {
         alignItems: 'flex-start'

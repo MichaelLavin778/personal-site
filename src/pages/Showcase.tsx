@@ -3,11 +3,12 @@ import { makeStyles } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import { toTitleCase } from "../helpers/text";
-import { useAppDispatch, useAppSelector } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import type { Pokemon } from "../model/Pokemon";
 import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
-import type { RootState } from "../store";
+import type { RootState } from "../state/store";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
+
 
 const useStyles = makeStyles(() => ({
 	container: {
@@ -39,6 +40,11 @@ const Showcase = () => {
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const [currentPokemonName, setCurrentPokemonName] = useState<string>("bulbasaur");
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName) as Pokemon;
+
+	// Set the tab name
+	useEffect(() => {
+        document.title = "Showcase - Pokemon";
+    }, []);
 
 	// load list of pokemon and each pokemon info
 	useEffect(() => {

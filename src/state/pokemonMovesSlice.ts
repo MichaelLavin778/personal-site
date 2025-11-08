@@ -2,7 +2,7 @@ import { createSelector, createSlice, createAsyncThunk, createAction, type Paylo
 import pLimit from 'p-limit';
 import type { PokemonsMove } from '../model/Pokemon';
 import type { PokemonMove } from '../model/PokemonMove';
-import type { RootState } from '../store'
+import type { RootState } from './store'
 
 const initialState: Record<string, PokemonMove> = {}
 
