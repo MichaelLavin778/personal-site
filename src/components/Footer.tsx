@@ -1,10 +1,12 @@
 import { makeStyles } from "@material-ui/core";
 import { Box, Container, Typography, Stack } from "@mui/material";
-import LinkedInIconButton from "./icon_buttons/LinkedInIconButton";
-import GithubIconButton from "./icon_buttons/GitHubIconButton";
 import AmplifyIconButton from "./icon_buttons/AmplifyIconButton";
-import ViteIconButton from "./icon_buttons/ViteIconButton";
+import GithubIconButton from "./icon_buttons/GitHubIconButton";
+import LinkedInIconButton from "./icon_buttons/LinkedInIconButton";
 import ReactIconButton from "./icon_buttons/ReactIconButton";
+import S3IconButton from "./icon_buttons/S3IconButton";
+import ViteIconButton from "./icon_buttons/ViteIconButton";
+
 
 const useStyles = makeStyles(() => ({
 	footer: {
@@ -52,6 +54,7 @@ const Footer = () => {
 					>
 						<Typography variant="body2">Powered by</Typography>
 						<AmplifyIconButton />
+						<S3IconButton />
 						<ViteIconButton />
 						<ReactIconButton />
 					</Stack>

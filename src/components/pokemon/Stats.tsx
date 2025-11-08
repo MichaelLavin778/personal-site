@@ -118,8 +118,6 @@ const Stats = ({ stats }: StatsProps) => {
                     />
                 </Box>
             </Stack>
-
-            {/* <FormHelperText>* Calculated at level 100 with either max IVs, EVs and a beneficial nature or min IVs, EVs and a hindering nature.</FormHelperText> */}
         </>
     );
 }

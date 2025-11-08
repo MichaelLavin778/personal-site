@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { selectResumeUrl, loadResume } from "../state/resumeSlice";
 
+
 const useStyles = makeStyles(() => ({
     container: {
         position: 'absolute',
@@ -26,9 +27,12 @@ const Resume = () => {
 
     // grab resume from s3 and store blob URL in the Redux store
     useEffect(() => {
-        dispatch(loadResume())
-    }, [dispatch]);
+        if (!s3Resume) {
+            dispatch(loadResume());
+        }
+    }, [dispatch, s3Resume]);
 
+    // TODO: pdf looks "backdropped" on mobile
     return (
         <Box className={classes.container}>
             <object data={s3Resume} type="application/pdf" width="100%" height="100%" />
