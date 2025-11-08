@@ -41,7 +41,9 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     }, []);
 
     useEffect(() => {
-        setHeight(ref.current?.clientHeight ?? 0);
+        const h = ref.current?.clientHeight;
+        // ~59 is a row, so subtracting 50 just in case
+        setHeight(h ? Math.max(h - 50, 0) : 0);
     }, [ref, windowWidth]);
 
     if (!pokemon) {
