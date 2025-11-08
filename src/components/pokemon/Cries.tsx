@@ -4,7 +4,7 @@ import { Box, Slider, Stack, Typography } from "@mui/material";
 import { useContext, useEffect, useRef } from "react";
 import VolumeContext from "../../context/VolumeContext";
 import type { PokemonCry } from "../../model/Pokemon";
-import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.mp3"
+import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.ogg"
 import CryAudio from "./CryAudio";
 
 const useStyles = makeStyles(() => ({
@@ -36,9 +36,7 @@ const Cries = ({ cries }: CriesProps) => {
     const applyVolume = (newVolume: number) => {
         setRefVolume(audioLatestRef, newVolume);
         setRefVolume(audioLegacyRef, newVolume);
-        if (showDreadnawEasterEgg) {
-            setRefVolume(audioLegacyRef, volume);
-        }
+        setRefVolume(audioDreadnawRef, newVolume);
     }
 
     // workaround to keep volume consistent across pokemon changes
