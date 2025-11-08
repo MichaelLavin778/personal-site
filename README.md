@@ -1,17 +1,20 @@
-# React + TypeScript + Vite
+# Running the Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+local - [localhost:5173/](localhost:5173/):
+```
+npm install --legacy-peer-deps
+npm run dev
+```
 
-Currently, two official plugins are available:
+production - [me](https://main.d1y82t1cx4u01s.amplifyapp.com/)
+```
+npm install --legacy-peer-deps
+npm run build
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Authors
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
+[Michael Lavin](https://www.linkedin.com/in/michael-lavin-2373b7198/)
 
 ## Expanding the ESLint configuration
 

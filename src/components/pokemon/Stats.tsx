@@ -18,9 +18,8 @@ const Stats = ({ stats }: StatsProps) => {
     const maxEVs = 252;
     const maxIVs = 31;
 
-    const hpLabel = "HP";
     const metrics = [
-        { name: hpLabel, max: 714 },
+        { name: 'HP', max: 714 },
         { name: 'Attack', max: 526 },
         { name: 'Defense', max: 614 },
         { name: 'Sp. Att', max: 535 },
@@ -31,7 +30,7 @@ const Stats = ({ stats }: StatsProps) => {
 
     const calcMinStat = (name: string, base: number) => {
         let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
-        if (name === hpLabel) {
+        if (name === 'hp') {
             min = Math.floor(2 * base * maxLevel / 100) + maxLevel + 10;
         }
         return min;
@@ -39,7 +38,7 @@ const Stats = ({ stats }: StatsProps) => {
 
     const calcMaxStat = (name: string, base: number) => {
         let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
-        if (name === hpLabel) {
+        if (name === 'hp') {
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
         }
         return max;
