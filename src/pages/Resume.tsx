@@ -1,7 +1,8 @@
 import { Box } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
-import { useEffect, useState } from "react";
-import fetchPublicS3Blob from "../loaders/S3FileDownloader";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../hooks/hooks";
+import { selectResumeUrl, loadResume } from "../state/resumeSlice";
 
 const useStyles = makeStyles(() => ({
     container: {
@@ -15,19 +16,18 @@ const useStyles = makeStyles(() => ({
 
 const Resume = () => {
     const classes = useStyles();
-    const [s3Resume, setS3Resume] = useState<string | undefined>(undefined);
+    const dispatch = useAppDispatch();
+    const s3Resume = useAppSelector(selectResumeUrl);
 
     // Set the tab name
     useEffect(() => {
         document.title = "Resume";
     }, []);
 
-    // grab resume from s3
+    // grab resume from s3 and store blob URL in the Redux store
     useEffect(() => {
-        Promise.resolve(fetchPublicS3Blob('personal--site', 'resume.pdf')).then((blob) => {
-            if (blob) setS3Resume(URL.createObjectURL(blob))
-        })
-    }, []);
+        dispatch(loadResume())
+    }, [dispatch]);
 
     return (
         <Box className={classes.container}>

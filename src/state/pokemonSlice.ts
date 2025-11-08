@@ -1,15 +1,8 @@
-import { createSlice, createAsyncThunk, createAction, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 import type { Pokemon, PokemonItemSimple } from '../model/Pokemon'
 
 const initialState: Pokemon[] = [];
-
-type Payload = {
-	index: number;
-	pokemon: Pokemon
-}
-// Batched partial updates (apply many partial updates in a single dispatch)
-const updatePokemonBatch = createAction<Payload[]>('pokemon/partialUpdateBatch')
 
 // Async thunk to fetch pokemon list
 export const loadPokemonList = createAsyncThunk<
@@ -65,22 +58,6 @@ export const pokemonSlice = createSlice({
 					state.push(p)
 				}
 			})
-			.addCase(updatePokemonBatch, (state, action: PayloadAction<Payload[]>) => {
-				// Apply many partial updates in a single pass. This reduces the number of
-				// times React will re-render because only one dispatch happens per batch.
-				for (const { index, pokemon } of action.payload) {
-					if (index >= 0 && index < state.length) {
-						state[index] = { ...state[index], ...pokemon }
-					} else if (index === state.length) {
-						state.push(pokemon)
-					} else {
-						while (state.length < index) {
-							state.push({ name: '', id: 0 } as unknown as Pokemon)
-						}
-						state[index] = pokemon
-					}
-				}
-			})
 			.addCase(loadPokemon.fulfilled, (state, action: PayloadAction<Pokemon>) => {
 				const index = state.findIndex(p => p.name === action.payload.name);
 				state[index] = { ...state[index], ...action.payload };
@@ -88,7 +65,6 @@ export const pokemonSlice = createSlice({
 	},
 })
 
-// Other code such as selectors can use the imported `RootState` type
 export const selectPokemon = (state: RootState) => state.pokemon.pokemon
 
 export default pokemonSlice.reducer

@@ -6,7 +6,6 @@ import { toTitleCase } from "../helpers/text";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import type { Pokemon } from "../model/Pokemon";
 import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
-import type { RootState } from "../state/store";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
 
 
@@ -18,7 +17,7 @@ const useStyles = makeStyles(() => ({
 		height: '100%',
 		minHeight: '97vh',
 		paddingTop: 50, // header
-		paddingBottom: 50, // footer
+		paddingBottom: 50 // footer
 	},
 	paper: {
 		width: '100%',
@@ -35,7 +34,7 @@ const useStyles = makeStyles(() => ({
 const Showcase = () => {
 	const classes = useStyles();
 	const dispatch = useAppDispatch();
-	const pokemonList = useAppSelector((state: RootState) => selectPokemon(state));
+	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const [currentPokemonName, setCurrentPokemonName] = useState<string>("bulbasaur");
@@ -55,17 +54,6 @@ const Showcase = () => {
 				setError(err as Error);
 			}
 		}
-		// if (!loaded) {
-		// 	try {
-		// 		dispatch(loadPokemonList()).then((resp) => {
-		// 			setLoaded(true);
-		// 			const resList: Pokemon[] = resp.payload as Pokemon[];
-		// 			dispatch(loadAllPokemon(resList.map(p => p.url)));
-		// 		});
-		// 	} catch (err: unknown) {
-		// 		setError(err as Error);
-		// 	}
-		// }
 	}, [dispatch, loaded]);
 
 	// backup loader incase all or specific pokemon failed to load
@@ -107,6 +95,7 @@ const Showcase = () => {
 						<Autocomplete
 							options={pokemonList}
 							getOptionLabel={(option) => toTitleCase(option.name)}
+							// TODO: improve labels
 							// getOptionLabel={(option) => {
 							// 	if (!!option.name && !!option.species?.name) {
 							// 		const splitName = option.name.split('-');
