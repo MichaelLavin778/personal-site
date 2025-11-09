@@ -77,11 +77,12 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     }, [goToNextPage, goToPrevPage]);
 
     const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Move', hideable: false, flex: 1 },
+        { field: 'name', headerName: 'Move', hideable: false, flex: 1, minWidth: 130 },
         {
             field: 'type',
             headerName: 'Type',
             width: 110,
+            minWidth: 90,
             display: 'flex',
             cellClassName: classes.cell,
             renderCell: (params) => <Type typeName={params.row.type} />
