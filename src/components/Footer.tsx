@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { Box, Container, Typography, Stack } from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import AmplifyIconButton from "./icon_buttons/AmplifyIconButton";
 import GithubIconButton from "./icon_buttons/GitHubIconButton";
 import LinkedInIconButton from "./icon_buttons/LinkedInIconButton";

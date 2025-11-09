@@ -107,6 +107,7 @@ const Stats = ({ stats }: StatsProps) => {
                     ))}
                 </ToggleButtonGroup>
                 <Box sx={{ width: '100%' }}>
+                    {/* TODO: display value of data points on radar graph */}
                     <RadarChart
                         height={250}
                         highlight="series"

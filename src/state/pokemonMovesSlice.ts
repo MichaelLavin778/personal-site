@@ -57,12 +57,8 @@ export const loadAllPokemonMoves = createAsyncThunk<
         // completes, flush any remaining items.
     const results = (await Promise.all(tasks)) as PokemonMove[]
 
-    // flush any remaining buffered items before returning
-    // while (buffer.length > 0) flushBuffer()
-
     return results
     } catch (err: unknown) {
-        // while (buffer.length > 0) flushBuffer()
         const message = (err as Error)?.message ?? String(err)
         return thunkAPI.rejectWithValue(message)
     } finally {

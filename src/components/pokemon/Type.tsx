@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { Box } from "@mui/material";
+import { Box, type BoxProps } from "@mui/material";
 
 const useStyles = makeStyles(() => ({
     typeBox: {
@@ -19,11 +19,11 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-interface TypeProps {
+interface TypeProps extends BoxProps {
     typeName: string;
 }
 
-const Type = ({ typeName }: TypeProps) => {
+const Type = ({ typeName, ...props }: TypeProps) => {
     const classes = useStyles();
 
     let bgcolor = "";
@@ -105,7 +105,7 @@ const Type = ({ typeName }: TypeProps) => {
     }
 
     return (
-        <Box key={typeName} bgcolor={bgcolor} borderColor={borderColor} className={classes.typeBox}>
+        <Box key={typeName} bgcolor={bgcolor} borderColor={borderColor} className={classes.typeBox} {...props}>
             {typeName}
         </Box>
     );

@@ -1,7 +1,8 @@
 import { makeStyles } from "@material-ui/core";
-import { useMemo } from "react";
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { toTitleCase } from "../../helpers/text";
+import { Box, Typography } from "@mui/material";
+import { DataGrid, useGridApiRef, type GridColDef } from '@mui/x-data-grid';
+import { useMemo, useState, useRef, useEffect } from "react";
+import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove } from "../../model/Pokemon";
 import type { PokemonMove } from "../../model/PokemonMove";
@@ -10,13 +11,8 @@ import Type from "./Type";
 
 
 const useStyles = makeStyles(() => ({
-    lastRow: {
-        '&:last-child td': {
-            border: 0
-        },
-        '&:last-child th': {
-            border: 0
-        }
+    cell: {
+        alignContent: 'center'
     }
 }));
 
@@ -27,133 +23,126 @@ interface MovesProps {
 
 const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     const classes = useStyles();
+    const apiRef = useGridApiRef()
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
 
+    const headerSize = 55;
+    const rowSize = 52;
+    const pageSize = Math.floor((leftColumnHeight - headerSize) / rowSize);
+
+    // controlled pagination model so we can programmatically change pages
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
+    const lastWheelTimeRef = useRef(0);
+
+    // call this to go next using controlled pagination
+    const goToNextPage = () => {
+        const { page, pageSize } = paginationModel;
+        if (detailedMoves.length === 0) return;
+        const maxPage = Math.max(0, Math.ceil(detailedMoves.length / pageSize) - 1);
+        setPaginationModel({ ...paginationModel, page: Math.min(page + 1, maxPage) });
+    };
+
+    const goToPrevPage = () => {
+        const { page } = paginationModel;
+        setPaginationModel({ ...paginationModel, page: Math.max(0, page - 1) });
+    };
+
+    // use a native non-passive wheel listener so preventDefault() works reliably
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const handler = (e: WheelEvent) => {
+            // throttle rapid wheel events (300ms)
+            const now = Date.now();
+            if (now - lastWheelTimeRef.current < 300) return;
+            lastWheelTimeRef.current = now;
+
+            const delta = e.deltaY;
+            const threshold = 10; // ignore tiny jitters
+            if (delta > threshold) {
+                goToNextPage();
+                // prevent the default scrolling so user can page through
+                e.preventDefault();
+            } else if (delta < -threshold) {
+                goToPrevPage();
+                e.preventDefault();
+            }
+        };
+
+        el.addEventListener('wheel', handler, { passive: false });
+        return () => el.removeEventListener('wheel', handler);
+    }, [goToNextPage, goToPrevPage]);
+
+    const columns: GridColDef[] = [
+        { field: 'name', headerName: 'Move', hideable: false, flex: 1 },
+        {
+            field: 'type',
+            headerName: 'Type',
+            width: 110,
+            display: 'flex',
+            cellClassName: classes.cell,
+            renderCell: (params) => <Type typeName={params.row.type} />
+        },
+        {
+            field: 'category',
+            headerName: 'Cat.',
+            width: 70,
+            display: 'flex',
+            cellClassName: classes.cell,
+            renderCell: (params) => <img src={`https://img.pokemondb.net/images/icons/move-${params.row.category}.png`} alt={params.row.category} width={36} />
+        },
+        { field: 'power', headerName: 'Power', width: 70 },
+        { field: 'accuracy', headerName: 'Acc.', width: 70 },
+    ];
+
     const createData = (
+        id: number,
         name: string,
         type: string,
+        category: string,
         power: number | undefined,
         accuracy: number | undefined,
         allMoves: PokemonMove[]
     ) => {
         // name
-        let nameLabel = "";
-        switch (name) {
-            case 'double-edge':
-                nameLabel = "Double-Edge"
-                break;
-            case 'self-destruct':
-                nameLabel = "Self-Destruct"
-                break;
-            case 'soft-boiled':
-                nameLabel = "Soft-Boiled"
-                break;
-            case 'lock-on':
-                nameLabel = "Lock-On"
-                break;
-            case 'mud-slap':
-                nameLabel = "Mud-Slap"
-                break;
-            case 'will-o-wisp':
-                nameLabel = "Will-O-Wisp"
-                break;
-            case 'u-turn':
-                nameLabel = "U-Turn"
-                break;
-            case 'wake-up-slap':
-                nameLabel = "Wake-Up Slap"
-                break;
-            case 'x-scissor':
-                nameLabel = "X-Scissor"
-                break;
-            case 'v-create':
-                nameLabel = "V-create"
-                break;
-            case 'baby-doll-eyes':
-                nameLabel = "Baby-Doll Eyes"
-                break;
-            case 'freeze-dry':
-                nameLabel = "Freeze-Dry"
-                break;
-            case 'power-up-punch':
-                nameLabel = "Power-Up Punch"
-                break;
-            case 'topsy-turvy':
-                nameLabel = "Topsy-Turvy"
-                break;
-            case 'trick-or-treat':
-                nameLabel = "Trick-or-Treat"
-                break;
-            case 'all-out-pummeling':
-                nameLabel = "All-Out Pummeling"
-                break;
-            case 'multi-attack':
-                nameLabel = "Multi-Attack"
-                break;
-            case 'never-ending-nightmare':
-                nameLabel = "Never-Ending Nightmare"
-                break;
-            case 'savage-spin-out':
-                nameLabel = "Savage Spin-Out"
-                break;
-            case 'soul-stealing-7-star-strike':
-                nameLabel = "Soul-Stealing 7-Star Strike"
-                break;
-            default:
-                nameLabel = toTitleCase(name.replaceAll('-', ' ').replaceAll('G Max', 'G-Max'))
-        }
+        const nameLabel = moveIdToLabel(name);
 
         // power
-        const powerLabel = power ?? '-';
+        const powerLabel = power ? String(power) : '-';
 
         // accuracy
-        let accuracyLabel: string | number | undefined = accuracy;
-        if (!accuracyLabel) {
-            const effectEntries = allMoves.find((m => m.name === name))?.effect_entries;
-            if (effectEntries?.some(entry => entry.short_effect === "Never misses.")) {
-                accuracyLabel = '∞';
-            } else {
-                accuracyLabel = '-';
-            }
+        let accuracyLabel: string | undefined = accuracy ? String(accuracy) : '-';
+        const effectEntries = allMoves.find((m => m.name === name))?.effect_entries;
+        if (effectEntries?.some(entry => entry.short_effect === "Never misses.")) {
+            accuracyLabel = '∞';
         }
 
-        return { name: nameLabel, type, power: powerLabel, accuracy: accuracyLabel };
+        return { id, name: nameLabel, type, category, power: powerLabel, accuracy: accuracyLabel };
     }
-    const rows = useMemo(() => (detailedMoves).map(m => createData(m.name, m.type.name, m.power, m.accuracy, detailedMoves)), [detailedMoves]);
+    const rows = useMemo(() => (detailedMoves).map((m, i) => createData(i, m.name, m.type.name, m.damage_class.name, m.power, m.accuracy, detailedMoves)), [detailedMoves]);
 
     return (
         <>
             <Box>
                 <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
             </Box>
-            <TableContainer sx={{ maxHeight: leftColumnHeight }}>
-                <Table aria-label="moves table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell />
-                            <TableCell align="right">Type</TableCell>
-                            <TableCell align="right">Power</TableCell>
-                            <TableCell align="right">Accuracy</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.map((row) => (
-                            <TableRow
-                                key={row.name}
-                                className={classes.lastRow}
-                            >
-                                <TableCell component="th" scope="row">
-                                    {row.name}
-                                </TableCell>
-                                <TableCell align="right" sx={{ justifyItems: 'flex-end' }}><Type typeName={row.type} /></TableCell>
-                                <TableCell align="right">{row.power}</TableCell>
-                                <TableCell align="right">{row.accuracy}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Box ref={containerRef}>
+                <DataGrid
+                    rows={rows}
+                    columns={columns}
+                    apiRef={apiRef}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={(model) => setPaginationModel(model)}
+                    pageSizeOptions={[pageSize]}
+                    disableRowSelectionOnClick={true}
+                    // filterModel={}
+                    sx={{ border: 0 }}
+                />
+            </Box>
         </>
     );
 }

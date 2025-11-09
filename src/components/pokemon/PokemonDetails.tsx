@@ -15,8 +15,7 @@ const useStyles = makeStyles(() => ({
     },
     spritesContainer: {
         textAlign: 'center',
-        alignContent: 'center',
-        // minHeight: 134
+        alignContent: 'center'
     }
 }));
 
@@ -43,8 +42,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
 
     useEffect(() => {
         const h = ref.current?.clientHeight;
-        // ~59 is a row, so subtracting 50 just in case
-        setHeight(h ? Math.max(h - 50, 0) : 0);
+        if (h && pokemon.id) setHeight(Math.max(h, 0));
     }, [ref, windowWidth, pokemon]);
 
     if (!pokemon) {
@@ -115,7 +113,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 </Grid>
             </Grid>
             <Grid size={{ xs: 12, sm: 7 }}>
-                <Moves moves={pokemon.moves} leftColumnHeight={height} />
+                {height > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} leftColumnHeight={height} />}
             </Grid>
         </Grid>
     );
