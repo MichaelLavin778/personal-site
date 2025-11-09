@@ -56,6 +56,7 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
         if (!el) return;
 
         const handler = (e: WheelEvent) => {
+            e.preventDefault();
             // throttle rapid wheel events (300ms)
             const now = Date.now();
             if (now - lastWheelTimeRef.current < 300) return;
@@ -66,10 +67,8 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
             if (delta > threshold) {
                 goToNextPage();
                 // prevent the default scrolling so user can page through
-                e.preventDefault();
             } else if (delta < -threshold) {
                 goToPrevPage();
-                e.preventDefault();
             }
         };
 
