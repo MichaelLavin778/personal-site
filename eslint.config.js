@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-	globalIgnores(['dist']),
+	globalIgnores(['dist', 'node_modules']),
 	{
 		files: ['**/*.{ts,tsx}'],
 		extends: [
@@ -89,16 +89,16 @@ export default defineConfig([
 
 			// suggestions
 			'arrow-body-style': ['error', 'as-needed'],
-			'curly': ['warn', 'multi-or-nest'],
+			'curly': ['warn', 'all'],
 			'eqeqeq': ['error', 'always'],
 			'func-style': ['error', 'expression'],
 			'logical-assignment-operators': ['error', 'always'],
 			'operator-assignment': ['warn', 'always'],
 			'sort-imports': ['warn', {
 				'ignoreCase': false,
-				'ignoreDeclarationSort': false,
+				'ignoreDeclarationSort': true,
 				'ignoreMemberSort': false,
-				'memberSyntaxSortOrder': [],
+				'memberSyntaxSortOrder': ['none', 'all', 'multiple', 'single'],
 				'allowSeparatedGroups': false
 			}]
 		},

@@ -1,12 +1,9 @@
 import { IconButton, type IconButtonOwnProps } from "@mui/material";
 import S3Icon from "../icons/S3Icon";
 
-const S3IconButton = (props: IconButtonOwnProps) => {
-	const name = "S3";
-
-	return (
+const S3IconButton = (props: IconButtonOwnProps) => (
 		<IconButton
-			aria-label={name}
+			aria-label="S3"
 			href="https://aws.amazon.com/s3/"
 			target="_blank"
 			rel="noopener noreferrer"
@@ -15,6 +12,5 @@ const S3IconButton = (props: IconButtonOwnProps) => {
 			<S3Icon sx={{ overflow: 'visible', mt: -1 }} />
 		</IconButton>
 	);
-};
 
 export default S3IconButton;

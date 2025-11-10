@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import { VolumeDown, VolumeUp } from "@mui/icons-material";
 import { Box, Slider, Stack, Typography } from "@mui/material";
-import { useContext, useEffect, useRef } from "react";
+import { type RefObject, useContext, useEffect, useRef } from "react";
 import VolumeContext from "../../context/VolumeContext";
 import type { PokemonCry } from "../../model/Pokemon";
 import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.ogg"
@@ -26,7 +26,7 @@ const Cries = ({ cries }: CriesProps) => {
     const audioDreadnawRef = useRef<HTMLAudioElement | null>(null);
     const showDreadnawEasterEgg = cries?.latest?.includes("latest/834.ogg");
 
-    const setRefVolume = (ref: React.RefObject<HTMLAudioElement | null>, v: number) => {
+    const setRefVolume = (ref: RefObject<HTMLAudioElement | null>, v: number) => {
         const calcVolume = v / 100;
         if (ref.current && ref.current.volume !== calcVolume) {
             ref.current.volume = calcVolume; // Volume range is 0.0 to 1.0

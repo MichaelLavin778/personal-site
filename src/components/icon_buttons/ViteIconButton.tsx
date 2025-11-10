@@ -1,12 +1,9 @@
 import { IconButton, type IconButtonOwnProps } from "@mui/material";
 import ViteIcon from "../icons/ViteIcon";
 
-const ViteIconButton = (props: IconButtonOwnProps) => {
-	const name = "Vite";
-
-	return (
+const ViteIconButton = (props: IconButtonOwnProps) => (
 		<IconButton
-			aria-label={name}
+			aria-label="Vite"
 			href="https://vite.dev"
 			target="_blank"
 			rel="noopener noreferrer"
@@ -15,6 +12,5 @@ const ViteIconButton = (props: IconButtonOwnProps) => {
 			<ViteIcon sx={{ overflow: 'visible', mt: -1 }} />
 		</IconButton>
 	);
-};
 
 export default ViteIconButton;

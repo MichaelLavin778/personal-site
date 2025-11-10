@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
-import { selectResumeUrl, loadResume } from "../state/resumeSlice";
+import { loadResume, selectResumeUrl } from "../state/resumeSlice";
 
 
 const useStyles = makeStyles(() => ({

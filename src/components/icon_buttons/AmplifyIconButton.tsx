@@ -1,12 +1,9 @@
 import { IconButton, type IconButtonOwnProps } from "@mui/material";
 import AmplifyIcon from "../icons/AmplifyIcon";
 
-const AmplifyIconButton = (props: IconButtonOwnProps) => {
-	const name = "AWS Amplify";
-
-	return (
+const AmplifyIconButton = (props: IconButtonOwnProps) => (
 		<IconButton
-			aria-label={name}
+			aria-label="AWS Amplify"
 			href="https://aws.amazon.com/amplify"
 			target="_blank"
 			rel="noopener noreferrer"
@@ -15,6 +12,5 @@ const AmplifyIconButton = (props: IconButtonOwnProps) => {
 			<AmplifyIcon sx={{ overflow: 'visible', mt: -1 }} />
 		</IconButton>
 	);
-};
 
 export default AmplifyIconButton;

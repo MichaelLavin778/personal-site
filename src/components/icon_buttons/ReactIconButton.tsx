@@ -1,12 +1,9 @@
 import { IconButton, type IconButtonOwnProps } from "@mui/material";
 import ReactIcon from "../icons/ReactIcon";
 
-const ReactIconButton = (props: IconButtonOwnProps) => {
-	const name = "React";
-
-	return (
+const ReactIconButton = (props: IconButtonOwnProps) => (
 		<IconButton
-			aria-label={name}
+			aria-label="React"
 			href="https://react.dev"
 			target="_blank"
 			rel="noopener noreferrer"
@@ -15,6 +12,5 @@ const ReactIconButton = (props: IconButtonOwnProps) => {
 			<ReactIcon sx={{ overflow: 'visible', mt: -1 }} />
 		</IconButton>
 	);
-};
 
 export default ReactIconButton;

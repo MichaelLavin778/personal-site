@@ -42,7 +42,9 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
 
     useEffect(() => {
         const h = ref.current?.clientHeight;
-        if (h && pokemon.id) setHeight(Math.max(h, 0));
+        if (h && pokemon.id) {
+            setHeight(Math.max(h, 0));
+        }
     }, [ref, windowWidth, pokemon]);
 
     if (!pokemon) {

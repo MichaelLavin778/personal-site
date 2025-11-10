@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@material-ui/core'
+import { ThemeProvider } from '@mui/material/styles'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import store from './state/store.ts'

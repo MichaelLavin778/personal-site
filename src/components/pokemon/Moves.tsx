@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import { Box, Typography } from "@mui/material";
-import { DataGrid, useGridApiRef, type GridColDef } from '@mui/x-data-grid';
-import { useMemo, useState, useRef, useEffect } from "react";
+import { DataGrid, type GridColDef, useGridApiRef } from '@mui/x-data-grid';
+import { useEffect, useMemo, useRef, useState } from "react";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove } from "../../model/Pokemon";
@@ -35,31 +35,37 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
     const lastWheelTimeRef = useRef(0);
 
-    // call this to go next using controlled pagination
-    const goToNextPage = () => {
-        const { page, pageSize } = paginationModel;
-        if (detailedMoves.length === 0) return;
-        const maxPage = Math.max(0, Math.ceil(detailedMoves.length / pageSize) - 1);
-        setPaginationModel({ ...paginationModel, page: Math.min(page + 1, maxPage) });
-    };
-
-    const goToPrevPage = () => {
-        const { page } = paginationModel;
-        setPaginationModel({ ...paginationModel, page: Math.max(0, page - 1) });
-    };
-
     // use a native non-passive wheel listener so preventDefault() works reliably
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
+        // call this to go next using controlled pagination
+        const goToNextPage = () => {
+            const { page, pageSize } = paginationModel;
+            if (detailedMoves.length === 0) {
+                return;
+            }
+            const maxPage = Math.max(0, Math.ceil(detailedMoves.length / pageSize) - 1);
+            setPaginationModel({ ...paginationModel, page: Math.min(page + 1, maxPage) });
+        };
+
+        const goToPrevPage = () => {
+            const { page } = paginationModel;
+            setPaginationModel({ ...paginationModel, page: Math.max(0, page - 1) });
+        };
+
         const el = containerRef.current;
-        if (!el) return;
+        if (!el) {
+            return;
+        }
 
         const handler = (e: WheelEvent) => {
             e.preventDefault();
             // throttle rapid wheel events (300ms)
             const now = Date.now();
-            if (now - lastWheelTimeRef.current < 300) return;
+            if (now - lastWheelTimeRef.current < 300) {
+                return;
+            }
             lastWheelTimeRef.current = now;
 
             const delta = e.deltaY;
@@ -74,7 +80,7 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
 
         el.addEventListener('wheel', handler, { passive: false });
         return () => el.removeEventListener('wheel', handler);
-    }, [goToNextPage, goToPrevPage]);
+    });
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Move', hideable: false, flex: 1, minWidth: 130 },

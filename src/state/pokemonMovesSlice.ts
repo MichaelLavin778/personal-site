@@ -1,4 +1,4 @@
-import { createSelector, createSlice, createAsyncThunk, createAction, type PayloadAction } from '@reduxjs/toolkit'
+import { type PayloadAction, createAction, createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import pLimit from 'p-limit';
 import type { PokemonsMove } from '../model/Pokemon';
 import type { PokemonMove } from '../model/PokemonMove';
@@ -18,20 +18,22 @@ export const loadAllPokemonMoves = createAsyncThunk<
 
     // Buffer partial updates and dispatch them in batches to avoid dispatching
     // thousands of single-item updates which triggers many re-renders.
-    const buffer: PokemonMove[] = []
-    const chunkSize = 10
-    const flushIntervalMs = 250 // flush every 200ms at least
+    const buffer: PokemonMove[] = [];
+    const chunkSize = 10;
+    const flushIntervalMs = 250; // flush every 200ms at least
 
     const flushBuffer = () => {
-        if (buffer.length === 0) return
+        if (buffer.length === 0) {
+            return;
+        }
         // capture and clear buffer atomically
-        const payload = buffer.splice(0, Math.min(buffer.length, chunkSize))
+        const payload = buffer.splice(0, Math.min(buffer.length, chunkSize));
         // dispatch the action created by the action creator so middleware/types behave
-        thunkAPI.dispatch(updateMovesBatch(payload))
+        thunkAPI.dispatch(updateMovesBatch(payload));
     }
 
     // Periodic flush so we don't wait for the chunk size if network is slow
-    const timer = setInterval(flushBuffer, flushIntervalMs)
+    const timer = setInterval(flushBuffer, flushIntervalMs);
 
     try {
         // For each API, fetch and when the response comes back, parse it and
@@ -39,30 +41,32 @@ export const loadAllPokemonMoves = createAsyncThunk<
         // once it reaches chunkSize.
         const tasks = apis.map((api) =>
             limit(async () => {
-                const res = await fetch(api)
+                const res = await fetch(api);
                 if (!res.ok) {
-                    throw Error(`Failed to fetch: ${res.status} ${res.statusText}`)
+                    throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
                 }
-                const json = await res.json()
-                const move = json as PokemonMove
+                const json = await res.json();
+                const move = json as PokemonMove;
                 // push into buffer for batched dispatch
-                buffer.push(move)
-                if (buffer.length >= chunkSize) flushBuffer()
+                buffer.push(move);
+                if (buffer.length >= chunkSize) {
+                    flushBuffer();
+                }
 
-                return move
+                return move;
             })
         )
 
         // Wait for all to complete (we still flushed along the way). After all
         // completes, flush any remaining items.
-    const results = (await Promise.all(tasks)) as PokemonMove[]
+    const results = (await Promise.all(tasks)) as PokemonMove[];
 
-    return results
+    return results;
     } catch (err: unknown) {
-        const message = (err as Error)?.message ?? String(err)
-        return thunkAPI.rejectWithValue(message)
+        const message = (err as Error)?.message ?? String(err);
+        return thunkAPI.rejectWithValue(message);
     } finally {
-        clearInterval(timer as ReturnType<typeof setInterval>)
+        clearInterval(timer as ReturnType<typeof setInterval>);
     }
 })
 
@@ -93,11 +97,11 @@ export const pokemonMovesSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(updateMovesBatch, (state, action: PayloadAction<PokemonMove[]>) => {
-                action.payload.forEach(m => state[m.name] = m)
+                action.payload.forEach(m => state[m.name] = m);
             })
             .addCase(loadMove.fulfilled, (state, action: PayloadAction<PokemonMove>) => {
-                const key = action.payload.name
-                state[key] = action.payload
+                const key = action.payload.name;
+                state[key] = action.payload;
             })
     },
 })
@@ -108,10 +112,12 @@ export const selectAllMoves = (state: RootState) => state.pokemon.moves
 export const makeSelectPokemonMoves = () => createSelector(
     [selectAllMoves, (_: RootState, pokemonsMoves?: PokemonsMove[]) => pokemonsMoves],
     (all, pokemonsMoves) => {
-        if (!Array.isArray(pokemonsMoves) || pokemonsMoves.length === 0) return []
+        if (!Array.isArray(pokemonsMoves) || pokemonsMoves.length === 0) {
+            return [];
+        }
         return pokemonsMoves
             .map(pm => pm?.move?.name && all ? all[pm.move.name] : undefined)
-            .filter((m): m is PokemonMove => m !== undefined)
+            .filter((m): m is PokemonMove => m !== undefined);
     }
 )
 

@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import { AppBar, Container, Stack } from "@mui/material";
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(() => ({
@@ -29,7 +30,7 @@ const Header = () => {
 	const toShowcase = "/showcase"
 	const toResume = "/resume"
 
-	const onClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname === to && e.preventDefault();
+	const onClick = (e: ReactMouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname === to && e.preventDefault();
 
 	return (
 		<AppBar className={classes.header}>
