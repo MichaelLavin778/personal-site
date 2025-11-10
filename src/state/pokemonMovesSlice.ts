@@ -23,9 +23,7 @@ export const loadAllPokemonMoves = createAsyncThunk<
     const flushIntervalMs = 250; // flush every 200ms at least
 
     const flushBuffer = () => {
-        if (buffer.length === 0) {
-            return;
-        }
+        if (buffer.length === 0) return;        
         // capture and clear buffer atomically
         const payload = buffer.splice(0, Math.min(buffer.length, chunkSize));
         // dispatch the action created by the action creator so middleware/types behave
@@ -42,16 +40,13 @@ export const loadAllPokemonMoves = createAsyncThunk<
         const tasks = apis.map((api) =>
             limit(async () => {
                 const res = await fetch(api);
-                if (!res.ok) {
-                    throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-                }
+                if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+
                 const json = await res.json();
                 const move = json as PokemonMove;
                 // push into buffer for batched dispatch
                 buffer.push(move);
-                if (buffer.length >= chunkSize) {
-                    flushBuffer();
-                }
+                if (buffer.length >= chunkSize) flushBuffer();                
 
                 return move;
             })
@@ -77,9 +72,8 @@ export const loadMove = createAsyncThunk<
 >('pokemon/move', async (apiUrl, thunkAPI) => {
     try {
         const res = await fetch(apiUrl);
-        if (!res.ok) {
-            throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-        }
+        if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+
         const json = await res.json();
         const results: PokemonMove = json;
 
@@ -112,9 +106,8 @@ export const selectAllMoves = (state: RootState) => state.pokemon.moves
 export const makeSelectPokemonMoves = () => createSelector(
     [selectAllMoves, (_: RootState, pokemonsMoves?: PokemonsMove[]) => pokemonsMoves],
     (all, pokemonsMoves) => {
-        if (!Array.isArray(pokemonsMoves) || pokemonsMoves.length === 0) {
-            return [];
-        }
+        if (!Array.isArray(pokemonsMoves) || pokemonsMoves.length === 0) return [];
+
         return pokemonsMoves
             .map(pm => pm?.move?.name && all ? all[pm.move.name] : undefined)
             .filter((m): m is PokemonMove => m !== undefined);

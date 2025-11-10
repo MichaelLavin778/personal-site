@@ -21,9 +21,8 @@ export const getPublicS3Url = (bucket: string, key: string): string => {
 export const fetchPublicS3Blob = async (bucket: string, key: string): Promise<Blob | undefined> => {
 		const url = getPublicS3Url(bucket, key);
 		const res = await fetch(url);
-		if (!res.ok) {
-			throw Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
-		}
+		if (!res.ok) 
+			throw Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);		
 		return await res.blob();
 }
 
@@ -33,9 +32,7 @@ export const fetchPublicS3Blob = async (bucket: string, key: string): Promise<Bl
  */
 export const downloadPublicS3File = async (bucket: string, key: string, filename?: string): Promise<boolean> =>  {
 	const blob = await fetchPublicS3Blob(bucket, key);
-	if (!blob) {
-		return false;
-	}
+	if (!blob) return false;	
 
 	const url = URL.createObjectURL(blob);
 	try {

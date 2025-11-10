@@ -1,10 +1,10 @@
 import { makeStyles } from "@material-ui/core";
-import { Box, Typography } from "@mui/material";
-import { DataGrid, type GridColDef, useGridApiRef } from '@mui/x-data-grid';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel, useGridApiRef } from '@mui/x-data-grid';
+import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
-import type { PokemonsMove } from "../../model/Pokemon";
+import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
 import type { PokemonMove } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
@@ -27,24 +27,36 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
 
-    const headerSize = 55;
-    const rowSize = 52;
-    const pageSize = Math.floor((leftColumnHeight - headerSize) / rowSize);
+    // move filter buttons
+    const [moveTypeFilter, setMoveTypeFilter] = useState<{ label: string, value: string } | null>({ label: "Level", value: "level-up" });
+    const buttonOptions = [
+        { label: "Level", value: "level-up" },
+        { label: "TM", value: "machine" },
+        { label: "Egg", value: "egg" },
+        { label: "Tutor", value: "tutor" },
+    ];
 
     // controlled pagination model so we can programmatically change pages
+    const toggleButtonGroupHeight = 27.5;
+    const headerSize = 55;
+    const rowSize = 52;
+    const pageSize = Math.floor((leftColumnHeight - headerSize - toggleButtonGroupHeight) / rowSize);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
     const lastWheelTimeRef = useRef(0);
+
+    // intial sort and sort model controls
+    const intialSort = { field: 'learned', sort: 'asc' as const };
+    const [sortModel, setSortModel] = useState<GridSortModel>([intialSort]);
 
     // use a native non-passive wheel listener so preventDefault() works reliably
     const containerRef = useRef<HTMLDivElement | null>(null);
 
+    // override scrolling in the table to turn the table pages instead
     useEffect(() => {
-        // call this to go next using controlled pagination
         const goToNextPage = () => {
             const { page, pageSize } = paginationModel;
-            if (detailedMoves.length === 0) {
-                return;
-            }
+            if (detailedMoves.length === 0) return;
+
             const maxPage = Math.max(0, Math.ceil(detailedMoves.length / pageSize) - 1);
             setPaginationModel({ ...paginationModel, page: Math.min(page + 1, maxPage) });
         };
@@ -55,35 +67,98 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
         };
 
         const el = containerRef.current;
-        if (!el) {
-            return;
-        }
+        if (!el) return;
 
         const handler = (e: WheelEvent) => {
             e.preventDefault();
-            // throttle rapid wheel events (300ms)
             const now = Date.now();
-            if (now - lastWheelTimeRef.current < 300) {
-                return;
-            }
+            // throttle rapid wheel events (300ms)
+            if (now - lastWheelTimeRef.current < 300) return;
+
             lastWheelTimeRef.current = now;
 
             const delta = e.deltaY;
             const threshold = 10; // ignore tiny jitters
-            if (delta > threshold) {
-                goToNextPage();
-                // prevent the default scrolling so user can page through
-            } else if (delta < -threshold) {
-                goToPrevPage();
-            }
+            if (delta > threshold) goToNextPage();
+            // prevent the default scrolling so user can page through
+            else if (delta < -threshold) goToPrevPage();
         };
 
         el.addEventListener('wheel', handler, { passive: false });
         return () => el.removeEventListener('wheel', handler);
     });
 
+    const handleMoveTypeFilter = (_event: ReactMouseEvent<HTMLElement, MouseEvent>, newMoveTypeFilter: string | null) => {
+        const newOption = buttonOptions.find(opt => opt.value === newMoveTypeFilter) || null;
+        setMoveTypeFilter(newOption);
+        if (newMoveTypeFilter === "level-up") setSortModel([intialSort]);
+        // TODO: look up TM numbers and then uncomment code below to default sort it
+        // else if (newMoveTypeFilter === "machine") setSortModel([intialSort]);
+        else setSortModel([]);
+    };
+
+    const pwrAndAccSorter: GridComparatorFn = (v1: string, v2: string) => {
+        const parseVal = (v: string) => {
+            if (v === '-' || v === '') return NaN;
+            if (v === '∞' || v === '\u221E') return Infinity;
+            const n = Number(v);
+            return Number.isFinite(n) ? n : NaN;
+        };
+
+        const n1 = parseVal(v1);
+        const n2 = parseVal(v2);
+        const n1Finite = Number.isFinite(n1);
+        const n2Finite = Number.isFinite(n2);
+
+        // 1st) infinity
+        if (n1 === Infinity) return 1;
+        if (n2 === Infinity) return -1;
+        // 2nd) number value
+        if (n1Finite && n2Finite) return n1 - n2;
+        // 3rd) string "-"
+        if (n1Finite && !n2Finite) return 1;
+        if (!n1Finite && n2Finite) return -1;
+
+        return v1.localeCompare(v2);
+    };
+
+    const learnSorter: GridComparatorFn = (v1: string, v2: string) => {
+        const parseVal = (v: string) => {
+            const n = Number(v);
+            if (isNaN(n)) return NaN;
+            return Number(n);
+        };
+
+        const n1 = parseVal(v1);
+        const n2 = parseVal(v2);
+        const n1Finite = Number.isFinite(n1);
+        const n2Finite = Number.isFinite(n2);
+
+        // DESC by default looks better this way
+        if (n1Finite && n2Finite) return (n1 as number) - (n2 as number);
+        if (n1Finite && !n2Finite) return -1;
+        if (!n1Finite && n2Finite) return 1;
+
+        return String(v1).localeCompare(String(v2));
+    };
+
+    const getVGs = (mvs: PokemonsMove[], moveName: string) => mvs.find(move => move.move.name === moveName)?.version_group_details;
+
     const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Move', hideable: false, flex: 1, minWidth: 130 },
+        {
+            field: 'learned',
+            headerName: moveTypeFilter?.label || "Lrn",
+            filterable: false,
+            width: 100,
+            sortComparator: learnSorter
+        },
+        {
+            field: 'name',
+            headerName: 'Move',
+            hideable: false,
+            flex: 1,
+            minWidth: 130
+        },
         {
             field: 'type',
             headerName: 'Type',
@@ -101,12 +176,23 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
             cellClassName: classes.cell,
             renderCell: (params) => <img src={`https://img.pokemondb.net/images/icons/move-${params.row.category}.png`} alt={params.row.category} width={36} />
         },
-        { field: 'power', headerName: 'Power', width: 70 },
-        { field: 'accuracy', headerName: 'Acc.', width: 70 },
+        {
+            field: 'power',
+            headerName: 'Power',
+            width: 70,
+            sortComparator: pwrAndAccSorter
+        },
+        {
+            field: 'accuracy',
+            headerName: 'Acc.',
+            width: 70,
+            sortComparator: pwrAndAccSorter
+        },
     ];
 
     const createData = (
         id: number,
+        vgs: VersionGroupDetails[] | undefined,
         name: string,
         type: string,
         category: string,
@@ -114,6 +200,26 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
         accuracy: number | undefined,
         allMoves: PokemonMove[]
     ) => {
+        // learned by and learned at
+        const vg = vgs?.at(-1);
+        let learned: string;
+        switch (vg?.move_learn_method.name) {
+            case "level-up":
+                learned = `${vg?.level_learned_at || 0}`;
+                break;
+            case "machine":
+                learned = "TM";
+                break;
+            case "tutor":
+                learned = "Tutor";
+                break;
+            case "egg":
+                learned = "Egg";
+                break;
+            default:
+                learned = "Other";
+        }
+
         // name
         const nameLabel = moveIdToLabel(name);
 
@@ -123,19 +229,41 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
         // accuracy
         let accuracyLabel: string | undefined = accuracy ? String(accuracy) : '-';
         const effectEntries = allMoves.find((m => m.name === name))?.effect_entries;
-        if (effectEntries?.some(entry => entry.short_effect === "Never misses.")) {
-            accuracyLabel = '∞';
-        }
+        if (effectEntries?.some(entry => entry.short_effect === "Never misses.")) accuracyLabel = '∞';
 
-        return { id, name: nameLabel, type, category, power: powerLabel, accuracy: accuracyLabel };
+        return { id, learned, name: nameLabel, type, category, power: powerLabel, accuracy: accuracyLabel };
     }
-    const rows = useMemo(() => (detailedMoves).map((m, i) => createData(i, m.name, m.type.name, m.damage_class.name, m.power, m.accuracy, detailedMoves)), [detailedMoves]);
+
+    const rows = useMemo(
+        () => (detailedMoves)
+            .filter(m => moveTypeFilter?.value ? getVGs(moves, m.name)?.at(-1)?.move_learn_method.name === moveTypeFilter.value : m)
+            .map((m, i) => {
+                const vgs = getVGs(moves, m.name);
+                return createData(i, vgs, m.name, m.type.name, m.damage_class.name, m.power, m.accuracy, detailedMoves)
+            }), [detailedMoves, moveTypeFilter, moves]);
 
     return (
         <>
             <Box>
                 <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
             </Box>
+            <ToggleButtonGroup
+                value={moveTypeFilter?.value}
+                exclusive={true}
+                onChange={handleMoveTypeFilter}
+                aria-label="move learned by filter"
+                fullWidth={true}
+            >
+                {buttonOptions.map((label) => (
+                    <ToggleButton
+                        key={label.label}
+                        value={label.value || ''}
+                        sx={{ lineHeight: 0.25, width: 70 }}
+                    >
+                        {label.label}
+                    </ToggleButton>
+                ))}
+            </ToggleButtonGroup>
             <Box ref={containerRef}>
                 <DataGrid
                     rows={rows}
@@ -145,7 +273,8 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
                     onPaginationModelChange={(model) => setPaginationModel(model)}
                     pageSizeOptions={[pageSize]}
                     disableRowSelectionOnClick={true}
-                    // filterModel={}
+                    sortModel={sortModel}
+                    onSortModelChange={(model) => setSortModel(model)}
                     sx={{ border: 0 }}
                 />
             </Box>

@@ -89,7 +89,7 @@ export default defineConfig([
 
 			// suggestions
 			'arrow-body-style': ['error', 'as-needed'],
-			'curly': ['warn', 'all'],
+			'curly': ['warn', 'multi-or-nest'],
 			'eqeqeq': ['error', 'always'],
 			'func-style': ['error', 'expression'],
 			'logical-assignment-operators': ['error', 'always'],

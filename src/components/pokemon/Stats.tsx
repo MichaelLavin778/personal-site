@@ -30,17 +30,15 @@ const Stats = ({ stats }: StatsProps) => {
 
     const calcMinStat = (name: string, base: number) => {
         let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
-        if (name === 'hp') {
+        if (name === 'hp') 
             min = Math.floor(2 * base * maxLevel / 100) + maxLevel + 10;
-        }
         return min;
     }
 
     const calcMaxStat = (name: string, base: number) => {
         let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
-        if (name === 'hp') {
+        if (name === 'hp') 
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
-        }
         return max;
     }
 

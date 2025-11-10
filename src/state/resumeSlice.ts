@@ -22,11 +22,9 @@ export const loadResume = createAsyncThunk<
 >('resume/resume', async (_, thunkAPI) => {
     try {
         const blob = await fetchPublicS3Blob('personal--site', 'resume.pdf');
-        if (!blob) {
-            throw Error('Failed to download resume');
-        }
+        if (!blob) throw Error('Failed to download resume');
+        
         const objectUrl = URL.createObjectURL(blob);
-
         return objectUrl;
     } catch (err: unknown) {
         const message = (err as Error)?.message ?? String(err);

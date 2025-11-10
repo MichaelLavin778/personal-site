@@ -27,9 +27,7 @@ const Resume = () => {
 
     // grab resume from s3 and store blob URL in the Redux store
     useEffect(() => {
-        if (!s3Resume) {
-            dispatch(loadResume());
-        }
+        if (!s3Resume) dispatch(loadResume());
     }, [dispatch, s3Resume]);
 
     // TODO: pdf looks "backdropped" on mobile

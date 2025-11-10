@@ -11,9 +11,8 @@ export const loadPokemonList = createAsyncThunk<
 	try {
 		const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 		const res = await fetch(apiUrl);
-		if (!res.ok) {
-			throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-		}
+		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+		
 		const json = await res.json();
 		const results: PokemonItemSimple[] = Array.isArray(json?.results)
 			? json.results.map((p: Record<string, unknown>) => ({ name: String(p['name'] ?? ''), url: String(p['url'] ?? '') }))
@@ -33,9 +32,8 @@ export const loadPokemon = createAsyncThunk<
 >('pokemon/pokemon', async (apiUrl, thunkAPI) => {
 	try {
 		const res = await fetch(apiUrl);
-		if (!res.ok) {
-			throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-		}
+		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+		
 		const json = await res.json();
 		const results: Pokemon = json;
 
@@ -54,9 +52,7 @@ export const pokemonSlice = createSlice({
 		builder
 			.addCase(loadPokemonList.fulfilled, (state, action: PayloadAction<PokemonItemSimple[]>) => {
 				const payload = action.payload as Pokemon[];
-				for (const p of payload) {
-					state.push(p)
-				}
+				for (const p of payload) state.push(p);
 			})
 			.addCase(loadPokemon.fulfilled, (state, action: PayloadAction<Pokemon>) => {
 				const index = state.findIndex(p => p.name === action.payload.name);

@@ -27,10 +27,10 @@ const Cries = ({ cries }: CriesProps) => {
     const showDreadnawEasterEgg = cries?.latest?.includes("latest/834.ogg");
 
     const setRefVolume = (ref: RefObject<HTMLAudioElement | null>, v: number) => {
+        // Volume range is 0.0 to 1.0
         const calcVolume = v / 100;
-        if (ref.current && ref.current.volume !== calcVolume) {
-            ref.current.volume = calcVolume; // Volume range is 0.0 to 1.0
-        }
+        if (ref.current && ref.current.volume !== calcVolume)
+            ref.current.volume = calcVolume;
     }
 
     const applyVolume = (newVolume: number) => {
@@ -51,9 +51,7 @@ const Cries = ({ cries }: CriesProps) => {
         applyVolume(newVolume)
     };
 
-    if (!cries?.latest && !cries?.legacy) {
-        return null;
-    }
+    if (!cries?.latest && !cries?.legacy) return null;    
 
     return (
         <>
