@@ -1,8 +1,8 @@
-import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
 import type { PokemonStat } from "../../model/Pokemon";
 import type { HighlightItemData } from "@mui/x-charts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 interface StatsProps {
@@ -26,18 +26,18 @@ const Stats = ({ stats }: StatsProps) => {
         { name: 'Sp. Def', max: 614 },
         { name: 'Speed', max: 504 }
     ];
-    const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({ base_stat: 0, effort: 0, stat: { name: metric.name, url: `https://pokeapi.co/api/v2/stat/${i + 1}/` } }));    
+    const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({ base_stat: 0, effort: 0, stat: { name: metric.name, url: `https://pokeapi.co/api/v2/stat/${i + 1}/` } }));
 
     const calcMinStat = (name: string, base: number) => {
         let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
-        if (name === 'hp') 
+        if (name === 'hp')
             min = Math.floor(2 * base * maxLevel / 100) + maxLevel + 10;
         return min;
     }
 
     const calcMaxStat = (name: string, base: number) => {
         let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
-        if (name === 'hp') 
+        if (name === 'hp')
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
         return max;
     }
@@ -48,9 +48,9 @@ const Stats = ({ stats }: StatsProps) => {
 
     const series = [
         {
-            id: 'base',
-            label: 'Base',
-            data: baseData
+            id: 'max',
+            label: 'Max',
+            data: maxData
         },
         {
             id: 'min',
@@ -58,11 +58,14 @@ const Stats = ({ stats }: StatsProps) => {
             data: minData
         },
         {
-            id: 'max',
-            label: 'Max',
-            data: maxData
+            id: 'base',
+            label: 'Base',
+            data: baseData
         },
-    ]
+
+    ];
+
+    const currentSeries = series.find(s => s.id === highlightedItem?.seriesId);
 
     const withOptions = (series: RadarSeries[]) =>
         series.map((item) => ({
@@ -80,6 +83,10 @@ const Stats = ({ stats }: StatsProps) => {
         }
     };
 
+    useEffect(() => {
+        if (!highlightedItem) setHighlightedItem({ seriesId: 'base' })
+    }, [highlightedItem]);
+
     return (
         <>
             <Box>
@@ -93,7 +100,7 @@ const Stats = ({ stats }: StatsProps) => {
                     aria-label="highlighted series"
                     fullWidth={true}
                 >
-                    {series.map((item) => (
+                    {series.slice().reverse().map((item) => (
                         <ToggleButton
                             key={item.id}
                             value={item.id}
@@ -104,18 +111,32 @@ const Stats = ({ stats }: StatsProps) => {
                         </ToggleButton>
                     ))}
                 </ToggleButtonGroup>
-                <Box sx={{ width: '100%' }}>
-                    {/* TODO: display value of data points on radar graph */}
-                    <RadarChart
-                        height={250}
-                        highlight="series"
-                        highlightedItem={highlightedItem}
-                        onHighlightChange={setHighlightedItem}
-                        slotProps={{ tooltip: { trigger: 'axis' } }}
-                        series={withOptions(series)}
-                        radar={{ metrics }}
-                    />
-                </Box>
+                <Stack
+                    direction={{ xs: 'column', md: 'row' }}
+                    sx={{ width: '100%' }}
+                    alignItems="center"
+                >
+                    {highlightedItem?.seriesId && (
+                        <code>
+                            <Box border={1} borderRadius={4} borderColor="slategray" padding={2} margin={2} whiteSpace="nowrap">
+                                <Box justifySelf="right">{currentSeries?.label}</Box>
+                                <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
+                                <Box justifyItems="right">{currentSeries?.data.map((stat, i) => <Box>{metrics.at(i)?.name} {stat}</Box>)}</Box>
+                            </Box>
+                        </code>
+                    )}
+                    <Box sx={{ width: '100%' }}>
+                        <RadarChart
+                            height={250}
+                            highlight="series"
+                            highlightedItem={highlightedItem}
+                            onHighlightChange={setHighlightedItem}
+                            slotProps={{ tooltip: { trigger: 'axis' } }}
+                            series={withOptions(series)}
+                            radar={{ metrics }}
+                        />
+                    </Box>
+                </Stack>
             </Stack>
         </>
     );
