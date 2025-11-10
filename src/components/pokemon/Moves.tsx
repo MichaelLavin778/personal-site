@@ -28,12 +28,13 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
 
     // move filter buttons
-    const [moveTypeFilter, setMoveTypeFilter] = useState<{ label: string, value: string } | null>({ label: "Level", value: "level-up" });
+    const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
+    const [moveTypeFilter, setMoveTypeFilter] = useState<{ label: string, shortLabel?: string, value: string } | null>(levelOption);
     const buttonOptions = [
-        { label: "Level", value: "level-up" },
+        levelOption,
         { label: "TM", value: "machine" },
         { label: "Egg", value: "egg" },
-        { label: "Tutor", value: "tutor" },
+        { label: "Tutor", shortLabel: "Ttr", value: "tutor" },
     ];
 
     // controlled pagination model so we can programmatically change pages
@@ -147,9 +148,10 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     const columns: GridColDef[] = [
         {
             field: 'learned',
-            headerName: moveTypeFilter?.label || "Lrn",
+            headerName: moveTypeFilter?.shortLabel || moveTypeFilter?.label || "Lrn",
             filterable: false,
-            width: 100,
+            align: 'right',
+            width: 70,
             sortComparator: learnSorter
         },
         {
