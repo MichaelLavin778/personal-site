@@ -121,7 +121,12 @@ const Stats = ({ stats }: StatsProps) => {
                             <Box border={1} borderRadius={4} borderColor="slategray" padding={2} margin={2} whiteSpace="nowrap">
                                 <Box justifySelf="right">{currentSeries?.label}</Box>
                                 <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
-                                <Box justifyItems="right">{currentSeries?.data.map((stat, i) => <Box>{metrics.at(i)?.name} {stat}</Box>)}</Box>
+                                <Box justifyItems="right">
+                                    {currentSeries?.data.map((stat, i) => {
+                                        const statName = metrics.at(i)?.name;
+                                        return <Box key={statName}>{statName} {stat}</Box>
+                                    })}
+                                </Box>
                             </Box>
                         </code>
                     )}
