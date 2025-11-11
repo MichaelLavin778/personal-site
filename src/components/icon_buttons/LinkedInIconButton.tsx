@@ -7,6 +7,7 @@ const LinkedInIconButton = (props: SvgIconProps) => (
 			href="https://www.linkedin.com/in/michael-lavin-2373b7198"
 			target="_blank"
 			rel="noopener noreferrer"
+			color="inherit"
 		>
 			<LinkedInIcon {...props} />
 		</IconButton>

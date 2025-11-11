@@ -1,5 +1,8 @@
 import { makeStyles } from '@material-ui/core';
-import { AppBar, Container, Stack } from "@mui/material";
+import { AppBar, Container, IconButton, Stack } from "@mui/material";
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useThemeMode } from '../theme/ThemeModeContext';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -7,25 +10,19 @@ const useStyles = makeStyles(() => ({
 	header: {
 		height: 50
 	},
-	container: {
-		height: "100%"
-	},
 	stack: {
 		justifyContent: "space-around",
 		alignItems: "center",
 		height: '100%'
 	},
 	link: {
-		color: "#fff",
-		textDecoration: 'none',
-		'&:hover': {
-			textDecoration: 'underline',
-		},
+		color: 'inherit',
 	}
 }));
 
 const Header = () => {
 	const classes = useStyles();
+	const { mode, toggleMode } = useThemeMode();
 	const toHome = "/";
 	const toShowcase = "/showcase"
 	const toResume = "/resume"
@@ -34,7 +31,7 @@ const Header = () => {
 
 	return (
 		<AppBar className={classes.header}>
-			<Container className={classes.container}>
+			<Container>
 				<Stack direction="row" className={classes.stack}>
 					<Link to={toHome} onClick={(e) => onClick(e, toHome)} className={classes.link}>
 						Home
@@ -45,6 +42,9 @@ const Header = () => {
 					<Link to={toResume} onClick={(e) => onClick(e, toResume)} className={classes.link}>
 						Resume
 					</Link>
+					<IconButton color="inherit" onClick={toggleMode} aria-label="toggle theme">
+						{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+					</IconButton>
 				</Stack>
 			</Container>
 		</AppBar>

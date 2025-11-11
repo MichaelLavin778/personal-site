@@ -7,6 +7,7 @@ const GithubIconButton = (props: SvgIconProps) => (
 			href="https://github.com/MichaelLavin778"
 			target="_blank"
 			rel="noopener noreferrer"
+			color="inherit"
 		>
 			<GitHubIcon {...props} />
 		</IconButton>

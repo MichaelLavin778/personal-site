@@ -14,13 +14,11 @@ const useStyles = makeStyles(() => ({
 		bottom: 0,
 		left: 0,
 		width: '100%',
-		backgroundColor: "#1a1a1a",
 		height: 50,
 		overflow: 'hidden'
 	},
 	container: {
-		alignItems: "center",
-		height: '100%'
+		alignItems: "center"
 	},
 	main: {
 		justifyContent: "space-between",
@@ -29,9 +27,6 @@ const useStyles = makeStyles(() => ({
 	poweredRow: {
 		alignItems: "center"
 	},
-	icon: {
-		color: "#fff"
-	}
 }));
 
 const Footer = () => {
@@ -59,8 +54,8 @@ const Footer = () => {
 						<ReactIconButton />
 					</Stack>
 					<Stack direction="row" spacing={1}>
-						<LinkedInIconButton className={classes.icon} />
-						<GithubIconButton className={classes.icon} />
+						<LinkedInIconButton />
+						<GithubIconButton />
 					</Stack>
 				</Stack>
 			</Container>

@@ -9,7 +9,6 @@ const useStyles = makeStyles(() => ({
         display: 'flex',
         flex: 1,
         width: '100%',
-        height: '100%',
         minHeight: '97vh',
         paddingTop: 50, // header
         paddingBottom: 50, // footer
@@ -37,7 +36,7 @@ const Home = () => {
                     <Typography variant="h1" fontSize="max(min(6vw, 74px), 32px)">Michael Lavin</Typography>
                     <Typography variant="caption" fontSize="max(min(2vw, 24px), 12px)">FULL-STACK DEVELOPER</Typography>
                 </Box>
-                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '40vw', height: '40vw', minWidth: 175, minHeight: 175, maxWidth: 450, maxHeight: 450 }} />
+                <Avatar src={self_portrait} alt="Michael Lavin" sx={{ width: '40vw', height: '40vw', minWidth: 175, minHeight: 175, maxWidth: 450, maxHeight: 450, border: 1 }} />
             </Stack>
         </Container>
     );

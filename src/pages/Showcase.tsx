@@ -14,7 +14,6 @@ const useStyles = makeStyles(() => ({
 		display: 'flex',
 		flex: 1,
 		width: '100%',
-		height: '100%',
 		minHeight: 'max(97vh, calc(100vh - 15.6px))',
 		paddingTop: 50, // header
 		paddingBottom: 50 // footer
@@ -111,7 +110,7 @@ const Showcase = () => {
 
 	return (
 		<Container className={classes.container}>
-			<Paper elevation={12} className={classes.paper} ref={ref}>
+			<Paper elevation={4} className={classes.paper} ref={ref}>
 				<ShowcaseBottomContext.Provider value={heightContextValue}>
 					{loaded && pokemonList.length > 0 ?
 						<>
