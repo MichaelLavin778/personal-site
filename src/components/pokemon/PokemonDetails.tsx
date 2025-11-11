@@ -27,12 +27,23 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     const classes = useStyles();
     // purpose of tracking this is to make right col the same height as the left
     const [bottom, setBottom] = useState(0);
+    const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const refBottom = ref.current?.getBoundingClientRect().bottom;
         if (refBottom && pokemon.id) setBottom(refBottom);
-    }, [ref, pokemon]);
+    }, [ref, pokemon, windowHeight]);
+
+    // rerender on any window resizing
+	const handleResize = () => {
+		setWindowHeight(window.innerHeight);
+	};
+	useEffect(() => {
+		window.addEventListener('resize', handleResize);
+		// Cleanup
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
 
     if (!pokemon) return null;
 

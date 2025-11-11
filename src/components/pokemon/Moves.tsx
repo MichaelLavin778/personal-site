@@ -27,7 +27,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const apiRef = useGridApiRef()
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
-    const { bottom: containerBottom } = useContext(ShowcaseBottomContext);
+    const { bottom: pageBottom } = useContext(ShowcaseBottomContext);
 
     // use a native non-passive wheel listener so preventDefault() works reliably
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -47,7 +47,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const rowSize = 52;
     const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
     const contBuffer = 15;
-    const pageSize = Math.floor((Math.max(containerBottom - contBuffer, lefColBottom) - topSpace) / rowSize)
+    const pageSize = Math.floor((Math.max(pageBottom - contBuffer, lefColBottom) - topSpace) / rowSize)
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
@@ -62,7 +62,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
             return { ...prev, pageSize, page: newPage };
         });
         setPageSizeOptions([pageSize]);
-    }, [pageSize, containerBottom, lefColBottom]);
+    }, [pageSize, pageBottom, lefColBottom]);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
