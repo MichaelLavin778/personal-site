@@ -1,7 +1,8 @@
 import { makeStyles } from "@material-ui/core";
 import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel, useGridApiRef } from '@mui/x-data-grid';
-import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
+import ShowcaseHeightContext from "../../context/ShowcaseHeightContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
@@ -26,6 +27,7 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     const apiRef = useGridApiRef()
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
+    const { height: containerHeight } = useContext(ShowcaseHeightContext);
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
@@ -37,13 +39,29 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
         { label: "Tutor", shortLabel: "Ttr", value: "tutor" },
     ];
 
-    // controlled pagination model so we can programmatically change pages
+    // values for calc for dynamic page sizing
+    const dropdownHeight = 56;
+    const spriteHeight = 102;
+    const sectionLabelHeight = 25;
     const toggleButtonGroupHeight = 27.5;
     const headerSize = 55;
+    const sumPaddingHeight = 42;
     const rowSize = 52;
-    const pageSize = Math.floor((leftColumnHeight - headerSize - toggleButtonGroupHeight) / rowSize);
+    const topSpace = toggleButtonGroupHeight + headerSize + spriteHeight+ dropdownHeight + sectionLabelHeight + sumPaddingHeight + rowSize;
+    const pageSize = Math.floor((Math.max(containerHeight, leftColumnHeight) - topSpace) / rowSize);
+
+    // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
     const lastWheelTimeRef = useRef(0);
+
+    // keep paginationModel.pageSize in sync when calculated pageSize changes
+    useEffect(() => {
+        setPaginationModel((prev) => {
+            const maxPage = Math.floor((Math.max(containerHeight, leftColumnHeight) - topSpace) / rowSize);
+            const newPage = Math.min(prev.page, maxPage);
+            return { ...prev, pageSize, page: newPage };
+        });
+    }, [pageSize, containerHeight, leftColumnHeight, topSpace]);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
@@ -54,6 +72,9 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
 
     // override scrolling in the table to turn the table pages instead
     useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
         const goToNextPage = () => {
             const { page, pageSize } = paginationModel;
             if (detailedMoves.length === 0) return;
@@ -66,9 +87,6 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
             const { page } = paginationModel;
             setPaginationModel({ ...paginationModel, page: Math.max(0, page - 1) });
         };
-
-        const el = containerRef.current;
-        if (!el) return;
 
         const handler = (e: WheelEvent) => {
             e.preventDefault();

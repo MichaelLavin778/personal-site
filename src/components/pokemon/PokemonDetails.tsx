@@ -26,24 +26,13 @@ type PokemonProps = {
 const PokemonDetails = ({ pokemon }: PokemonProps) => {
     const classes = useStyles();
     // purpose of tracking this is to make right col the same height as the left
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [height, setHeight] = useState(0);
     const ref = useRef<HTMLDivElement>(null);
 
-    const handleResize = () => {
-        setWindowWidth(window.innerWidth);
-    };
-
     useEffect(() => {
-        window.addEventListener('resize', handleResize);
-        // Cleanup
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    useEffect(() => {
-        const h = ref.current?.clientHeight;
-        if (h && pokemon.id) setHeight(Math.max(h, 0));
-    }, [ref, windowWidth, pokemon]);
+        const refHeight = ref.current?.clientHeight;
+        if (refHeight && pokemon.id) setHeight(Math.max(refHeight, 0));
+    }, [ref, pokemon]);
 
     if (!pokemon) return null;
 
@@ -60,7 +49,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
             </Grid>
 
-            <Grid container={true} size={{ xs: 12, sm: 5 }} spacing={1} ref={ref}>
+            <Grid container={true} size={{ md: 12, lg: 5 }} spacing={1} ref={ref}>
                 <Grid size={6}>
                     <>
                         <Box>
@@ -110,7 +99,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                     <Cries cries={pokemon.cries} />
                 </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 7 }}>
+            <Grid size={{ md: 12, lg: 7 }}>
                 {height > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} leftColumnHeight={height} />}
             </Grid>
         </Grid>

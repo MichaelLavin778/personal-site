@@ -115,6 +115,7 @@ const Stats = ({ stats }: StatsProps) => {
                     direction={{ xs: 'column', md: 'row' }}
                     sx={{ width: '100%' }}
                     alignItems="center"
+                    justifyContent="center"
                 >
                     {highlightedItem?.seriesId && (
                         <code>
@@ -130,7 +131,7 @@ const Stats = ({ stats }: StatsProps) => {
                             </Box>
                         </code>
                     )}
-                    <Box sx={{ width: '100%' }}>
+                    <Box>
                         <RadarChart
                             height={250}
                             highlight="series"
