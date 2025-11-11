@@ -119,7 +119,7 @@ const Stats = ({ stats }: StatsProps) => {
                 >
                     {highlightedItem?.seriesId && (
                         <code>
-                            <Box minWidth={75} border={1} borderRadius={4} borderColor="slategray" padding={2} margin={2} whiteSpace="nowrap">
+                            <Box minWidth={77} border={1} borderRadius={4} borderColor="slategray" padding={2} margin={2} whiteSpace="nowrap">
                                 <Box justifySelf="right">{currentSeries?.label}</Box>
                                 <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
                                 <Box justifyItems="right">
