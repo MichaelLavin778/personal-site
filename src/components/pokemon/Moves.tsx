@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core";
 import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel, useGridApiRef } from '@mui/x-data-grid';
 import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
-import ShowcaseHeightContext from "../../context/ShowcaseHeightContext";
+import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
@@ -19,15 +19,18 @@ const useStyles = makeStyles(() => ({
 
 interface MovesProps {
     moves: PokemonsMove[];
-    leftColumnHeight: number;
+    lefColBottom: number;
 }
 
-const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
+const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const classes = useStyles();
     const apiRef = useGridApiRef()
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
-    const { height: containerHeight } = useContext(ShowcaseHeightContext);
+    const { bottom: containerBottom } = useContext(ShowcaseBottomContext);
+
+    // use a native non-passive wheel listener so preventDefault() works reliably
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
@@ -40,35 +43,30 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
     ];
 
     // values for calc for dynamic page sizing
-    const dropdownHeight = 56;
-    const spriteHeight = 102;
-    const sectionLabelHeight = 25;
-    const toggleButtonGroupHeight = 27.5;
     const headerSize = 55;
-    const sumPaddingHeight = 42;
     const rowSize = 52;
-    const topSpace = toggleButtonGroupHeight + headerSize + spriteHeight+ dropdownHeight + sectionLabelHeight + sumPaddingHeight + rowSize;
-    const pageSize = Math.floor((Math.max(containerHeight, leftColumnHeight) - topSpace) / rowSize);
+    const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
+    const contBuffer = 15;
+    const pageSize = Math.floor((Math.max(containerBottom - contBuffer, lefColBottom) - topSpace) / rowSize)
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
+    const [pageSizeOptions, setPageSizeOptions] = useState([pageSize]);
     const lastWheelTimeRef = useRef(0);
 
     // keep paginationModel.pageSize in sync when calculated pageSize changes
     useEffect(() => {
         setPaginationModel((prev) => {
-            const maxPage = Math.floor((Math.max(containerHeight, leftColumnHeight) - topSpace) / rowSize);
+            const maxPage = pageSize;
             const newPage = Math.min(prev.page, maxPage);
             return { ...prev, pageSize, page: newPage };
         });
-    }, [pageSize, containerHeight, leftColumnHeight, topSpace]);
+        setPageSizeOptions([pageSize]);
+    }, [pageSize, containerBottom, lefColBottom]);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
     const [sortModel, setSortModel] = useState<GridSortModel>([intialSort]);
-
-    // use a native non-passive wheel listener so preventDefault() works reliably
-    const containerRef = useRef<HTMLDivElement | null>(null);
 
     // override scrolling in the table to turn the table pages instead
     useEffect(() => {
@@ -277,7 +275,7 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
                 {buttonOptions.map((label) => (
                     <ToggleButton
                         key={label.label}
-                        value={label.value || ''}
+                        value={label.value}
                         sx={{ lineHeight: 0.25, width: 70 }}
                     >
                         {label.label}
@@ -291,7 +289,7 @@ const Moves = ({ moves, leftColumnHeight }: MovesProps) => {
                     apiRef={apiRef}
                     paginationModel={paginationModel}
                     onPaginationModelChange={(model) => setPaginationModel(model)}
-                    pageSizeOptions={[pageSize]}
+                    pageSizeOptions={pageSizeOptions}
                     disableRowSelectionOnClick={true}
                     sortModel={sortModel}
                     onSortModelChange={(model) => setSortModel(model)}

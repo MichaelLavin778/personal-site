@@ -2,7 +2,7 @@ import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography
 import { makeStyles } from "@material-ui/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
-import ShowcaseHeightContext from "../context/ShowcaseHeightContext";
+import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import { toTitleCase } from "../helpers/text";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
@@ -41,20 +41,20 @@ const Showcase = () => {
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
 	const ref = useRef<HTMLDivElement>(null);
 	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
-	const [height, setHeight] = useState<number>(0);
+	const [bottom, setBottom] = useState<number>(0);
 	const heightContextValue = useMemo(() => ({
-		height
-	}), [height]);
+		bottom
+	}), [bottom]);
 
 	// Set the tab name
 	useEffect(() => {
 		document.title = "Showcase - Pokemon";
 	}, []);
 
+	// rerender on any window resizing
 	const handleResize = () => {
 		setWindowHeight(window.innerHeight);
 	};
-
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
 		// Cleanup
@@ -62,8 +62,9 @@ const Showcase = () => {
 	}, []);
 
 	useEffect(() => {
-		const refHeight = ref.current?.clientHeight;
-		if (refHeight && currentPokemon?.id) setHeight(Math.min(Math.max(refHeight, 0), windowHeight));
+		const refBottom = ref.current?.getBoundingClientRect().bottom;
+		const footerHeight = 50;
+		if (refBottom && currentPokemon?.id) setBottom(Math.min(refBottom, windowHeight - footerHeight));
 	}, [currentPokemon, ref, windowHeight]);
 
 	// load list of pokemon and each pokemon info
@@ -111,7 +112,7 @@ const Showcase = () => {
 	return (
 		<Container className={classes.container}>
 			<Paper elevation={12} className={classes.paper} ref={ref}>
-				<ShowcaseHeightContext.Provider value={heightContextValue}>
+				<ShowcaseBottomContext.Provider value={heightContextValue}>
 					{loaded && pokemonList.length > 0 ?
 						<>
 							<Autocomplete
@@ -138,7 +139,7 @@ const Showcase = () => {
 						:
 						<CircularProgress />
 					}
-				</ShowcaseHeightContext.Provider>
+				</ShowcaseBottomContext.Provider>
 			</Paper>
 		</Container>
 	);

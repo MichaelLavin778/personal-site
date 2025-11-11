@@ -26,12 +26,12 @@ type PokemonProps = {
 const PokemonDetails = ({ pokemon }: PokemonProps) => {
     const classes = useStyles();
     // purpose of tracking this is to make right col the same height as the left
-    const [height, setHeight] = useState(0);
+    const [bottom, setBottom] = useState(0);
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const refHeight = ref.current?.clientHeight;
-        if (refHeight && pokemon.id) setHeight(Math.max(refHeight, 0));
+        const refBottom = ref.current?.getBoundingClientRect().bottom;
+        if (refBottom && pokemon.id) setBottom(refBottom);
     }, [ref, pokemon]);
 
     if (!pokemon) return null;
@@ -100,7 +100,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 </Grid>
             </Grid>
             <Grid size={{ md: 12, lg: 7 }}>
-                {height > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} leftColumnHeight={height} />}
+                {bottom > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} lefColBottom={bottom} />}
             </Grid>
         </Grid>
     );
