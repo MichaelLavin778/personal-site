@@ -18,14 +18,15 @@ const useStyles = makeStyles(() => ({
 		overflow: 'hidden'
 	},
 	container: {
-		alignItems: "center"
+		alignItems: 'center',
+		height: '100%'
 	},
 	main: {
-		justifyContent: "space-between",
+		justifyContent: 'space-between',
 		height: '100%'
 	},
 	poweredRow: {
-		alignItems: "center"
+		alignItems: 'center'
 	},
 }));
 

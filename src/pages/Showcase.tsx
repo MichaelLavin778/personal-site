@@ -16,7 +16,8 @@ const useStyles = makeStyles((theme) => ({
 		width: '100%',
 		minHeight: 'max(97vh, calc(100vh - 15.6px))',
 		paddingTop: 50, // header
-		paddingBottom: 50 // footer
+		paddingBottom: 50, // footer
+		height: '100%'
 	},
 	paper: {
 		width: '100%',

@@ -46,9 +46,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const headerSize = 55;
     const rowSize = 52;
     const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
-    // const contBuffer = 15;
-    // const pageSize = Math.floor((Math.max(pageBottom - contBuffer, lefColBottom) - topSpace) / rowSize);
-    const pageSize = Math.floor((lefColBottom - topSpace) / rowSize);
+    const contBuffer = 15;
+    const pageSize = Math.floor((Math.max(pageBottom - contBuffer, lefColBottom) - topSpace) / rowSize);
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
