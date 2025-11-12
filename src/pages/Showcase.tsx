@@ -1,5 +1,5 @@
-import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
+import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
@@ -9,7 +9,7 @@ import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSli
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
 
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
 	container: {
 		display: 'flex',
 		flex: 1,
@@ -20,13 +20,13 @@ const useStyles = makeStyles(() => ({
 	},
 	paper: {
 		width: '100%',
-		padding: 10
+		padding: theme.spacing(1.25)
 	},
 	dropdown: {
 		width: '100%',
 		maxWidth: 400,
 		justifySelf: 'center',
-		marginBottom: 4
+		marginBottom: theme.spacing(0.5)
 	}
 }));
 
