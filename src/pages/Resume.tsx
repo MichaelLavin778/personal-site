@@ -18,10 +18,15 @@ const Resume = () => {
         if (!s3Resume) dispatch(loadResume());
     }, [dispatch, s3Resume]);
 
-    // TODO: pdf looks "backdropped" on mobile
     return (
-        <Box sx={{ position: 'absolute', width: '100%', height: '100vh', paddingBottom: '50px', paddingTop: '50px' }}>
-            <object data={s3Resume} type="application/pdf" width="100%" height="100%" style={{ colorScheme: 'light' }} />
+        <Box sx={{ position: 'absolute', width: '100%', height: '100vh', paddingBottom: '50px', paddingTop: '50px', bgcolor: 'background.paper', colorScheme: 'light' }}>
+            <object
+                data={s3Resume}
+                type="application/pdf"
+                width="100%"
+                height="100%"
+                style={{ backgroundColor: '#fff', colorScheme: 'light', display: 'block' }}
+            />
         </Box>
     );
 };
