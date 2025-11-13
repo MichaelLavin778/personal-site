@@ -39,7 +39,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const rowSize = 52;
     const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
     const contBuffer = 15;
-    const pageSize = Math.floor((Math.max(pageBottom - contBuffer, lefColBottom) - topSpace) / rowSize);
+    const containerSize = (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace);
+    const pageSize = Math.floor(containerSize / rowSize);
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
@@ -272,7 +273,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                     </ToggleButton>
                 ))}
             </ToggleButtonGroup>
-            <Box ref={containerRef}>
+            <Box ref={containerRef} minHeight={containerSize}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
