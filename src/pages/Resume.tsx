@@ -33,7 +33,7 @@ const Resume = () => {
     // TODO: pdf looks "backdropped" on mobile
     return (
         <Box className={classes.container}>
-            <object data={s3Resume} type="application/pdf" width="100%" height="100%" />
+            <object data={s3Resume} type="application/pdf" width="100%" height="100%" style={{ colorScheme: 'light' }} />
         </Box>
     );
 };

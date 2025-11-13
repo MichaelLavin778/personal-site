@@ -26,9 +26,6 @@ export const createAppTheme = (mode: Mode) => createTheme({
 				'footer': {
 					backgroundColor: mode === 'dark' ? '#1b1b1b' : '#1976d2',
 				},
-				'object': {
-					colorScheme: 'light',
-				}
 			}
 		},
 

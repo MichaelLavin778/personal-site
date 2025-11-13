@@ -36,7 +36,7 @@ const Header = () => {
 			<Container sx={{ height: '100%' }}>
 				<Grid container={true} spacing={2} className={classes.grid}>
 					{/* below is to even out with the icon buttons */}
-					<Grid size={1} />
+					<Grid sx={{ display: { xs: 'none', sm: 'block' } }} />
 					{/* general links */}
 					<Grid size={10}>
 						<Stack direction="row" className={classes.stack}>

@@ -1,8 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import AmplifyIconButton from "./icon_buttons/AmplifyIconButton";
-import GithubIconButton from "./icon_buttons/GitHubIconButton";
-import LinkedInIconButton from "./icon_buttons/LinkedInIconButton";
 import ReactIconButton from "./icon_buttons/ReactIconButton";
 import S3IconButton from "./icon_buttons/S3IconButton";
 import ViteIconButton from "./icon_buttons/ViteIconButton";
@@ -53,10 +51,6 @@ const Footer = () => {
 						<S3IconButton />
 						<ViteIconButton />
 						<ReactIconButton />
-					</Stack>
-					<Stack direction="row" spacing={1}>
-						<LinkedInIconButton />
-						<GithubIconButton />
 					</Stack>
 				</Stack>
 			</Container>
