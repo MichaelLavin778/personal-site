@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/core';
-import { AppBar, Container, IconButton, Stack } from "@mui/material";
+import { AppBar, Container, Grid, IconButton, Stack } from "@mui/material";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useThemeMode } from '../theme/ThemeModeContext';
@@ -8,12 +8,14 @@ import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(() => ({
 	header: {
-		height: 50
+		height: 50,
+	},
+	grid: {
+		alignItems: 'center',
+		height: '100%'
 	},
 	stack: {
-		justifyContent: "space-around",
-		alignItems: "center",
-		height: '100%'
+		justifyContent: "space-around"
 	},
 	link: {
 		color: 'inherit',
@@ -31,21 +33,31 @@ const Header = () => {
 
 	return (
 		<AppBar className={classes.header}>
-			<Container>
-				<Stack direction="row" className={classes.stack}>
-					<Link to={toHome} onClick={(e) => onClick(e, toHome)} className={classes.link}>
-						Home
-					</Link>
-					<Link to={toShowcase} onClick={(e) => onClick(e, toShowcase)} className={classes.link}>
-						Showcase
-					</Link>
-					<Link to={toResume} onClick={(e) => onClick(e, toResume)} className={classes.link}>
-						Resume
-					</Link>
-					<IconButton color="inherit" onClick={toggleMode} aria-label="toggle theme">
-						{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-					</IconButton>
-				</Stack>
+			<Container sx={{ height: '100%' }}>
+				<Grid container={true} spacing={2} className={classes.grid}>
+					{/* below is to even out with the icon buttons */}
+					<Grid size={1} />
+					{/* general links */}
+					<Grid size={10}>
+						<Stack direction="row" className={classes.stack}>
+							<Link to={toHome} onClick={(e) => onClick(e, toHome)} className={classes.link}>
+								Home
+							</Link>
+							<Link to={toShowcase} onClick={(e) => onClick(e, toShowcase)} className={classes.link}>
+								Showcase
+							</Link>
+							<Link to={toResume} onClick={(e) => onClick(e, toResume)} className={classes.link}>
+								Resume
+							</Link>
+						</Stack>
+					</Grid>
+					{/* icon button actions */}
+					<Grid size={1}>
+						<IconButton color="inherit" onClick={toggleMode} aria-label="toggle theme">
+							{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+						</IconButton>
+					</Grid>
+				</Grid>
 			</Container>
 		</AppBar>
 	);

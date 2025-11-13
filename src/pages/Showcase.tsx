@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 		display: 'flex',
 		flex: 1,
 		width: '100%',
-		minHeight: 'max(97vh, calc(100vh - 15.6px))',
+		minHeight: '100vh',
 		paddingTop: 50, // header
 		paddingBottom: 50, // footer
 		height: '100%'

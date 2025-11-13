@@ -1,10 +1,11 @@
 import { createTheme } from "@mui/material/styles";
+import type { Mode } from "../model/common";
 
-export const createAppTheme = (mode: 'light' | 'dark') => createTheme({
+export const createAppTheme = (mode: Mode) => createTheme({
 	palette: {
 		mode,
 		background: {
-			default: mode === 'dark' ? '#242424' : '#ffffff',
+			default: mode === 'dark' ? '#242424' : '#fff',
 		},
 		primary: {
 			main: mode === 'dark' ? '#90caf9' : '#1976d2',
@@ -13,12 +14,7 @@ export const createAppTheme = (mode: 'light' | 'dark') => createTheme({
 	components: {
 		MuiCssBaseline: {
 			styleOverrides: {
-				// global base rules so app layout does not depend on an external CSS file
-				'html, body, #root': {
-					height: '100%',
-				},
-				// end global base
-				// style react-router-dom <Link> elements (they render as <a>)
+				// <Link> elements (they render as <a>)
 				'a': {
 					color: mode === 'dark' ? '#90caf9' : '#1976d2',
 					textDecoration: 'none',
@@ -26,8 +22,9 @@ export const createAppTheme = (mode: 'light' | 'dark') => createTheme({
 				'a:hover': {
 					textDecoration: 'underline',
 				},
+				// </Link>
 				'footer': {
-					backgroundColor: mode === 'dark' ? '#1b1b1b' : '#5812daa8',
+					backgroundColor: mode === 'dark' ? '#1b1b1b' : '#1976d2',
 				},
 			}
 		},
@@ -38,18 +35,6 @@ export const createAppTheme = (mode: 'light' | 'dark') => createTheme({
 					backgroundColor: mode === 'dark' ? '#1a1a1a' : '#1976d2',
 				}
 			}
-		},
-		MuiContainer : {
-			styleOverrides: {
-				root: {
-					height: '100%'
-				}
-			}
-		},
-		MuiStack: {
-			defaultProps: {
-				useFlexGap: true,
-			},
 		},
 	}
 });
