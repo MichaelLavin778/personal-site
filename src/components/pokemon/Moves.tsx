@@ -1,4 +1,3 @@
-import { makeStyles } from "@material-ui/core";
 import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel, useGridApiRef } from '@mui/x-data-grid';
 import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -11,19 +10,12 @@ import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
 
 
-const useStyles = makeStyles(() => ({
-    cell: {
-        alignContent: 'center'
-    }
-}));
-
 interface MovesProps {
     moves: PokemonsMove[];
     lefColBottom: number;
 }
 
 const Moves = ({ moves, lefColBottom }: MovesProps) => {
-    const classes = useStyles();
     const apiRef = useGridApiRef()
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
@@ -183,7 +175,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
             width: 110,
             minWidth: 90,
             display: 'flex',
-            cellClassName: classes.cell,
             renderCell: (params) => <Type typeName={params.row.type} />
         },
         {
@@ -191,7 +182,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
             headerName: 'Cat.',
             width: 70,
             display: 'flex',
-            cellClassName: classes.cell,
             renderCell: (params) => <img src={`https://img.pokemondb.net/images/icons/move-${params.row.category}.png`} alt={params.row.category} width={36} />
         },
         {

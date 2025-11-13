@@ -1,4 +1,3 @@
-import { makeStyles } from "@material-ui/core";
 import { VolumeDown, VolumeUp } from "@mui/icons-material";
 import { Box, Slider, Stack, Typography } from "@mui/material";
 import { type RefObject, useContext, useEffect, useRef } from "react";
@@ -7,19 +6,12 @@ import type { PokemonCry } from "../../model/Pokemon";
 import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.ogg"
 import CryAudio from "./CryAudio";
 
-const useStyles = makeStyles(() => ({
-    volumeSlider: {
-        alignItems: 'center',
-        maxWidth: 200
-    }
-}));
 
 type CriesProps = {
     cries: PokemonCry | undefined;
 }
 
 const Cries = ({ cries }: CriesProps) => {
-    const classes = useStyles();
     const { volume, setVolume } = useContext(VolumeContext);
     const audioLatestRef = useRef<HTMLAudioElement | null>(null);
     const audioLegacyRef = useRef<HTMLAudioElement | null>(null);
@@ -69,7 +61,7 @@ const Cries = ({ cries }: CriesProps) => {
                     <CryAudio ref={audioDreadnawRef} cry={dreadnaw} label="?" />
                 )}
             </Stack>
-            <Stack spacing={2} direction="row" className={classes.volumeSlider}>
+            <Stack spacing={2} direction="row" sx={{ alignItems: 'center', maxWidth: 200 }}>
                 <VolumeDown fontSize="small" />
                 <Slider aria-label="Volume" value={volume} onChange={handleVolumeChange} size="small" />
                 <VolumeUp fontSize="small" />

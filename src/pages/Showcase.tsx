@@ -1,38 +1,15 @@
-import { makeStyles } from "@material-ui/core";
 import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
-import { toTitleCase } from "../helpers/text";
+import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
+import { headerFooterPadding } from "../model/common";
 import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
 
 
-const useStyles = makeStyles((theme) => ({
-	container: {
-		display: 'flex',
-		flex: 1,
-		width: '100%',
-		minHeight: '100vh',
-		paddingTop: 50, // header
-		paddingBottom: 50, // footer
-		height: '100%'
-	},
-	paper: {
-		width: '100%',
-		padding: theme.spacing(1.25)
-	},
-	dropdown: {
-		width: '100%',
-		maxWidth: 400,
-		justifySelf: 'center',
-		marginBottom: theme.spacing(0.5)
-	}
-}));
-
 const Showcase = () => {
-	const classes = useStyles();
 	const dispatch = useAppDispatch();
 	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
@@ -63,8 +40,7 @@ const Showcase = () => {
 
 	useEffect(() => {
 		const refBottom = ref.current?.getBoundingClientRect().bottom;
-		const footerHeight = 50;
-		if (refBottom && currentPokemon?.id) setBottom(Math.min(refBottom, windowHeight - footerHeight));
+		if (refBottom && currentPokemon?.id) setBottom(Math.min(refBottom, windowHeight - Number(headerFooterPadding.replace('px', ''))));
 	}, [currentPokemon, ref, windowHeight]);
 
 	// load list of pokemon and each pokemon info
@@ -103,36 +79,26 @@ const Showcase = () => {
 
 	if (error) {
 		return (
-			<Container className={classes.container}>
+			<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>
 				<Typography color="error">Error loading Pokémon: {error.message}</Typography>
 			</Container>
 		);
 	}
 
 	return (
-		<Container className={classes.container}>
-			<Paper elevation={4} className={classes.paper} ref={ref}>
+		<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>
+			<Paper elevation={4} sx={{ width: '100%', p: 1.25 }} ref={ref}>
 				<ShowcaseBottomContext.Provider value={heightContextValue}>
 					{loaded && pokemonList.length > 0 ?
 						<>
 							<Autocomplete
 								options={pokemonList}
-								getOptionLabel={(option) => toTitleCase(option.name)}
-								// TODO: improve labels
-								// getOptionLabel={(option) => {
-								// 	if (!!option.name && !!option.species?.name) {
-								// 		const splitName = option.name.split('-');
-								// 		if (splitName.length > 1 && splitName[0] === option.species.name) {
-								// 			return `${toTitleCase(option.species.name)} (${splitName.map(n => toTitleCase(n)).slice(1).join('-')})`;
-								// 		}
-								// 	}
-								// 	return toTitleCase(option.name);
-								// }}
+								getOptionLabel={(option) => getPokemonLabel(option.name) ?? option.name}
 								renderInput={(params) => <TextField {...params} />}
 								value={currentPokemon}
 								disableClearable={true}
 								onChange={(_event, value) => setCurrentPokemonName(value.name)}
-								className={classes.dropdown}
+								sx={{ width: '100%', maxWidth: 400, justifySelf: 'center', mb: 0.5 }}
 							/>
 							{currentPokemon && <PokemonDetails pokemon={currentPokemon} />}
 						</>

@@ -36,6 +36,17 @@ export const createAppTheme = (mode: Mode) => createTheme({
 				}
 			}
 		},
+		MuiLink: {
+			styleOverrides: {
+				root: {
+					color: mode === 'dark' ? '#90caf9' : '#1976d2',
+					textDecoration: 'none',
+					'&:hover': {
+						textDecoration: 'underline',
+					},
+				},
+			}
+		}
 	}
 });
 

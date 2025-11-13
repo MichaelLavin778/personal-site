@@ -1,4 +1,3 @@
-import { makeStyles } from "@material-ui/core";
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import type { Pokemon } from "../../model/Pokemon";
@@ -9,22 +8,11 @@ import Stats from "./Stats";
 import Type from "./Type";
 
 
-const useStyles = makeStyles(() => ({
-    gridContainer: {
-        alignItems: 'flex-start'
-    },
-    spritesContainer: {
-        textAlign: 'center',
-        alignContent: 'center'
-    }
-}));
-
 type PokemonProps = {
     pokemon: Pokemon;
 }
 
 const PokemonDetails = ({ pokemon }: PokemonProps) => {
-    const classes = useStyles();
     // purpose of tracking this is to make right col the same height as the left
     const [bottom, setBottom] = useState(0);
     const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
@@ -48,8 +36,8 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     if (!pokemon) return null;
 
     return (
-        <Grid container={true} spacing={2} className={classes.gridContainer}>
-            <Grid size={12} className={classes.spritesContainer}>
+        <Grid container={true} spacing={2} alignItems="flex-start">
+            <Grid size={12} textAlign="center" alignContent="center">
                 <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
                 {!!pokemon.sprites?.back_default && <img src={pokemon.sprites.back_default} />}
                 {!!pokemon.sprites?.front_female && <img src={pokemon.sprites.front_female} />}

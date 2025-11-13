@@ -1,22 +1,10 @@
 import { Box } from "@mui/material";
-import { makeStyles } from "@material-ui/core";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { loadResume, selectResumeUrl } from "../state/resumeSlice";
 
 
-const useStyles = makeStyles(() => ({
-    container: {
-        position: 'absolute',
-        left: 0,
-        top: 50,
-        width: '100%',
-        height: '89.4vh'
-    }
-}));
-
 const Resume = () => {
-    const classes = useStyles();
     const dispatch = useAppDispatch();
     const s3Resume = useAppSelector(selectResumeUrl);
 
@@ -32,7 +20,7 @@ const Resume = () => {
 
     // TODO: pdf looks "backdropped" on mobile
     return (
-        <Box className={classes.container}>
+        <Box sx={{ position: 'absolute', width: '100%', height: '100vh', paddingBottom: '50px', paddingTop: '50px' }}>
             <object data={s3Resume} type="application/pdf" width="100%" height="100%" style={{ colorScheme: 'light' }} />
         </Box>
     );

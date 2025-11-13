@@ -1,29 +1,12 @@
-import { makeStyles } from '@material-ui/core';
-import { AppBar, Container, Grid, IconButton, Stack } from "@mui/material";
+import { AppBar, Container, Grid, IconButton, Link as MuiLink, Stack } from "@mui/material";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useThemeMode } from '../theme/ThemeModeContext';
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
-const useStyles = makeStyles(() => ({
-	header: {
-		height: 50,
-	},
-	grid: {
-		alignItems: 'center',
-		height: '100%'
-	},
-	stack: {
-		justifyContent: "space-around"
-	},
-	link: {
-		color: 'inherit',
-	}
-}));
 
 const Header = () => {
-	const classes = useStyles();
 	const { mode, toggleMode } = useThemeMode();
 	const toHome = "/";
 	const toShowcase = "/showcase"
@@ -32,23 +15,23 @@ const Header = () => {
 	const onClick = (e: ReactMouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname === to && e.preventDefault();
 
 	return (
-		<AppBar className={classes.header}>
+		<AppBar sx={{ height: 50 }}>
 			<Container sx={{ height: '100%' }}>
-				<Grid container={true} spacing={2} className={classes.grid}>
+				<Grid container={true} spacing={2} sx={{ alignItems: 'center', height: '100%' }}>
 					{/* below is to even out with the icon buttons */}
-					<Grid sx={{ display: { xs: 'none', sm: 'block' } }} />
+					<Grid  size={1} sx={{ display: { xs: 'none', sm: 'block' }}}/>
 					{/* general links */}
 					<Grid size={10}>
-						<Stack direction="row" className={classes.stack}>
-							<Link to={toHome} onClick={(e) => onClick(e, toHome)} className={classes.link}>
+						<Stack direction="row" justifyContent="space-around">
+							<MuiLink component={RouterLink} to={toHome} onClick={(e) => onClick(e, toHome)} sx={{ color: 'inherit' }}>
 								Home
-							</Link>
-							<Link to={toShowcase} onClick={(e) => onClick(e, toShowcase)} className={classes.link}>
+							</MuiLink>
+							<MuiLink component={RouterLink} to={toShowcase} onClick={(e) => onClick(e, toShowcase)} sx={{ color: 'inherit' }}>
 								Showcase
-							</Link>
-							<Link to={toResume} onClick={(e) => onClick(e, toResume)} className={classes.link}>
+							</MuiLink>
+							<MuiLink component={RouterLink} to={toResume} onClick={(e) => onClick(e, toResume)} sx={{ color: 'inherit' }}>
 								Resume
-							</Link>
+							</MuiLink>
 						</Stack>
 					</Grid>
 					{/* icon button actions */}

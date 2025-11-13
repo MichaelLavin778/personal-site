@@ -1,31 +1,11 @@
-import { makeStyles } from "@material-ui/core";
 import { Box, type BoxProps } from "@mui/material";
 
-const useStyles = makeStyles(() => ({
-    typeBox: {
-        maxWidth: '64px',
-        width: '100%',
-        maxHeight: '24px',
-        height: '100%',
-        border: '1px solid',
-        borderRadius: 4,
-        color: 'white',
-        textAlign: 'center',
-        justifyContent: 'center',
-        textTransform: 'uppercase',
-        fontSize: '.75rem',
-        lineHeight: '1.5rem',
-        textShadow: '1px 1px 2px rgba(0, 0, 0, .7)'
-    }
-}));
 
 interface TypeProps extends BoxProps {
     typeName: string;
 }
 
 const Type = ({ typeName, ...props }: TypeProps) => {
-    const classes = useStyles();
-
     let bgcolor = "";
     let borderColor = "";
 
@@ -105,7 +85,26 @@ const Type = ({ typeName, ...props }: TypeProps) => {
     }
 
     return (
-        <Box key={typeName} bgcolor={bgcolor} borderColor={borderColor} className={classes.typeBox} {...props}>
+        <Box
+            key={typeName}
+            display="flex"
+            color="white"
+            bgcolor={bgcolor}
+            width="100%"
+            maxWidth="64px"
+            height="100%"
+            maxHeight="24px"
+            border="1px solid"
+            borderColor={borderColor}
+            borderRadius={1}
+            justifyContent="center"
+            textAlign="center"
+            fontSize=".75rem"
+            lineHeight="1.5rem"
+            textTransform="uppercase"
+            sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, .7)" }}
+            {...props}
+        >
             {typeName}
         </Box>
     );
