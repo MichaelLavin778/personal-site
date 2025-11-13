@@ -14,6 +14,18 @@ const getPokemonLabel = (name: string) => {
         return `G-Max ${base}`;
     }
 
+    // Alolan Forms
+    if (name.includes('-alola')) {
+        const base = toTitleCase(name.replace('alola', '').replaceAll('-', ' ').trim());
+        return `Alolan ${base}`;
+    }
+
+    // Galarian Forms
+    if (name.includes('-galar')) {
+        const base = toTitleCase(name.replace('galar', '').replaceAll('-', ' ').trim());
+        return `Galarian ${base}`;
+    }
+
     // Galarian Forms
     if (name.includes('-galar')) {
         const base = toTitleCase(name.replace('galar', '').replaceAll('-', ' ').trim());
@@ -32,6 +44,12 @@ const getPokemonLabel = (name: string) => {
         return `Totem ${base}`;
     }
 
+    // Ash
+    if (name.includes('-ash')) {
+        const base = toTitleCase(name.replace('ash', '').replaceAll('-', ' ').trim());
+        return `Ash's ${base}`;
+    }
+
     // Special Cases
     switch (name) {
         case 'mr-mime':
@@ -46,8 +64,6 @@ const getPokemonLabel = (name: string) => {
             return'Hakamo-o';
         case 'kommo-o':
             return'Kommo-o';
-        case 'kommo-o-totem':
-            return'Totem Kommo-o';
         case 'nidoran-f':
             return'Nidoran♀';
         case 'nidoran-m':
@@ -72,10 +88,36 @@ const getPokemonLabel = (name: string) => {
             return'Ho-Oh';
         case 'porygon-z':
             return'Porygon-Z';
+        case 'wo-chien':
+            return 'Wo-Chien';
+        case 'chien-pao':
+            return 'Chien-Pao';
+        case 'ting-lu':
+            return 'Ting-Lu';
+        case 'chi-yu':
+            return 'Chi-Yu';
+        case 'deoxys-attack':
+            return 'Deoxys (Attack Forme)';
+        case 'deoxys-defense':
+            return 'Deoxys (Defense Forme)';
+        case 'deoxys-speed':
+            return 'Deoxys (Speed Forme)';
         case 'dudunsparce-two-segment':
-            return'Dudunsparce (Two-Segment)';
+            return 'Dudunsparce (Two-Segment)';
         case 'dudunsparce-three-segment':
-            return
+            return 'Dudunsparce (Three-Segment)';
+        case 'zygarde-10-power-construct':
+            return 'Zygarde (10% Forme)';
+        case 'zygarde-50-power-construct':
+            return 'Zygarde (50% Forme)';
+        case 'zygarde-complete-power-construct':
+            return 'Zygarde (Complete Forme)';
+        case 'zygarde-10':
+            return 'Zygarde (10% Forme)';
+        case 'zygarde-50':
+            return 'Zygarde (50% Forme)';
+        case 'zygarde-complete':
+            return 'Zygarde (Complete Forme)';
         default:
             return toTitleCase(name.replaceAll('-', ' '));
     }
