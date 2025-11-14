@@ -18,6 +18,7 @@ const Stats = ({ stats }: StatsProps) => {
     const maxEVs = 252;
     const maxIVs = 31;
 
+    // Max for each stat
     const metrics = [
         { name: 'HP', max: 714 },
         { name: 'Attack', max: 526 },
@@ -33,14 +34,14 @@ const Stats = ({ stats }: StatsProps) => {
         if (name === 'hp')
             min = Math.floor(2 * base * maxLevel / 100) + maxLevel + 10;
         return min;
-    }
+    };
 
     const calcMaxStat = (name: string, base: number) => {
         let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
         if (name === 'hp')
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
         return max;
-    }
+    };
 
     const baseData = (stats || fallbackStats).map(s => s.base_stat);
     const minData = (stats || fallbackStats).map(s => calcMinStat(s.stat.name, s.base_stat));
@@ -83,15 +84,19 @@ const Stats = ({ stats }: StatsProps) => {
         }
     };
 
+    // force base to be selected by default
     useEffect(() => {
-        if (!highlightedItem) setHighlightedItem({ seriesId: 'base' })
+        if (!highlightedItem) setHighlightedItem({ seriesId: 'base' });
     }, [highlightedItem]);
 
     return (
         <>
+            {/* Label */}
             <Box>
                 <Typography component="label" variant="caption" color="textSecondary">Stats</Typography>
             </Box>
+
+            {/* Controls */}
             <Stack spacing={1} alignItems={'center'}>
                 <ToggleButtonGroup
                     value={highlightedItem?.seriesId ?? null}
@@ -111,6 +116,8 @@ const Stats = ({ stats }: StatsProps) => {
                         </ToggleButton>
                     ))}
                 </ToggleButtonGroup>
+
+                {/* Legend & Chart */}
                 <Stack
                     direction={{ xs: 'column', md: 'row' }}
                     sx={{ width: '100%' }}

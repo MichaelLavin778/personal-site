@@ -1,16 +1,19 @@
 import { AppBar, Container, Grid, IconButton, Link as MuiLink, Stack } from "@mui/material";
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useThemeMode } from '../theme/ThemeModeContext';
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import { Brightness4 as Brightness4Icon, Brightness7 as Brightness7Icon, WebAsset as WebAssetIcon, WebAssetOff as WebAssetOffIcon } from "@mui/icons-material";
+import { useThemeMode } from '../context/ThemeModeContext';
+import { type MouseEvent as ReactMouseEvent, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import TutorialContext from "../context/TutorialContext";
+import { isMobile } from "../helpers/common";
 
 
 const Header = () => {
-	const { mode, toggleMode } = useThemeMode();
 	const toHome = "/";
 	const toShowcase = "/showcase"
 	const toResume = "/resume"
+
+	const { mode, toggleMode } = useThemeMode();
+	const { showTutorial, toggleTutorial } = useContext(TutorialContext);
 
 	const onClick = (e: ReactMouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname === to && e.preventDefault();
 
@@ -19,7 +22,7 @@ const Header = () => {
 			<Container sx={{ height: '100%' }}>
 				<Grid container={true} spacing={2} sx={{ alignItems: 'center', height: '100%' }}>
 					{/* below is to even out with the icon buttons */}
-					<Grid  size={1} sx={{ display: { xs: 'none', sm: 'block' }}}/>
+					<Grid size={1} sx={{ display: { xs: 'none', sm: 'block' } }} />
 					{/* general links */}
 					<Grid size={10}>
 						<Stack direction="row" justifyContent="space-around">
@@ -34,11 +37,16 @@ const Header = () => {
 							</MuiLink>
 						</Stack>
 					</Grid>
-					{/* icon button actions */}
-					<Grid size={1}>
+					{/* actions */}
+					<Grid size={1} sx={{ whiteSpace: 'nowrap' }}>
 						<IconButton color="inherit" onClick={toggleMode} aria-label="toggle theme">
 							{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
 						</IconButton>
+						{!isMobile() && (
+							<IconButton color="inherit" onClick={toggleTutorial} aria-label="toggle tutorial">
+								{showTutorial ? <WebAssetIcon /> : <WebAssetOffIcon />}
+							</IconButton>
+						)}
 					</Grid>
 				</Grid>
 			</Container>

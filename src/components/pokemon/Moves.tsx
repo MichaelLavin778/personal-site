@@ -1,7 +1,8 @@
-import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Backdrop, Box, Popover, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel, useGridApiRef } from '@mui/x-data-grid';
 import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
+import TutorialContext from "../../context/TutorialContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
@@ -23,6 +24,12 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     // use a native non-passive wheel listener so preventDefault() works reliably
     const containerRef = useRef<HTMLDivElement | null>(null);
+
+    // tutorial controls
+    const { showTutorial } = useContext(TutorialContext);
+    // Anchor should be an HTMLElement so Popover can position itself over the table
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const open = showTutorial && !!anchorEl;
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
@@ -56,6 +63,12 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         });
         setPageSizeOptions([pageSize]);
     }, [pageSize, pageBottom, lefColBottom]);
+
+    // when tutorial is shown, anchor the popover to the container that holds the DataGrid
+    useEffect(() => {
+        if (showTutorial) setAnchorEl(containerRef.current || null);
+        else setAnchorEl(null);
+    }, [showTutorial]);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
@@ -152,6 +165,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         return String(v1).localeCompare(String(v2));
     };
 
+    // get version group details for a move - comes from pokemon's data
     const getVGs = (mvs: PokemonsMove[], moveName: string) => mvs.find(move => move.move.name === moveName)?.version_group_details;
 
     const columns: GridColDef[] = [
@@ -253,9 +267,12 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     return (
         <>
+            {/* Label */}
             <Box>
                 <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
             </Box>
+
+            {/* Filter */}
             <ToggleButtonGroup
                 value={moveTypeFilter?.value}
                 exclusive={true}
@@ -273,6 +290,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                     </ToggleButton>
                 ))}
             </ToggleButtonGroup>
+
+            {/* Moves Table */}
             <Box ref={containerRef} minHeight={containerSize}>
                 <DataGrid
                     rows={rows}
@@ -287,6 +306,20 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                     sx={{ border: 0 }}
                 />
             </Box>
+
+            {/* Tutorial */}
+            {open && (
+                <Backdrop
+                    open={open}
+                    onClick={() => setAnchorEl(null)}
+                    sx={{ zIndex: (theme) => theme.zIndex.modal - 1, backgroundColor: 'rgba(0,0,0,0.3)' }}
+                />
+            )}
+            <Popover open={open} onClose={() => setAnchorEl(null)} anchorEl={anchorEl} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
+                <Typography maxWidth={300} padding={2} border={1} borderRadius={2}>
+                    All data is pulled from <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">PokéAPI</a>. Moves table uses a DataGrid which <b>dynamically</b> sizes between the bottom of the left column and the bottom of the page.
+                </Typography>
+            </Popover>
         </>
     );
 }
