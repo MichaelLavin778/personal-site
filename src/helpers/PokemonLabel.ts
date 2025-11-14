@@ -107,11 +107,11 @@ const getPokemonLabel = (name: string) => {
         case 'dudunsparce-three-segment':
             return 'Dudunsparce (Three-Segment)';
         case 'zygarde-10-power-construct':
-            return 'Zygarde (10% Forme)';
+            return 'Zygarde (10% Forme Power Construct)';
         case 'zygarde-50-power-construct':
-            return 'Zygarde (50% Forme)';
+            return 'Zygarde (50% Forme Power Construct)';
         case 'zygarde-complete-power-construct':
-            return 'Zygarde (Complete Forme)';
+            return 'Zygarde (Complete Forme Power Construct)';
         case 'zygarde-10':
             return 'Zygarde (10% Forme)';
         case 'zygarde-50':
