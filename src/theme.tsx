@@ -1,5 +1,5 @@
 import { createTheme } from "@mui/material/styles";
-import type { Mode } from "../model/common";
+import type { Mode } from "./model/common";
 
 export const createAppTheme = (mode: Mode) => createTheme({
 	palette: {

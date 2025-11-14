@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { toTitleCase } from "../../helpers/text";
+import { toTitleCase } from "../../helpers/common";
 import type { PokemonAbility } from "../../model/Pokemon";
 
 interface AbilitiesProps {

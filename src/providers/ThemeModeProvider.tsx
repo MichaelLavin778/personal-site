@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { Mode } from '../model/common';
-import { createAppTheme } from './theme';
-import ThemeModeContext from './ThemeModeContext';
+import { createAppTheme } from '../theme';
+import ThemeModeContext from '../context/ThemeModeContext';
 
 
 const ThemeModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

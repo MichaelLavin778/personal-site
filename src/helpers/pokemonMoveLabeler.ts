@@ -1,4 +1,4 @@
-import { toTitleCase } from "./text";
+import { toTitleCase } from "./common";
 
 
 const moveIdToLabel = (name: string) => {
