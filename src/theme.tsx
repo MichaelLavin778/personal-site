@@ -5,10 +5,10 @@ export const createAppTheme = (mode: Mode) => createTheme({
 	palette: {
 		mode,
 		background: {
-			default: mode === 'dark' ? '#242424' : '#fff',
+			default: mode === 'dark' ? '#242424' : '#f1f3e0',
 		},
 		primary: {
-			main: mode === 'dark' ? '#90caf9' : '#1976d2',
+			main: mode === 'dark' ? '#90caf9' : '#778873',
 		},
 	},
 	components: {
@@ -24,7 +24,7 @@ export const createAppTheme = (mode: Mode) => createTheme({
 				},
 				// </Link>
 				'footer': {
-					backgroundColor: mode === 'dark' ? '#1b1b1b' : '#1976d2',
+					backgroundColor: mode === 'dark' ? '#1a1a1a' : '#778873',
 				},
 			}
 		},
@@ -32,7 +32,7 @@ export const createAppTheme = (mode: Mode) => createTheme({
 		MuiAppBar: {
 			styleOverrides: {
 				root: {
-					backgroundColor: mode === 'dark' ? '#1a1a1a' : '#1976d2',
+					backgroundColor: mode === 'dark' ? '#1a1a1a' : '#778873',
 				}
 			}
 		},
