@@ -5,7 +5,7 @@ import { isMobile } from '../helpers/common';
 
 const TutorialModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const storedTutorialSetting = localStorage.getItem('TUTORIAL');
-	const [showTutorial, setShowTutorial] = useState<boolean>(storedTutorialSetting !== null ? storedTutorialSetting === 'true' : isMobile());
+	const [showTutorial, setShowTutorial] = useState<boolean>(storedTutorialSetting !== null ? storedTutorialSetting === 'true' : !isMobile());
 
     const toggleTutorial = () => {
         setShowTutorial((show) => !show);
