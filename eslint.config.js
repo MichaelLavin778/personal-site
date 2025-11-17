@@ -12,7 +12,7 @@ export default defineConfig([
 		extends: [
 			js.configs.recommended,
 			tseslint.configs.recommended,
-			reactHooks.configs['recommended-latest'],
+			reactHooks.configs.flat['recommended-latest'],
 			reactRefresh.configs.vite,
 		],
 		languageOptions: {
@@ -86,6 +86,8 @@ export default defineConfig([
 			'no-useless-rename': 'warn',
 			'no-useless-return': 'warn',
 			'prefer-const': 'warn',
+			'react-hooks/rules-of-hooks': 'warn',
+			'react-hooks/exhaustive-deps': 'warn',
 
 			// suggestions
 			'arrow-body-style': ['error', 'as-needed'],

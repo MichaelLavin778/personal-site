@@ -1,5 +1,5 @@
 import { Backdrop, Box, Popover, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel } from '@mui/x-data-grid';
 import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
 import TutorialContext from "../../context/TutorialContext";
@@ -9,6 +9,7 @@ import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
 import type { PokemonMove } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
+import { headerFooterPadding } from "../../model/common";
 
 
 interface MovesProps {
@@ -17,12 +18,12 @@ interface MovesProps {
 }
 
 const Moves = ({ moves, lefColBottom }: MovesProps) => {
-    const apiRef = useGridApiRef()
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
     const { bottom: pageBottom } = useContext(ShowcaseBottomContext);
+    const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
+    const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 
-    // use a native non-passive wheel listener so preventDefault() works reliably
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     // tutorial controls
@@ -45,9 +46,10 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const headerSize = 55;
     const rowSize = 52;
     const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
-    const contBuffer = 15;
-    const containerSize = (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace);
-    const pageSize = Math.max(Math.floor(containerSize / rowSize), 5);
+    const contBuffer = windowWidth >= 1200 ? 15 : 50;
+    const headerFooterPaddingValue = Number(headerFooterPadding.replace('px', ''));
+    const containerSize = windowWidth >= 1200 ? (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace) : (windowHeight - headerSize - rowSize - contBuffer - headerFooterPaddingValue * 2);
+    const pageSize = Math.floor(containerSize / rowSize);
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
@@ -69,6 +71,17 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         if (showTutorial) setAnchorEl(containerRef.current || null);
         else setAnchorEl(null);
     }, [showTutorial]);
+
+    // track window height and width
+    const handleResize = () => {
+		setWindowWidth(window.innerWidth);
+        setWindowHeight(window.innerHeight);
+	};
+	useEffect(() => {
+		window.addEventListener('resize', handleResize);
+		// Cleanup
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
@@ -292,11 +305,10 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
             </ToggleButtonGroup>
 
             {/* Moves Table */}
-            <Box ref={containerRef} minHeight={containerSize}>
+            <Box ref={containerRef} minHeight={{ lg: containerSize}}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
-                    apiRef={apiRef}
                     paginationModel={paginationModel}
                     onPaginationModelChange={(model) => setPaginationModel(model)}
                     pageSizeOptions={pageSizeOptions}
