@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import self_portrait from '../assets/self_portrait.jpg';
 import GithubIconButton from "../components/icon_buttons/GitHubIconButton";
 import LinkedInIconButton from "../components/icon_buttons/LinkedInIconButton";
-import { headerFooterPadding } from "../model/common";
 import TutorialPopover from "../components/TutorialPopover";
+import { headerFooterPadding } from "../model/common";
 
 
 const Home = () => {
