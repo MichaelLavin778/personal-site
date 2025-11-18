@@ -1,8 +1,7 @@
-import { Backdrop, Box, Popover, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel } from '@mui/x-data-grid';
 import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
-import TutorialContext from "../../context/TutorialContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
@@ -10,6 +9,7 @@ import type { PokemonMove } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
 import { headerFooterPadding } from "../../model/common";
+import TutorialPopover from "../TutorialPopover";
 
 
 interface MovesProps {
@@ -24,13 +24,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
     const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 
+    // for tutorial popover
     const containerRef = useRef<HTMLDivElement | null>(null);
-
-    // tutorial controls
-    const { showTutorial } = useContext(TutorialContext);
-    // Anchor should be an HTMLElement so Popover can position itself over the table
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = showTutorial && !!anchorEl;
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
@@ -65,12 +60,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         });
         setPageSizeOptions([pageSize]);
     }, [pageSize, pageBottom, lefColBottom]);
-
-    // when tutorial is shown, anchor the popover to the container that holds the DataGrid
-    useEffect(() => {
-        if (showTutorial) setAnchorEl(containerRef.current || null);
-        else setAnchorEl(null);
-    }, [showTutorial]);
 
     // track window height and width
     const handleResize = () => {
@@ -320,18 +309,11 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
             </Box>
 
             {/* Tutorial */}
-            {open && (
-                <Backdrop
-                    open={open}
-                    onClick={() => setAnchorEl(null)}
-                    sx={{ zIndex: (theme) => theme.zIndex.modal - 1, backgroundColor: 'rgba(0,0,0,0.3)' }}
-                />
-            )}
-            <Popover open={open} onClose={() => setAnchorEl(null)} anchorEl={anchorEl} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
-                <Typography maxWidth={300} padding={2} border={1} borderRadius={2}>
+            {containerRef.current && (
+                <TutorialPopover anchorEl={containerRef.current} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
                     All data is pulled from <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">PokéAPI</a>. Moves table uses a DataGrid which <b>dynamically</b> sizes between the bottom of the left column and the bottom of the page.
-                </Typography>
-            </Popover>
+                </TutorialPopover>
+            )}
         </>
     );
 }

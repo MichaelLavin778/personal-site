@@ -1,16 +1,13 @@
-import { Backdrop, Box, Popover, Typography } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
-import TutorialContext from "../context/TutorialContext";
+import { Box } from "@mui/material";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { loadResume, selectResumeUrl } from "../state/resumeSlice";
+import TutorialPopover from "../components/TutorialPopover";
 
 
 const Resume = () => {
     const dispatch = useAppDispatch();
     const s3Resume = useAppSelector(selectResumeUrl);
-    const { showTutorial } = useContext(TutorialContext);
-    const [anchorEl, setAnchorEl] = useState<DOMRect | null>(window.document.body.getBoundingClientRect());
-    const open = showTutorial && !!anchorEl;
 
     // Set the tab name
     useEffect(() => {
@@ -36,19 +33,9 @@ const Resume = () => {
             </Box>
 
             {/* Tutorial */}
-            {open && (
-                <Backdrop
-                    open={open}
-                    onClick={() => setAnchorEl(null)}
-                    sx={{ zIndex: (theme) => theme.zIndex.modal - 1, backgroundColor: 'rgba(0,0,0,0.3)' }}
-                />
-            )}
-            <Popover open={open} onClose={() => setAnchorEl(null)}>
-                <Typography maxWidth={300} padding={2} border={1} borderRadius={2}>
-                    The file here was pulled from an <b style={{ whiteSpace: 'nowrap' }}>S3 bucket</b> and stored in the state (this way the resume can be updated without needing to redeploy the site).
-                </Typography>
-            </Popover>
-            
+            <TutorialPopover>
+                My resume was pulled from an <b style={{ whiteSpace: 'nowrap' }}>S3 bucket</b> and stored in the state. This way the resume can be updated without needing to redeploy the site.
+            </TutorialPopover>
         </>
     );
 };
