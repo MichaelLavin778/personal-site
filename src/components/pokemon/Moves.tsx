@@ -1,4 +1,4 @@
-import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, LinearProgress, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel } from '@mui/x-data-grid';
 import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
@@ -6,7 +6,7 @@ import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
 import type { PokemonMove } from "../../model/PokemonMove";
-import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
+import { makeSelectPokemonMoves, selectAllMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
 import { headerFooterPadding } from "../../model/common";
 import TutorialPopover from "../TutorialPopover";
@@ -20,6 +20,7 @@ interface MovesProps {
 const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
+    const allMovesByName = useAppSelector(selectAllMoves);
     const { bottom: pageBottom } = useContext(ShowcaseBottomContext);
     const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
     const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
@@ -36,6 +37,17 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         { label: "Egg", value: "egg" },
         { label: "Tutor", shortLabel: "Ttr", value: "tutor" },
     ];
+
+    // Some Pokémon move names may not exist in the global moves store (e.g., API list mismatch).
+    // Count only moves that are actually "loadable" based on what's in the store.
+    const loadableMovesTotal = useMemo(
+        () => moves.filter((m) => Boolean(m?.move?.name && allMovesByName[m.move.name])).length,
+        [moves, allMovesByName]
+    );
+    const loadedMovesCount = detailedMoves.length;
+    const movesLoadedPercent = loadableMovesTotal === 0
+        ? 100
+        : Math.min(100, Math.max(0, Math.round((loadedMovesCount / loadableMovesTotal) * 100)));
 
     // values for calc for dynamic page sizing
     const headerSize = 55;
@@ -63,14 +75,14 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     // track window height and width
     const handleResize = () => {
-		setWindowWidth(window.innerWidth);
+        setWindowWidth(window.innerWidth);
         setWindowHeight(window.innerHeight);
-	};
-	useEffect(() => {
-		window.addEventListener('resize', handleResize);
-		// Cleanup
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
+    };
+    useEffect(() => {
+        window.addEventListener('resize', handleResize);
+        // Cleanup
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
@@ -274,27 +286,50 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                 <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
             </Box>
 
-            {/* Filter */}
-            <ToggleButtonGroup
-                value={moveTypeFilter?.value}
-                exclusive={true}
-                onChange={handleMoveTypeFilter}
-                aria-label="move learned by filter"
-                fullWidth={true}
-            >
-                {buttonOptions.map((label) => (
-                    <ToggleButton
-                        key={label.label}
-                        value={label.value}
-                        sx={{ lineHeight: 0.25, width: 70 }}
+            {/* Table Header */}
+            <Box display="flex" alignItems="center" gap={1}>
+                {/* Filter */}
+                <ToggleButtonGroup
+                    value={moveTypeFilter?.value}
+                    exclusive={true}
+                    onChange={handleMoveTypeFilter}
+                    aria-label="move learned by filter"
+                    fullWidth={true}
+                >
+                    {buttonOptions.map((label) => (
+                        <ToggleButton
+                            key={label.label}
+                            value={label.value}
+                            sx={{ lineHeight: 0.25, width: 70 }}
+                        >
+                            {label.label}
+                        </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+
+                {/* Loading Progress */}
+                {movesLoadedPercent < 100 && (
+                    <Box
+                        minWidth={120}
+                        display={{ xs: 'none', sm: 'flex' }}
+                        flexDirection="column"
+                        alignItems="flex-end"
+                        justifyContent="center"
                     >
-                        {label.label}
-                    </ToggleButton>
-                ))}
-            </ToggleButtonGroup>
+                        <Typography variant="caption" color="textSecondary" lineHeight={1}>
+                            {movesLoadedPercent}%
+                        </Typography>
+                        <LinearProgress
+                            variant="determinate"
+                            value={movesLoadedPercent}
+                            sx={{ width: 120, height: 6, borderRadius: 3 }}
+                        />
+                    </Box>
+                )}
+            </Box>
 
             {/* Moves Table */}
-            <Box ref={containerRef} minHeight={{ lg: containerSize}}>
+            <Box ref={containerRef} minHeight={{ lg: containerSize }}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
