@@ -34,8 +34,16 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Lint
         run: npm run lint
 
       - name: Build
         run: npm run build
+
+      - name: E2E (Playwright)
+        env:
+          VITE_APP_ENV: main
+        run: npx playwright test

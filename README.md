@@ -1,15 +1,27 @@
 # Running the Application
 
-local - [localhost:5173/](localhost:5173/):
-```
-npm install --legacy-peer-deps
+## Environment URLs
+
+This project uses one env selector (`VITE_APP_ENV`) to choose the correct base URL.
+
+- **local**: `http://localhost:5173/`
+- **main**: `https://main.d1y82t1cx4u01s.amplifyapp.com/`
+- **production**: `https://production.d1y82t1cx4u01s.amplifyapp.com/`
+
+### Set the environment (PowerShell)
+
+```powershell
+$env:VITE_APP_ENV = "local"
 npm run dev
+
+$env:VITE_APP_ENV = "main"
+npx playwright test
 ```
 
-production - [here](https://main.d1y82t1cx4u01s.amplifyapp.com/)
+local - [localhost:5173/](localhost:5173/):
 ```
-npm install --legacy-peer-deps
-npm run build
+npm install
+npm run dev
 ```
 
 ## Release pipeline (main -> production)
@@ -18,8 +30,9 @@ This repo uses GitHub Actions to gate merges into `production`.
 
 ### Workflows
 
-- `CI` (`.github/workflows/ci.yml`): runs `npm ci`, `npm run lint`, `npm run build` on PRs, and on pushes to `main`.
+- `CI` (`.github/workflows/ci.yml`): runs `npm ci`, `npm run lint`, `npm run build`, and `npx playwright test` on PRs, and on pushes to `main`.
 - `Promote main -> production` (`.github/workflows/promote-to-production.yml`): manual workflow that re-runs lint/build and then opens a PR from `main` into `production`.
+	- Includes Playwright E2E checks against the `production` URL.
 
 ### One-time GitHub settings (required)
 
