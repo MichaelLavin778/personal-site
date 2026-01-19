@@ -63,8 +63,8 @@ jobs:
           retention-days: 7
 
       - name: Upload Playwright Report to Pages Artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: playwright-report/
 
