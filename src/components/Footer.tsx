@@ -1,5 +1,6 @@
 import { Box, Container, Stack, Typography } from "@mui/material";
 import AmplifyIconButton from "./icon_buttons/AmplifyIconButton";
+import MaterialUIIconButton from "./icon_buttons/MaterialUIIconButton";
 import PlaywrightIconButton from "./icon_buttons/PlaywrightIconButton";
 import ReactIconButton from "./icon_buttons/ReactIconButton";
 import S3IconButton from "./icon_buttons/S3IconButton";
@@ -25,6 +26,7 @@ const Footer = () => (
 					<AmplifyIconButton />
 					<S3IconButton />
 					<ViteIconButton />
+					<MaterialUIIconButton />
 					<ReactIconButton />
 					<PlaywrightIconButton />
 				</Stack>
