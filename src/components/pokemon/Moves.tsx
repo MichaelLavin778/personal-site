@@ -1,6 +1,6 @@
 import { Box, LinearProgress, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { DataGrid, type GridColDef, type GridComparatorFn, type GridSortModel } from '@mui/x-data-grid';
-import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
@@ -10,6 +10,105 @@ import { makeSelectPokemonMoves, selectAllMoves } from "../../state/pokemonMoves
 import Type from "./Type";
 import { headerFooterPadding } from "../../model/common";
 import TutorialPopover from "../TutorialPopover";
+
+// Keep comparator function references stable so the grid doesn't treat columns as changed every render.
+const pwrAndAccSorter: GridComparatorFn = (v1: string, v2: string) => {
+    const parseVal = (v: string) => {
+        if (v === '-' || v === '') return NaN;
+        if (v === '∞' || v === '\u221E') return Infinity;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : NaN;
+    };
+
+    const n1 = parseVal(v1);
+    const n2 = parseVal(v2);
+    const n1Finite = Number.isFinite(n1);
+    const n2Finite = Number.isFinite(n2);
+
+    // 1st) infinity
+    if (n1 === Infinity) return 1;
+    if (n2 === Infinity) return -1;
+    // 2nd) number value
+    if (n1Finite && n2Finite) return n1 - n2;
+    // 3rd) string "-"
+    if (n1Finite && !n2Finite) return 1;
+    if (!n1Finite && n2Finite) return -1;
+
+    return v1.localeCompare(v2);
+};
+
+const learnSorter: GridComparatorFn = (v1: string, v2: string) => {
+    const parseVal = (v: string) => {
+        const n = Number(v);
+        if (isNaN(n)) return NaN;
+        return Number(n);
+    };
+
+    const n1 = parseVal(v1);
+    const n2 = parseVal(v2);
+    const n1Finite = Number.isFinite(n1);
+    const n2Finite = Number.isFinite(n2);
+
+    // DESC by default looks better this way
+    if (n1Finite && n2Finite) return (n1 as number) - (n2 as number);
+    if (n1Finite && !n2Finite) return -1;
+    if (!n1Finite && n2Finite) return 1;
+
+    return String(v1).localeCompare(String(v2));
+};
+
+type MoveColumnWidths = {
+    learned: number;
+    name: number;
+    type: number;
+    category: number;
+    power: number;
+    accuracy: number;
+};
+
+const computeMoveColumnWidths = (containerWidth: number): MoveColumnWidths => {
+    // Minimums closely match the old "width" + "minWidth" defaults.
+    const min: MoveColumnWidths = {
+        learned: 70,
+        name: 130,
+        type: 110,
+        category: 70,
+        power: 70,
+        accuracy: 70,
+    };
+
+    const totalMin = Object.values(min).reduce((a, b) => a + b, 0);
+    if (!Number.isFinite(containerWidth) || containerWidth <= 0) return min;
+    if (containerWidth <= totalMin) return min;
+
+    // Preserve the previous flex proportions (was): 1 / 5 / 1 / 1 / 1 / 1
+    const flex = {
+        learned: 2,
+        name: 24,
+        type: 1,
+        category: 1,
+        power: 1.5,
+        accuracy: 1,
+    };
+    const flexTotal = Object.values(flex).reduce((a, b) => a + b, 0);
+    const remaining = containerWidth - totalMin;
+
+    const widths: MoveColumnWidths = {
+        learned: min.learned + Math.floor((remaining * flex.learned) / flexTotal),
+        name: min.name + Math.floor((remaining * flex.name) / flexTotal),
+        type: min.type + Math.floor((remaining * flex.type) / flexTotal),
+        category: min.category + Math.floor((remaining * flex.category) / flexTotal),
+        power: min.power + Math.floor((remaining * flex.power) / flexTotal),
+        accuracy: min.accuracy + Math.floor((remaining * flex.accuracy) / flexTotal),
+    };
+
+    // Correct rounding drift by putting any leftover pixels into the name column.
+    const sum = Object.values(widths).reduce((a, b) => a + b, 0);
+    const drift = containerWidth - sum;
+    if (drift !== 0) widths.name += drift;
+
+    return widths;
+};
 
 
 interface MovesProps {
@@ -27,6 +126,24 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     // for tutorial popover
     const containerRef = useRef<HTMLDivElement | null>(null);
+
+    // Keep column widths stable by computing pixel widths from the container width.
+    const [gridWidth, setGridWidth] = useState<number>(0);
+    useLayoutEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const measure = () => {
+            const next = Math.floor(el.getBoundingClientRect().width);
+            setGridWidth((prev) => (prev === next ? prev : next));
+        };
+
+        measure();
+
+        const ro = new ResizeObserver(() => measure());
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
@@ -61,7 +178,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
     const [pageSizeOptions, setPageSizeOptions] = useState([pageSize]);
-    const lastWheelTimeRef = useRef(0);
 
     // keep paginationModel.pageSize in sync when calculated pageSize changes
     useEffect(() => {
@@ -108,11 +224,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
         const handler = (e: WheelEvent) => {
             e.preventDefault();
-            const now = Date.now();
-            // throttle rapid wheel events (300ms)
-            if (now - lastWheelTimeRef.current < 300) return;
-
-            lastWheelTimeRef.current = now;
 
             const delta = e.deltaY;
             const threshold = 10; // ignore tiny jitters
@@ -125,6 +236,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         return () => el.removeEventListener('wheel', handler);
     });
 
+    // handle move type filter change
     const handleMoveTypeFilter = (_event: ReactMouseEvent<HTMLElement, MouseEvent>, newMoveTypeFilter: string | null) => {
         const newOption = buttonOptions.find(opt => opt.value === newMoveTypeFilter) || null;
         setMoveTypeFilter(newOption);
@@ -134,74 +246,31 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         else setSortModel([]);
     };
 
-    const pwrAndAccSorter: GridComparatorFn = (v1: string, v2: string) => {
-        const parseVal = (v: string) => {
-            if (v === '-' || v === '') return NaN;
-            if (v === '∞' || v === '\u221E') return Infinity;
-            const n = Number(v);
-            return Number.isFinite(n) ? n : NaN;
-        };
-
-        const n1 = parseVal(v1);
-        const n2 = parseVal(v2);
-        const n1Finite = Number.isFinite(n1);
-        const n2Finite = Number.isFinite(n2);
-
-        // 1st) infinity
-        if (n1 === Infinity) return 1;
-        if (n2 === Infinity) return -1;
-        // 2nd) number value
-        if (n1Finite && n2Finite) return n1 - n2;
-        // 3rd) string "-"
-        if (n1Finite && !n2Finite) return 1;
-        if (!n1Finite && n2Finite) return -1;
-
-        return v1.localeCompare(v2);
-    };
-
-    const learnSorter: GridComparatorFn = (v1: string, v2: string) => {
-        const parseVal = (v: string) => {
-            const n = Number(v);
-            if (isNaN(n)) return NaN;
-            return Number(n);
-        };
-
-        const n1 = parseVal(v1);
-        const n2 = parseVal(v2);
-        const n1Finite = Number.isFinite(n1);
-        const n2Finite = Number.isFinite(n2);
-
-        // DESC by default looks better this way
-        if (n1Finite && n2Finite) return (n1 as number) - (n2 as number);
-        if (n1Finite && !n2Finite) return -1;
-        if (!n1Finite && n2Finite) return 1;
-
-        return String(v1).localeCompare(String(v2));
-    };
-
     // get version group details for a move - comes from pokemon's data
     const getVGs = (mvs: PokemonsMove[], moveName: string) => mvs.find(move => move.move.name === moveName)?.version_group_details;
 
-    const columns: GridColDef[] = [
+    const columnWidths = useMemo(() => computeMoveColumnWidths(gridWidth), [gridWidth]);
+
+    const columns = useMemo<GridColDef[]>(() => [
         {
             field: 'learned',
             headerName: moveTypeFilter?.shortLabel || moveTypeFilter?.label || "Lrn",
             filterable: false,
             align: 'right',
-            width: 70,
+            width: columnWidths.learned,
             sortComparator: learnSorter
         },
         {
             field: 'name',
             headerName: 'Move',
             hideable: false,
-            flex: 1,
+            width: columnWidths.name,
             minWidth: 130
         },
         {
             field: 'type',
             headerName: 'Type',
-            width: 110,
+            width: columnWidths.type,
             minWidth: 90,
             display: 'flex',
             renderCell: (params) => <Type typeName={params.row.type} />
@@ -209,23 +278,23 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         {
             field: 'category',
             headerName: 'Cat.',
-            width: 70,
+            width: columnWidths.category,
             display: 'flex',
             renderCell: (params) => <img src={`https://img.pokemondb.net/images/icons/move-${params.row.category}.png`} alt={params.row.category} width={36} />
         },
         {
             field: 'power',
             headerName: 'Power',
-            width: 70,
+            width: columnWidths.power,
             sortComparator: pwrAndAccSorter
         },
         {
             field: 'accuracy',
             headerName: 'Acc.',
-            width: 70,
+            width: columnWidths.accuracy,
             sortComparator: pwrAndAccSorter
         },
-    ];
+    ], [columnWidths, moveTypeFilter?.label, moveTypeFilter?.shortLabel]);
 
     const createData = (
         id: number,
@@ -339,7 +408,24 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                     disableRowSelectionOnClick={true}
                     sortModel={sortModel}
                     onSortModelChange={(model) => setSortModel(model)}
-                    sx={{ border: 0 }}
+                    sx={{
+                        border: 0,
+                        overflow: 'hidden',
+                        // Hard-hide scrollbars inside the grid (native + MUI overlay).
+                        '& .MuiDataGrid-virtualScroller': {
+                            scrollbarWidth: 'none', // Firefox
+                            msOverflowStyle: 'none', // IE/Edge legacy
+                        },
+                        '& .MuiDataGrid-virtualScroller::-webkit-scrollbar': {
+                            width: 0,
+                            height: 0,
+                            display: 'none',
+                        },
+                        // MUI renders an overlay scrollbar element in some modes.
+                        '& .MuiDataGrid-scrollbar': {
+                            display: 'none',
+                        },
+                    }}
                 />
             </Box>
 
