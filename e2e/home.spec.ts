@@ -4,7 +4,7 @@ import { verifyFooter, verifyHeader } from './common/helpers';
 test('home page renders core content and navigation', async ({ page }) => {
     await page.goto('/');
 
-    // Title set by Home.tsx
+    // Title
     await expect(page).toHaveTitle(/Michael Lavin/i);
 
     // Core content

@@ -39,7 +39,7 @@ const Header = () => {
 					</Grid>
 					{/* actions */}
 					<Grid size={1} sx={{ whiteSpace: 'nowrap' }}>
-						<IconButton color="inherit" onClick={toggleMode} aria-label="toggle theme">
+						<IconButton color="inherit" onClick={toggleMode} aria-label={mode === 'dark' ? "dark theme" : "light theme"}>
 							{mode === 'dark' ? <Brightness4Icon /> : <Brightness7Icon /> }
 						</IconButton>
 						{!isMobile() && (

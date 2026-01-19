@@ -38,7 +38,10 @@ export default defineConfig({
       origins: [
         {
           origin: getPlaywrightBaseUrl().replace(/\/$/, ''),
-          localStorage: [{ name: 'TUTORIAL', value: 'false' }],
+          localStorage: [
+            { name: 'TUTORIAL', value: 'false' },
+            { name: 'THEME_MODE', value: 'light' },
+          ],
         },
       ],
     },
