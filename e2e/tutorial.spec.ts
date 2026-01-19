@@ -2,9 +2,9 @@ import { Page, expect, test } from "@playwright/test";
 
 export const verifyTutorial = async (page: Page) => {
     let pageContext: '' | 'showcase' | 'resume' = '';
-    if (page.url().endsWith('/showcase') || page.url().endsWith('/showcase/')) 
+    if (page.url().includes('/showcase')) 
         pageContext = 'showcase';
-     else if (page.url().endsWith('/resume') || page.url().endsWith('/resume/')) 
+     else if (page.url().includes('/resume')) 
         pageContext = 'resume';
     
     let tutorialText = 'unknown page';

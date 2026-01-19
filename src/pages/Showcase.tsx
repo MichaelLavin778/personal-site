@@ -14,7 +14,8 @@ const Showcase = () => {
 	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const [currentPokemonName, setCurrentPokemonName] = useState<string>("bulbasaur");
+	const initialPokemon = new URLSearchParams(window.location.search).get('pokemon');
+	const [currentPokemonName, setCurrentPokemonName] = useState<string>(initialPokemon?.trim().toLowerCase() ?? "bulbasaur");
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
 	const ref = useRef<HTMLDivElement>(null);
 	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
