@@ -14,7 +14,8 @@ const Showcase = () => {
 	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const [currentPokemonName, setCurrentPokemonName] = useState<string>("bulbasaur");
+	const initialPokemon = new URLSearchParams(window.location.search).get('pokemon');
+	const [currentPokemonName, setCurrentPokemonName] = useState<string>(initialPokemon?.trim().toLowerCase() ?? "bulbasaur");
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
 	const ref = useRef<HTMLDivElement>(null);
 	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
@@ -27,6 +28,34 @@ const Showcase = () => {
 	useEffect(() => {
 		document.title = "Showcase - Pokemon";
 	}, []);
+
+	// read the initial pokemon from URL query param: ?pokemon=bulbasaur
+	useEffect(() => {
+		try {
+			const params = new URLSearchParams(window.location.search);
+			const raw = params.get('pokemon');
+			const fromUrl = (raw ?? '').trim().toLowerCase();
+			if (fromUrl) setCurrentPokemonName(fromUrl);
+		} catch {
+			// ignore malformed URL values
+		}
+		// run once on mount
+	}, []);
+
+	// keep the ?pokemon=... query param in sync with current selection
+	useEffect(() => {
+		try {
+			const url = new URL(window.location.href);
+			const pokemon = (currentPokemonName ?? '').trim().toLowerCase();
+			if (pokemon) url.searchParams.set('pokemon', pokemon);
+			else url.searchParams.delete('pokemon');
+			const next = url.pathname + url.search + url.hash;
+			const current = window.location.pathname + window.location.search + window.location.hash;
+			if (next !== current) window.history.replaceState({}, '', next);
+		} catch {
+			// ignore
+		}
+	}, [currentPokemonName]);
 
 	// rerender on any window resizing
 	const handleResize = () => {
@@ -95,9 +124,11 @@ const Showcase = () => {
 								options={pokemonList}
 								getOptionLabel={(option) => getPokemonLabel(option.name) ?? option.name}
 								renderInput={(params) => <TextField {...params} />}
-								value={currentPokemon}
+								value={currentPokemon ?? undefined}
 								disableClearable={true}
-								onChange={(_event, value) => setCurrentPokemonName(value.name)}
+								onChange={(_event, value) => {
+									if (value?.name) setCurrentPokemonName(value.name);
+								}}
 								sx={{ width: '100%', maxWidth: 400, justifySelf: 'center', mb: 0.5 }}
 							/>
 							{currentPokemon && <PokemonDetails pokemon={currentPokemon} />}

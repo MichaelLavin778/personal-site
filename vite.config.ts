@@ -9,7 +9,5 @@ export default defineConfig({
       // It currently triggers: Missing "./compiler-runtime" specifier in "react" package
     }),
   ],
-  define: {
-    'process.env': {}
-  }
+  // Keep config browser-native. Avoid process polyfills.
 })

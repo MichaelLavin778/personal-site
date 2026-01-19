@@ -1,0 +1,78 @@
+name: Promote main -> production
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Ref (branch, tag, or SHA) to promote; default is main"
+        required: false
+        default: "main"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: promote-production
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Verify CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: E2E (Playwright)
+        env:
+          VITE_APP_ENV: main
+        run: npx playwright test
+
+  pr:
+    name: Open PR to production
+    needs: gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create PR main -> production
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: production
+          branch: promote/main-to-production
+          delete-branch: true
+          title: "Promote main to production"
+          body: |
+            This PR was opened by the manual promotion workflow.
+
+            Merge is allowed only if required status checks are passing.
+          commit-message: "Promote main to production"
+          labels: |
+            promotion

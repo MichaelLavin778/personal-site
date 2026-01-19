@@ -18,9 +18,8 @@ const CryAudio = forwardRef<HTMLAudioElement, CryAudioProps>(
                 variant="outlined"
                 startIcon={<PlayArrow />}
                 onClick={() => {
-                    if (ref && typeof ref !== "function") {
+                    if (ref && typeof ref !== "function") 
                         ref.current?.play()
-                    }
                 }}
                 disabled={disabled}
             >
