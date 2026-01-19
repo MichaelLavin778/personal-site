@@ -8,7 +8,11 @@ test('showcase page', async ({ page }) => {
     await expect(page).toHaveTitle(/Showcase - Pokemon/i);
 
     // Core content
-    // TODO
+    // Ensure we can deep-link to a specific pokemon via query param
+    await page.goto('/showcase?pokemon=pikachu');
+
+    // Current selection should reflect the URL param
+    await expect(page.getByRole('combobox')).toHaveValue(/pikachu/i);
 
     // Header navigation links
     await verifyHeader(page);
