@@ -4,12 +4,12 @@ import { type MouseEvent as ReactMouseEvent, useContext, useEffect, useLayoutEff
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
+import { headerFooterPadding } from "../../model/common";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
 import type { PokemonMove } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves, selectAllMoves } from "../../state/pokemonMovesSlice";
-import Type from "./Type";
-import { headerFooterPadding } from "../../model/common";
 import TutorialPopover from "../TutorialPopover";
+import Type from "./Type";
 
 // Keep comparator function references stable so the grid doesn't treat columns as changed every render.
 const pwrAndAccSorter: GridComparatorFn = (v1: string, v2: string) => {
@@ -147,7 +147,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
-    const [moveTypeFilter, setMoveTypeFilter] = useState<{ label: string, shortLabel?: string, value: string } | null>(levelOption);
+	type MoveTypeFilterOption = { label: string; shortLabel?: string; value: string };
+	const [moveTypeFilter, setMoveTypeFilter] = useState<MoveTypeFilterOption | null>(levelOption);
     const buttonOptions = [
         levelOption,
         { label: "TM", value: "machine" },
@@ -172,7 +173,9 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
     const contBuffer = windowWidth >= 1200 ? 15 : 50;
     const headerFooterPaddingValue = Number(headerFooterPadding.replace('px', ''));
-    const containerSize = windowWidth >= 1200 ? (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace) : (windowHeight - headerSize - rowSize - contBuffer - headerFooterPaddingValue * 2);
+	const containerSize = windowWidth >= 1200
+		? (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace)
+		: (windowHeight - headerSize - rowSize - contBuffer - headerFooterPaddingValue * 2);
     const pageSize = Math.floor(containerSize / rowSize);
 
     // controlled pagination model so we can programmatically change pages
@@ -237,7 +240,10 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     });
 
     // handle move type filter change
-    const handleMoveTypeFilter = (_event: ReactMouseEvent<HTMLElement, MouseEvent>, newMoveTypeFilter: string | null) => {
+        const handleMoveTypeFilter = (
+		_event: ReactMouseEvent<HTMLElement, MouseEvent>,
+		newMoveTypeFilter: string | null
+	) => {
         const newOption = buttonOptions.find(opt => opt.value === newMoveTypeFilter) || null;
         setMoveTypeFilter(newOption);
         if (newMoveTypeFilter === "level-up") setSortModel([intialSort]);
@@ -247,7 +253,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     };
 
     // get version group details for a move - comes from pokemon's data
-    const getVGs = (mvs: PokemonsMove[], moveName: string) => mvs.find(move => move.move.name === moveName)?.version_group_details;
+	const getVGs = (mvs: PokemonsMove[], moveName: string) =>
+		mvs.find(move => move.move.name === moveName)?.version_group_details;
 
     const columnWidths = useMemo(() => computeMoveColumnWidths(gridWidth), [gridWidth]);
 
@@ -335,18 +342,41 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         // accuracy
         let accuracyLabel: string | undefined = accuracy ? String(accuracy) : '-';
         const effectEntries = allMoves.find((m => m.name === name))?.effect_entries;
-        if (effectEntries?.some(entry => entry.short_effect === "Never misses.")) accuracyLabel = '∞';
+        if (effectEntries?.some(entry => entry.short_effect === "Never misses."))
+            accuracyLabel = '∞';
 
-        return { id, learned, name: nameLabel, type, category, power: powerLabel, accuracy: accuracyLabel };
+        return {
+            id,
+            learned,
+            name: nameLabel,
+            type,
+            category,
+            power: powerLabel,
+            accuracy: accuracyLabel,
+        };
     }
 
     const rows = useMemo(
         () => (detailedMoves)
-            .filter(m => moveTypeFilter?.value ? getVGs(moves, m.name)?.at(-1)?.move_learn_method.name === moveTypeFilter.value : m)
+            .filter((m) => {
+                if (!moveTypeFilter?.value) return true;
+                return getVGs(moves, m.name)?.at(-1)?.move_learn_method.name === moveTypeFilter.value;
+            })
             .map((m, i) => {
                 const vgs = getVGs(moves, m.name);
-                return createData(i, vgs, m.name, m.type.name, m.damage_class.name, m.power, m.accuracy, detailedMoves)
-            }), [detailedMoves, moveTypeFilter, moves]);
+                return createData(
+                    i,
+                    vgs,
+                    m.name,
+                    m.type.name,
+                    m.damage_class.name,
+                    m.power,
+                    m.accuracy,
+                    detailedMoves
+                );
+            }),
+        [detailedMoves, moveTypeFilter, moves]
+    );
 
     return (
         <>
