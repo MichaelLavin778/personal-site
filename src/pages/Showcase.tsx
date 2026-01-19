@@ -106,6 +106,7 @@ const Showcase = () => {
 		}
 	}, [currentPokemon, dispatch, loaded]);
 
+	// error display
 	if (error) {
 		return (
 			<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>

@@ -1,8 +1,8 @@
 import { Box, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
-import type { PokemonStat } from "../../model/Pokemon";
 import type { HighlightItemData } from "@mui/x-charts";
+import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
 import { useEffect, useState } from "react";
+import type { PokemonStat } from "../../model/Pokemon";
 
 
 interface StatsProps {
@@ -10,7 +10,7 @@ interface StatsProps {
 }
 
 const Stats = ({ stats }: StatsProps) => {
-    const [highlightedItem, setHighlightedItem] = useState<HighlightItemData | null>(null);
+    const [highlightedItem, setHighlightedItem] = useState<HighlightItemData>({ seriesId: 'base' });
 
     const maxLevel = 100;
     const badNature = 0.9;
@@ -18,7 +18,7 @@ const Stats = ({ stats }: StatsProps) => {
     const maxEVs = 252;
     const maxIVs = 31;
 
-    // Max for each stat
+    // Max value for each stat
     const metrics = [
         { name: 'HP', max: 714 },
         { name: 'Attack', max: 526 },
@@ -27,18 +27,27 @@ const Stats = ({ stats }: StatsProps) => {
         { name: 'Sp. Def', max: 614 },
         { name: 'Speed', max: 504 }
     ];
-    const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({ base_stat: 0, effort: 0, stat: { name: metric.name, url: `https://pokeapi.co/api/v2/stat/${i + 1}/` } }));
+	const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({
+		base_stat: 0,
+		effort: 0,
+		stat: {
+			name: metric.name,
+			url: `https://pokeapi.co/api/v2/stat/${i + 1}/`,
+		},
+	}));
 
     const calcMinStat = (name: string, base: number) => {
         let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
-        if (name === 'hp')
+        if (name.toLowerCase() === 'hp')
             min = Math.floor(2 * base * maxLevel / 100) + maxLevel + 10;
         return min;
     };
 
     const calcMaxStat = (name: string, base: number) => {
-        let max = Math.floor((Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature);
-        if (name === 'hp')
+		let max = Math.floor(
+			(Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature
+		);
+        if (name.toLowerCase() === 'hp')
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
         return max;
     };
@@ -89,6 +98,17 @@ const Stats = ({ stats }: StatsProps) => {
         if (!highlightedItem) setHighlightedItem({ seriesId: 'base' });
     }, [highlightedItem]);
 
+    // stats as a list
+    const renderStatChart = () => {
+        if (currentSeries && currentSeries.data.length > 0) {
+            return currentSeries.data.map((stat, i) => {
+                const statName = metrics.at(i)?.name;
+                return <Box key={statName}>{statName} {stat}</Box>
+            });
+        }
+        return metrics.map((metric) => (<Box key={metric.name}>{metric.name} -</Box>));
+    }
+
     return (
         <>
             {/* Label */}
@@ -124,26 +144,23 @@ const Stats = ({ stats }: StatsProps) => {
                     alignItems="center"
                     justifyContent="center"
                 >
-                    {highlightedItem?.seriesId && (
-                        <code>
-                            <Box minWidth={133} border={1} borderRadius={4} borderColor="slategray" padding={2} margin={2} whiteSpace="nowrap">
-                                <Box justifySelf="right">{currentSeries?.label}</Box>
-                                <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
-                                <Box justifyItems="right">
-                                    {currentSeries?.data.map((stat, i) => {
-                                        const statName = metrics.at(i)?.name;
-                                        return <Box key={statName}>{statName} {stat}</Box>
-                                    })}
-                                </Box>
+                    {/* Legend */}
+                    <code>
+                        <Box minWidth={133} border={1} borderRadius={4} borderColor="slategray" padding={2} margin={2} whiteSpace="nowrap">
+                            <Box justifySelf="right">{currentSeries ? currentSeries.label : 'Stats'}</Box>
+                            <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
+                            <Box justifyItems="right">
+                                {renderStatChart()}
                             </Box>
-                        </code>
-                    )}
+                        </Box>
+                    </code>
+                    {/* Chart */}
                     <Box>
                         <RadarChart
                             height={250}
                             highlight="series"
                             highlightedItem={highlightedItem}
-                            onHighlightChange={setHighlightedItem}
+                            onHighlightChange={(newHighlightedItem) => setHighlightedItem(newHighlightedItem ? newHighlightedItem : { seriesId: 'base' })}
                             slotProps={{ tooltip: { trigger: 'axis' } }}
                             series={withOptions(series)}
                             radar={{ metrics }}

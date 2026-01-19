@@ -1,8 +1,28 @@
-import { AppBar, Box, Container, Drawer, Grid, IconButton, List, ListItemButton, ListItemText, Link as MuiLink, Stack, useMediaQuery, useTheme } from "@mui/material";
-import { Brightness4 as Brightness4Icon, Brightness7 as Brightness7Icon, Menu as MenuIcon, WebAsset as WebAssetIcon, WebAssetOff as WebAssetOffIcon } from "@mui/icons-material";
-import { useThemeMode } from '../context/ThemeModeContext';
+import {
+	Brightness4 as Brightness4Icon,
+	Brightness7 as Brightness7Icon,
+	Menu as MenuIcon,
+	WebAsset as WebAssetIcon,
+	WebAssetOff as WebAssetOffIcon,
+} from "@mui/icons-material";
+import {
+	AppBar,
+	Box,
+	Container,
+	Drawer,
+	Grid,
+	IconButton,
+	List,
+	ListItemButton,
+	ListItemText,
+	Link as MuiLink,
+	Stack,
+	useMediaQuery,
+	useTheme,
+} from "@mui/material";
 import { type MouseEvent as ReactMouseEvent, useContext, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useThemeMode } from '../context/ThemeModeContext';
 import TutorialContext from "../context/TutorialContext";
 import { isMobile } from "../helpers/common";
 
@@ -25,7 +45,12 @@ const Header = () => {
 		{ label: 'Resume', to: toResume },
 	]), [toHome, toResume, toShowcase]);
 
-	const onClick = (e: ReactMouseEvent<HTMLAnchorElement, MouseEvent>, to: string) => window.location.pathname === to && e.preventDefault();
+	const onClick = (
+		e: ReactMouseEvent<HTMLAnchorElement, MouseEvent>,
+		to: string
+	) => {
+		if (window.location.pathname === to) e.preventDefault();
+	};
 
 	return (
 		<AppBar sx={{ height: 50 }}>
@@ -44,9 +69,19 @@ const Header = () => {
 					</Grid>
 					{/* center: desktop links */}
 					<Grid size={{ xs: 8, sm: 10 }}>
-						<Stack direction="row" justifyContent="space-around" sx={{ display: { xs: 'none', sm: 'flex' } }}>
+						<Stack
+							direction="row"
+							justifyContent="space-around"
+							sx={{ display: { xs: 'none', sm: 'flex' } }}
+						>
 							{navLinks.map(({ label, to }) => (
-								<MuiLink key={to} component={RouterLink} to={to} onClick={(e) => onClick(e, to)} sx={{ color: 'inherit' }}>
+								<MuiLink
+									key={to}
+									component={RouterLink}
+									to={to}
+									onClick={(e) => onClick(e, to)}
+									sx={{ color: 'inherit' }}
+								>
 									{label}
 								</MuiLink>
 							))}

@@ -1,7 +1,7 @@
-import { defineConfig, globalIgnores } from 'eslint/config'
 import js from '@eslint/js'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -24,6 +24,13 @@ export default defineConfig([
 			// errors
 			'no-debugger': 'error',
 			'default-param-last': 'error',
+			'max-len': ['warn', {
+				code: 120,
+				ignoreUrls: true,
+				ignoreStrings: true,
+				ignoreTemplateLiterals: true,
+				ignoreRegExpLiterals: true,
+			}],
 			'no-dupe-args': 'error',
 			'no-dupe-else-if': 'error',
 			'no-duplicate-case': 'error',

@@ -20,7 +20,13 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
             hiddenAbility = abilityLabels.find(ability => ability.is_hidden);
         return (
             <>
-                {abilityLabels.filter(ability => !ability.is_hidden).map(ability => <Typography key={ability.ability.name}>{ability.ability.name}</Typography>)}
+                {abilityLabels
+					.filter(ability => !ability.is_hidden)
+					.map(ability => (
+						<Typography key={ability.ability.name}>
+							{ability.ability.name}
+						</Typography>
+					))}
                 {!!hiddenAbility && (
                     <Typography key={hiddenAbility.ability.name} variant="body2">{`${hiddenAbility.ability.name} (hidden)`}</Typography>
                 )}
