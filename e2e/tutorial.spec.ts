@@ -25,9 +25,9 @@ export const verifyTutorial = async (page: Page) => {
     // General Locators
     const header = page.locator('header');
     const tutorialPopover = page.getByRole('presentation').getByText(tutorialText);
-    const toggleTutorial = header.getByRole('button', { name: 'toggle tutorial' });
-    const tutorialOn = toggleTutorial.getByTestId('WebAssetIcon');
-    const tutorialOff = toggleTutorial.getByTestId('WebAssetOffIcon');
+    const tutorialOn = header.getByRole('button', { name: 'tutorial on' });
+    const tutorialOff = header.getByRole('button', { name: 'tutorial off' });
+    const toggleTutorial = header.getByRole('button', { name: /tutorial (on|off)/ });
 
     // Initial state: tutorial disaabled via storageState in playwright.config.ts
     await expect(tutorialOff).toBeVisible();

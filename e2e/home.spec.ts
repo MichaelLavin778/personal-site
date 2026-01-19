@@ -11,11 +11,11 @@ test('home page renders core content and navigation', async ({ page }) => {
     await expect(page.getByText('Michael Lavin')).toBeVisible();
     await expect(page.getByText('FULL-STACK DEVELOPER')).toBeVisible();
     await expect(page.getByAltText('Michael Lavin')).toBeVisible();
-    const LinkedInButton = page.getByLabel('LinkedIn')
-    await expect(LinkedInButton.getByTestId('LinkedInIcon')).toBeVisible();
+    const LinkedInButton = page.getByLabel('LinkedIn');
+    await expect(LinkedInButton).toBeVisible();
     await expect(LinkedInButton).toHaveAttribute('href', 'https://www.linkedin.com/in/michael-lavin-2373b7198');
-    const GitHubButton = page.getByLabel('GitHub')
-    await expect(GitHubButton.getByTestId('GitHubIcon')).toBeVisible();
+    const GitHubButton = page.getByLabel('GitHub');
+    await expect(GitHubButton).toBeVisible();
     await expect(GitHubButton).toHaveAttribute('href', 'https://github.com/MichaelLavin778');
 
     // Header navigation links

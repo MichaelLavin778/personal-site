@@ -43,7 +43,7 @@ const Header = () => {
 							{mode === 'dark' ? <Brightness4Icon /> : <Brightness7Icon /> }
 						</IconButton>
 						{!isMobile() && (
-							<IconButton color="inherit" onClick={toggleTutorial} aria-label="toggle tutorial">
+							<IconButton color="inherit" onClick={toggleTutorial} aria-label={showTutorial ? "tutorial on" : "tutorial off"}>
 								{showTutorial ? <WebAssetIcon /> : <WebAssetOffIcon />}
 							</IconButton>
 						)}
