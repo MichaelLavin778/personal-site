@@ -47,7 +47,7 @@ jobs:
 
       - name: E2E (Playwright)
         env:
-          VITE_APP_ENV: production
+          VITE_APP_ENV: main
         run: npx playwright test
 
   pr:
