@@ -56,10 +56,9 @@ const FullPaper = ({ children, ...props }: PaperProps) => {
 
 type PokemonProps = {
     pokemon: Pokemon;
-	genderlessPokemonNames?: string[];
 }
 
-const PokemonDetails = ({ pokemon, genderlessPokemonNames = [] }: PokemonProps) => {
+const PokemonDetails = ({ pokemon }: PokemonProps) => {
     // purpose of tracking this is to make right col the same height as the left
     const [bottom, setBottom] = useState(0);
     const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
@@ -125,74 +124,20 @@ const PokemonDetails = ({ pokemon, genderlessPokemonNames = [] }: PokemonProps) 
     const femalePink = 'rgba(248, 185, 212, 0.5)';
     const genderlessGray = 'rgba(192, 192, 192, 0.3)';
     let background = genderlessGray;
-    const maleOverride = [
-        "nidoran-m",
-        "nidorino",
-        "nidoking",
-        "hitmonlee",
-        "hitmonchan",
-        "tauros",
-        "tyrogue",
-        "hitmontop",
-        "volbeat",
-        "latios",
-        "mothim",
-        "gallade",
-        "throh",
-        "sawk",
-        "rufflet",
-        "braviary",
-        "tornadus",
-        "tornadus-incarnate",
-        "tornadus-therian",
-        "thundurus",
-        "thundurus-incarnate",
-        "thundurus-therian",
-        "landorus",
-        "landorus-incarnate",
-        "landorus-therian",
-    ];
     const femaleOverride = [
-        "nidoran-f",
-        "nidorina",
-        "nidoqueen",
         "pikachu-cosplay",
         "pikachu-rock-star",
         "pikachu-belle",
         "pikachu-pop-star",
         "pikachu-phd",
         "pikachu-libre",
-        "chansey",
-        "kangaskhan",
-        "jynx",
-        "miltank",
-        "smoochum",
-        "blissey",
-        "illumise",
-        "latias",
-        "wormadam",
-        "happiny",
-        "vespiquen",
-        "froslass",
-        "cresselia",
-        "petilil",
-        "lilligant",
-        "vullaby",
-        "mandibuzz",
-        "oinkologne-female",
-        "flabebe",
-        "floette",
-        "florges",
     ];
-    if (!genderlessPokemonNames.includes(pokemon.name)) {
-        if (hasAnyFemaleSprites || maleOverride.includes(pokemon.name)) 
-            background = maleBlue;
-        else if (femaleOverride.includes(pokemon.name))
-            background = femalePink;
-        else 
-            background = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
-        
-    }
+    if (pokemon.gender === 'male' && hasAnyFemaleSprites) 
+        background = maleBlue;
+    else if (femaleOverride.includes(pokemon.name))
+        background = femalePink;
+    else if (pokemon.gender !== 'genderless')
+        background = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
 
     return (
         <Grid container={true} spacing={2} alignItems="flex-start">
@@ -305,7 +250,9 @@ const PokemonDetails = ({ pokemon, genderlessPokemonNames = [] }: PokemonProps) 
             {/* Right column */}
             <Grid size={{ md: 12, lg: 7 }} ref={rightColRef}>
                 <FullPaper>
-                    {bottom > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} lefColBottom={bottom} />}
+                    {bottom > 0 && (pokemon.moves?.length ?? 0) > 0 && (
+                        <Moves moves={pokemon.moves ?? []} lefColBottom={bottom} />
+                    )}
                 </FullPaper>
             </Grid>
         </Grid>

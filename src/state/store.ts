@@ -1,13 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
-import genderReducer from './genderSlice'
+import abilityReducer from './abilitySlice'
 import pokemonMovesReducer from './pokemonMovesSlice'
 import pokemonReducer from './pokemonSlice'
 import resumeReducer from './resumeSlice'
 
 const pokemonRootReducer = combineReducers({
 	pokemon: pokemonReducer,
-	gender: genderReducer,
+	abilities: abilityReducer,
 	moves: pokemonMovesReducer,
 })
 

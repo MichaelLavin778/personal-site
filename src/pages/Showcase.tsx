@@ -5,9 +5,8 @@ import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { headerFooterPadding } from "../model/common";
-import { loadGenderlessPokemonList, selectGenderlessPokemonNames } from "../state/genderSlice";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
-import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
+import { loadGenderlessPokemonList, loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 
 
 type ShowcaseContainerProps = {
@@ -24,7 +23,6 @@ const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
 const Showcase = () => {
 	const dispatch = useAppDispatch();
 	const pokemonList = useAppSelector(selectPokemon);
-	const genderlessPokemonNames = useAppSelector(selectGenderlessPokemonNames);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const initialPokemon = new URLSearchParams(window.location.search).get('pokemon');
@@ -107,25 +105,25 @@ const Showcase = () => {
 		}
 	}, [currentPokemon, dispatch, loaded]);
 
+	// load gender data and merge it into the already-loaded pokemon list
+	useEffect(() => {
+		if (!loaded) return;
+		dispatch(loadGenderlessPokemonList())
+			.unwrap()
+			.catch((message) => setError(new Error(String(message))));
+	}, [dispatch, loaded]);
+
 	// load pokemon's moves (more detailed)
 	useEffect(() => {
 		if (loaded && !!currentPokemon?.id) {
 			try {
-				const apis = currentPokemon.moves.map(m => m.move.url);
+				const apis = (currentPokemon.moves ?? []).map(m => m.move.url);
 				dispatch(loadAllPokemonMoves(apis));
 			} catch (err: unknown) {
 				setError(err as Error);
 			}
 		}
 	}, [currentPokemon, dispatch, loaded]);
-
-	// load list of genderless pokemon
-	useEffect(() => {
-		if (genderlessPokemonNames.length > 0) return;
-		dispatch(loadGenderlessPokemonList())
-			.unwrap()
-			.catch((message) => setError(new Error(String(message))));
-	}, [dispatch, genderlessPokemonNames.length]);
 
 	// error display
 	if (error) {
@@ -156,7 +154,6 @@ const Showcase = () => {
 							{currentPokemon && (
 								<PokemonDetails
 									pokemon={currentPokemon}
-									genderlessPokemonNames={genderlessPokemonNames}
 								/>
 							)}
 						</>
