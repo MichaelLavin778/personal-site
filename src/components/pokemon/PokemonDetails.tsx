@@ -1,4 +1,4 @@
-import { Box, Grid, Stack, Typography } from "@mui/material";
+import { Box, Grid, Paper, type PaperProps, Stack, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import type { Pokemon } from "../../model/Pokemon";
 import Abilities from "./Abilities";
@@ -27,6 +27,30 @@ const SpriteCard = ({ background, children }: SpriteCardProps) => (
     </Box>
 );
 
+const FullPaper = ({ children, ...props }: PaperProps) => {
+    const sx = props.sx || {};
+    return (
+        <Paper
+            {...props}
+            variant="elevation"
+            sx={{
+                p: 2,
+                ...sx,
+                // MUI "elevation" shadows are intentionally directional (drop-shadow style).
+                // Override to make the shadow feel even on all sides.
+                boxShadow: (theme) =>
+                    theme.palette.mode === 'dark'
+                        ? '0 0 4px rgba(0,0,0,0.65)'
+                        : '0 0 4px rgba(0,0,0,0.22)',
+            }}
+            elevation={0}
+            
+        >
+            {children}
+        </Paper>
+    );
+};
+
 type PokemonProps = {
     pokemon: Pokemon;
 }
@@ -35,12 +59,13 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     // purpose of tracking this is to make right col the same height as the left
     const [bottom, setBottom] = useState(0);
     const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
-    const ref = useRef<HTMLDivElement>(null);
+    const leftColRef = useRef<HTMLDivElement>(null);
+    const rightColRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const refBottom = ref.current?.getBoundingClientRect().bottom;
+        const refBottom = leftColRef.current?.getBoundingClientRect().bottom;
         if (refBottom && pokemon.id) setBottom(refBottom);
-    }, [ref, pokemon, windowHeight]);
+    }, [leftColRef, pokemon, rightColRef, windowHeight]);
 
     // rerender on any window resizing
     const handleResize = () => {
@@ -140,68 +165,74 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
             </Grid>
 
             {/* Left column */}
-            <Grid container={true} size={{ md: 12, lg: 5 }} spacing={1} ref={ref}>
-                {/* Type(s) */}
-                <Grid size={6}>
-                    <>
-                        <Box>
-                            <Typography component="label" variant="caption" color="textSecondary">Type</Typography>
-                        </Box>
-                        {pokemon.types && pokemon.types.length > 0 ? (
-                            <Stack direction="row" spacing={1}>
-                                {pokemon.types.map(t => <Type key={t.type.name} typeName={t.type.name} />)}
-                            </Stack>
-                        ) : '-'}
-                    </>
-                </Grid>
-                {/* Abilities */}
-                <Grid size={6}>
-                    <Abilities abilities={pokemon.abilities} />
-                </Grid>
+            <Grid size={{ md: 12, lg: 5 }} ref={leftColRef}>
+                <FullPaper>
+                    <Grid container={true} spacing={1}>
+                        {/* Type(s) */}
+                        <Grid size={6}>
+                            <>
+                                <Box>
+                                    <Typography component="label" variant="caption" color="textSecondary">Type</Typography>
+                                </Box>
+                                {pokemon.types && pokemon.types.length > 0 ? (
+                                    <Stack direction="row" spacing={1}>
+                                        {pokemon.types.map(t => <Type key={t.type.name} typeName={t.type.name} />)}
+                                    </Stack>
+                                ) : '-'}
+                            </>
+                        </Grid>
+                        {/* Abilities */}
+                        <Grid size={6}>
+                            <Abilities abilities={pokemon.abilities} />
+                        </Grid>
 
-                {/* Stats chart */}
-                <Grid size={12}>
-                    <Stats stats={pokemon.stats} />
-                </Grid>
+                        {/* Stats chart */}
+                        <Grid size={12}>
+                            <Stats stats={pokemon.stats} />
+                        </Grid>
 
-                {/* Other info */}
-                {/* Base exp */}
-                <Grid size={4}>
-                    <>
-                        <Box>
-                            <Typography component="label" variant="caption" color="textSecondary">Base Experience</Typography>
-                        </Box>
-                        <Typography>{pokemon.base_experience ?? '-'}</Typography>
-                    </>
-                </Grid>
-                {/* Height */}
-                <Grid size={4}>
-                    <>
-                        <Box>
-                            <Typography component="label" variant="caption" color="textSecondary">Height</Typography>
-                        </Box>
-                        <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
-                    </>
-                </Grid>
-                {/* Weight */}
-                <Grid size={4}>
-                    <>
-                        <Box>
-                            <Typography component="label" variant="caption" color="textSecondary">Weight</Typography>
-                        </Box>
-                        <Typography>{pokemon.weight ? pokemon.weight / 10 : '-'} kg</Typography>
-                    </>
-                </Grid>
+                        {/* Other info */}
+                        {/* Base exp */}
+                        <Grid size={4}>
+                            <>
+                                <Box>
+                                    <Typography component="label" variant="caption" color="textSecondary">Base Experience</Typography>
+                                </Box>
+                                <Typography>{pokemon.base_experience ?? '-'}</Typography>
+                            </>
+                        </Grid>
+                        {/* Height */}
+                        <Grid size={4}>
+                            <>
+                                <Box>
+                                    <Typography component="label" variant="caption" color="textSecondary">Height</Typography>
+                                </Box>
+                                <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
+                            </>
+                        </Grid>
+                        {/* Weight */}
+                        <Grid size={4}>
+                            <>
+                                <Box>
+                                    <Typography component="label" variant="caption" color="textSecondary">Weight</Typography>
+                                </Box>
+                                <Typography>{pokemon.weight ? pokemon.weight / 10 : '-'} kg</Typography>
+                            </>
+                        </Grid>
 
-                {/* Cries */}
-                <Grid size={12}>
-                    <Cries cries={pokemon.cries} />
-                </Grid>
+                        {/* Cries */}
+                        <Grid size={12}>
+                            <Cries cries={pokemon.cries} />
+                        </Grid>
+                    </Grid>
+                </FullPaper>
             </Grid>
 
             {/* Right column */}
-            <Grid size={{ md: 12, lg: 7 }}>
-                {bottom > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} lefColBottom={bottom} />}
+            <Grid size={{ md: 12, lg: 7 }} ref={rightColRef}>
+                <FullPaper>
+                    {bottom > 0 && pokemon.moves?.length > 0 && <Moves moves={pokemon.moves} lefColBottom={bottom} />}
+                </FullPaper>
             </Grid>
         </Grid>
     );

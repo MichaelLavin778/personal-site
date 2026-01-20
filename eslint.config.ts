@@ -93,6 +93,7 @@ export default defineConfig([
 			'no-useless-escape': 'warn',
 			'no-useless-rename': 'warn',
 			'no-useless-return': 'warn',
+			'object-curly-spacing': ['warn', 'always'],
 			'prefer-const': 'warn',
 			'react-hooks/rules-of-hooks': 'warn',
 			'react-hooks/exhaustive-deps': 'warn',

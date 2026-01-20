@@ -1,13 +1,24 @@
 import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { headerFooterPadding } from "../model/common";
-import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
+import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 
+
+type ShowcaseContainerProps = {
+	children: React.ReactNode;
+}
+const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
+	<Container
+		sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}
+	>
+		{children}
+	</Container>
+);
 
 const Showcase = () => {
 	const dispatch = useAppDispatch();
@@ -109,14 +120,14 @@ const Showcase = () => {
 	// error display
 	if (error) {
 		return (
-			<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>
+			<ShowcaseContainer>
 				<Typography color="error">Error loading Pokémon: {error.message}</Typography>
-			</Container>
+			</ShowcaseContainer>
 		);
 	}
 
 	return (
-		<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>
+		<ShowcaseContainer>
 			<Paper elevation={4} sx={{ width: '100%', p: 1.25 }} ref={ref}>
 				<ShowcaseBottomContext.Provider value={heightContextValue}>
 					{loaded && pokemonList.length > 0 ?
@@ -139,7 +150,7 @@ const Showcase = () => {
 					}
 				</ShowcaseBottomContext.Provider>
 			</Paper>
-		</Container>
+		</ShowcaseContainer>
 	);
 };
 
