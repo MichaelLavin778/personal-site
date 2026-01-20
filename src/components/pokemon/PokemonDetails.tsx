@@ -19,9 +19,11 @@ const SpriteCard = ({ background, children }: SpriteCardProps) => (
         sx={{
             background,
             borderRadius: 2,
-            display: 'inline-block',
+            display: 'inline-flex',
+            alignItems: 'center',
             marginX: 0.5,
             border: '1px solid gray',
+            position: 'relative',
         }}
     >
         {children}
@@ -87,11 +89,14 @@ const PokemonDetails = ({ pokemon, genderlessPokemonNames = [] }: PokemonProps) 
         <Box
             component="span"
             sx={{
-                fontSize: 16,
                 position: 'absolute',
-                pointerEvents: 'none',
                 alignSelf,
                 justifySelf: 'center',
+                fontSize: 16,
+                pointerEvents: 'none',
+                zIndex: 1,
+                textShadow: '0 0 1px rgba(0,0,0,0.45)',
+                width:'100%'
             }}
             aria-hidden
         >
