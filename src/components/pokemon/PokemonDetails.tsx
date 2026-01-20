@@ -118,14 +118,13 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     const hasAnyFemaleShinySprites =
         !!pokemon.sprites?.front_shiny_female ||
         !!pokemon.sprites?.back_shiny_female;
-    const hasAnyMaleSprites = hasAnyMaleDefaultSprites || hasAnyShinySprites;
     const hasAnyFemaleSprites = hasAnyFemaleDefaultSprites || hasAnyFemaleShinySprites;
 
     // background color for sprite cards
     const maleBlue = 'rgba(108, 160, 220, 0.3)';
     const femalePink = 'rgba(248, 185, 212, 0.5)';
     const genderlessGray = 'rgba(192, 192, 192, 0.3)';
-    let background = genderlessGray;
+    let backgroundMaleOrDefault = genderlessGray;
     let showMaleSymbol = false;
     let showFemaleSymbol = false;
     const femaleOverride = [
@@ -138,14 +137,15 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     ];
     const isFemaleOverride = femaleOverride.includes(pokemon.name);
     if (gender === 'male' || (gender === 'both' && hasAnyFemaleSprites)) {
-        background = maleBlue;
+        backgroundMaleOrDefault = maleBlue;
         showMaleSymbol = true;
     } else if (isFemaleOverride) {
-        background = femalePink;
+        // some pokemon that are female only are labeled as genderless while using the male sprite slot
+        backgroundMaleOrDefault = femalePink;
         showFemaleSymbol = true;
     }
     else if (gender === 'both')
-        background = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
+        backgroundMaleOrDefault = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
 
     return (
         <Grid container={true} spacing={2} alignItems="flex-start">
@@ -153,7 +153,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
             <Grid size={12} textAlign="center" alignContent="center">
                 {/* Male / Male+Female Sprite */}
                 {hasAnyMaleDefaultSprites && (
-                    <SpriteCard background={background}>
+                    <SpriteCard background={backgroundMaleOrDefault}>
                         <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
                         {showMaleSymbol && cardSymbol('♂', 'self-start')}
                         {showFemaleSymbol && cardSymbol('♀', 'self-start')}
@@ -164,7 +164,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 )}
                 {/* Shiny Sprite */}
                 {hasAnyShinySprites && (
-                    <SpriteCard background={background}>
+                    <SpriteCard background={backgroundMaleOrDefault}>
                         {!!pokemon.sprites?.front_shiny && <img src={pokemon.sprites.front_shiny} />}
                         {showMaleSymbol && cardSymbol('♂', 'self-start')}
                         {showFemaleSymbol && cardSymbol('♀', 'self-start')}

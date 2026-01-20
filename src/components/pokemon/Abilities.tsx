@@ -214,7 +214,7 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
                 fullWidth
                 maxWidth="sm"
                 sx={{
-                    minWidth: 'sm',
+                    minWidth: '300px',
                 }}
                 slotProps={{
                     paper: { sx: { position: 'relative' } },
