@@ -171,7 +171,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const headerSize = 55;
     const rowSize = 52;
     const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
-    const contBuffer = windowWidth >= 1200 ? 15 : 50;
+    const contBuffer = windowWidth >= 1200 ? 23 : 50;
     const headerFooterPaddingValue = Number(headerFooterPadding.replace('px', ''));
 	const containerSize = windowWidth >= 1200
 		? (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace)
