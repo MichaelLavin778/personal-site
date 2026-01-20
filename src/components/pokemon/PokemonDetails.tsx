@@ -109,6 +109,11 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
         !!pokemon.sprites?.back_female ||
         !!pokemon.sprites?.front_shiny_female ||
         !!pokemon.sprites?.back_shiny_female;
+    const hasAnyMaleSprites =
+        !!pokemon.sprites?.front_default ||
+        !!pokemon.sprites?.back_default ||
+        !!pokemon.sprites?.front_shiny ||
+        !!pokemon.sprites?.back_shiny;
     const hasAnyShinySprites =
         !!pokemon.sprites?.front_shiny ||
         !!pokemon.sprites?.back_shiny;
@@ -132,11 +137,11 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
         "pikachu-phd",
         "pikachu-libre",
     ];
-    if (pokemon.gender === 'male' && hasAnyFemaleSprites) 
+    if (pokemon.gender === 'male') 
         background = maleBlue;
-    else if (femaleOverride.includes(pokemon.name))
+    else if (pokemon.gender === 'female' || femaleOverride.includes(pokemon.name))
         background = femalePink;
-    else if (pokemon.gender !== 'genderless')
+    else if (pokemon.gender === 'both')
         background = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
 
     return (
@@ -146,9 +151,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {/* Male / Male+Female Sprite */}
                 <SpriteCard background={background}>
                     <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
-                    {hasAnyFemaleSprites && (
-                        cardSymbol('♂', 'self-start')
-                    )}
+                    {hasAnyFemaleSprites && cardSymbol('♂', 'self-start')}
                     {!!pokemon.sprites?.back_default && (
                         <img src={pokemon.sprites.back_default} alt={`${pokemon.name} back`} />
                     )}
@@ -157,9 +160,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {hasAnyShinySprites && (
                     <SpriteCard background={background}>
                         {!!pokemon.sprites?.front_shiny && <img src={pokemon.sprites.front_shiny} />}
-                        {hasAnyFemaleSprites && (
-                            cardSymbol('♂', 'self-start')
-                        )}
+                        {hasAnyFemaleSprites && cardSymbol('♂', 'self-start')}
                         {cardSymbol('✨', 'self-end')}
                         {!!pokemon.sprites?.back_shiny && <img src={pokemon.sprites.back_shiny} />}
                     </SpriteCard>
@@ -168,7 +169,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {hasAnyFemaleDefaultSprites && (
                     <SpriteCard background={femalePink}>
                         {!!pokemon.sprites?.front_female && <img src={pokemon.sprites.front_female} />}
-                        {cardSymbol('♀', 'self-start')}
+                        {hasAnyMaleSprites && cardSymbol('♀', 'self-start')}
                         {!!pokemon.sprites?.back_female && <img src={pokemon.sprites.back_female} />}
                     </SpriteCard>
                 )}
@@ -176,7 +177,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {hasAnyFemaleShinySprites && (
                     <SpriteCard background={femalePink}>
                         {!!pokemon.sprites?.front_shiny_female && <img src={pokemon.sprites.front_shiny_female} />}
-                        {cardSymbol('♀', 'self-start')}
+                        {hasAnyMaleSprites && cardSymbol('♀', 'self-start')}
                         {cardSymbol('✨', 'self-end')}
                         {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
                     </SpriteCard>

@@ -213,6 +213,9 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
                 aria-labelledby="ability-info-title"
                 fullWidth
                 maxWidth="sm"
+                sx={{
+                    midWidth: 'sm',
+                }}
                 slotProps={{
                     paper: { sx: { position: 'relative' } },
                 }}
