@@ -5,6 +5,7 @@ import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { headerFooterPadding } from "../model/common";
+import { loadGenderlessPokemonList, selectGenderlessPokemonNames } from "../state/genderSlice";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
 import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 
@@ -23,6 +24,7 @@ const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
 const Showcase = () => {
 	const dispatch = useAppDispatch();
 	const pokemonList = useAppSelector(selectPokemon);
+	const genderlessPokemonNames = useAppSelector(selectGenderlessPokemonNames);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const initialPokemon = new URLSearchParams(window.location.search).get('pokemon');
@@ -117,6 +119,14 @@ const Showcase = () => {
 		}
 	}, [currentPokemon, dispatch, loaded]);
 
+	// load list of genderless pokemon
+	useEffect(() => {
+		if (genderlessPokemonNames.length > 0) return;
+		dispatch(loadGenderlessPokemonList())
+			.unwrap()
+			.catch((message) => setError(new Error(String(message))));
+	}, [dispatch, genderlessPokemonNames.length]);
+
 	// error display
 	if (error) {
 		return (
@@ -143,7 +153,12 @@ const Showcase = () => {
 								}}
 								sx={{ width: '100%', maxWidth: 400, justifySelf: 'center', mb: 0.5 }}
 							/>
-							{currentPokemon && <PokemonDetails pokemon={currentPokemon} />}
+							{currentPokemon && (
+								<PokemonDetails
+									pokemon={currentPokemon}
+									genderlessPokemonNames={genderlessPokemonNames}
+								/>
+							)}
 						</>
 						:
 						<CircularProgress />

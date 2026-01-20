@@ -7,6 +7,7 @@ import Moves from "./Moves";
 import Stats from "./Stats";
 import Type from "./Type";
 
+
 type SpriteCardProps = {
     background: string;
     children: React.ReactNode;
@@ -53,9 +54,10 @@ const FullPaper = ({ children, ...props }: PaperProps) => {
 
 type PokemonProps = {
     pokemon: Pokemon;
+	genderlessPokemonNames?: string[];
 }
 
-const PokemonDetails = ({ pokemon }: PokemonProps) => {
+const PokemonDetails = ({ pokemon, genderlessPokemonNames = [] }: PokemonProps) => {
     // purpose of tracking this is to make right col the same height as the left
     const [bottom, setBottom] = useState(0);
     const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
@@ -116,9 +118,19 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     // background color for sprite cards
     const maleBlue = 'rgba(108, 160, 220, 0.3)';
     const femalePink = 'rgba(248, 185, 212, 0.5)';
-    const background = hasAnyFemaleSprites
-        ? maleBlue
-        : `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
+    const genderlessGray = 'rgba(192, 192, 192, 0.3)';
+    let background = genderlessGray;
+    const maleOverride = ["nidoran-m", "nidorino", "nidoking"];
+    const femaleOverride = ["nidoran-f", "nidorina", "nidoqueen"];
+    if (!genderlessPokemonNames.includes(pokemon.name)) {
+        if (hasAnyFemaleSprites || maleOverride.includes(pokemon.name)) 
+            background = maleBlue;
+        else if (femaleOverride.includes(pokemon.name))
+            background = femalePink;
+        else 
+            background = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
+        
+    }
 
     return (
         <Grid container={true} spacing={2} alignItems="flex-start">
