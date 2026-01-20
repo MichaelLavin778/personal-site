@@ -125,8 +125,65 @@ const PokemonDetails = ({ pokemon, genderlessPokemonNames = [] }: PokemonProps) 
     const femalePink = 'rgba(248, 185, 212, 0.5)';
     const genderlessGray = 'rgba(192, 192, 192, 0.3)';
     let background = genderlessGray;
-    const maleOverride = ["nidoran-m", "nidorino", "nidoking"];
-    const femaleOverride = ["nidoran-f", "nidorina", "nidoqueen"];
+    const maleOverride = [
+        "nidoran-m",
+        "nidorino",
+        "nidoking",
+        "hitmonlee",
+        "hitmonchan",
+        "tauros",
+        "tyrogue",
+        "hitmontop",
+        "volbeat",
+        "latios",
+        "mothim",
+        "gallade",
+        "throh",
+        "sawk",
+        "rufflet",
+        "braviary",
+        "tornadus",
+        "tornadus-incarnate",
+        "tornadus-therian",
+        "thundurus",
+        "thundurus-incarnate",
+        "thundurus-therian",
+        "landorus",
+        "landorus-incarnate",
+        "landorus-therian",
+    ];
+    const femaleOverride = [
+        "nidoran-f",
+        "nidorina",
+        "nidoqueen",
+        "pikachu-cosplay",
+        "pikachu-rock-star",
+        "pikachu-belle",
+        "pikachu-pop-star",
+        "pikachu-phd",
+        "pikachu-libre",
+        "chansey",
+        "kangaskhan",
+        "jynx",
+        "miltank",
+        "smoochum",
+        "blissey",
+        "illumise",
+        "latias",
+        "wormadam",
+        "happiny",
+        "vespiquen",
+        "froslass",
+        "cresselia",
+        "petilil",
+        "lilligant",
+        "vullaby",
+        "mandibuzz",
+        "oinkologne-female",
+        "flabebe",
+        "floette",
+        "florges",
+    ];
     if (!genderlessPokemonNames.includes(pokemon.name)) {
         if (hasAnyFemaleSprites || maleOverride.includes(pokemon.name)) 
             background = maleBlue;
