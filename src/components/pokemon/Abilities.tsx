@@ -10,19 +10,22 @@ import {
     IconButton,
     Link,
     Stack,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import { type WheelEvent as ReactWheelEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Link as RouterLink } from 'react-router-dom';
 import { toTitleCase } from "../../helpers/common";
-import type { PokemonAbility } from "../../model/Pokemon";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
-import { loadAbilityDetails, selectAbilityFetchStateByUrl, type AbilityFetchState } from "../../state/abilitySlice";
+import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
+import { type AbilityFetchState, loadAbilityDetails, selectAbilityFetchStateByUrl } from "../../state/abilitySlice";
 
 interface AbilitiesProps {
-    abilities: PokemonAbility[] | undefined;
+    pokemon: Pokemon;
 }
 
-const Abilities = ({ abilities }: AbilitiesProps) => {
+const Abilities = ({ pokemon }: AbilitiesProps) => {
+    const abilities = pokemon.abilities;
     const dispatch = useAppDispatch();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedAbility, setSelectedAbility] = useState<PokemonAbility | null>(null);
@@ -69,10 +72,10 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
     useEffect(() => {
         if (!isDialogOpen) return;
         if (!selectedUrl) return;
-
         if (selectedFetchState.status === 'loading' || selectedFetchState.status === 'success') return;
+
         dispatch(loadAbilityDetails(selectedUrl));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [dispatch, isDialogOpen, selectedFetchState.status, selectedUrl]);
 
     const openAbilityDialog = (ability: PokemonAbility) => {
@@ -147,6 +150,46 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
         };
     }, [selectedFetchState]);
 
+    const pokemonWithAbility = useMemo(() => {
+        if (selectedFetchState.status !== 'success') return [];
+        return (selectedFetchState.ability.pokemon ?? [])
+            .map((p) => p?.pokemon?.name)
+            .filter((name): name is string => !!name)
+            .map((name) => ({
+                name,
+                label: toTitleCase(name.replaceAll('-', ' ')),
+            }));
+    }, [selectedFetchState]);
+
+    const onPokemonListWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
+        // Keep the dialog's wheel handler from firing while still enabling
+        // ability navigation when the list itself can't scroll further.
+        e.stopPropagation();
+        if (!canNavigateAbilities) return;
+
+        const now = Date.now();
+        if (now - lastWheelNavAtRef.current < 250) return;
+
+        const el = e.currentTarget;
+        const { scrollTop, scrollHeight, clientHeight } = el;
+        const isScrollable = scrollHeight > clientHeight + 1;
+        const atTop = scrollTop <= 0;
+        const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+        if (e.deltaY < 0 && (!isScrollable || atTop)) {
+            e.preventDefault();
+            lastWheelNavAtRef.current = now;
+            toPrevAbility();
+            return;
+        }
+
+        if (e.deltaY > 0 && (!isScrollable || atBottom)) {
+            e.preventDefault();
+            lastWheelNavAtRef.current = now;
+            toNextAbility();
+        }
+    };
+
     const renderAbilities = () => {
         const hiddenAbility = displayedAbilities.find(a => a.is_hidden);
         const nonHiddenAbilities = displayedAbilities.filter(a => !a.is_hidden);
@@ -212,12 +255,15 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
                 onClose={closeAbilityDialog}
                 aria-labelledby="ability-info-title"
                 fullWidth
-                maxWidth="sm"
-                sx={{
-                    minWidth: '300px',
-                }}
+                maxWidth="lg"
                 slotProps={{
-                    paper: { sx: { position: 'relative' } },
+                    paper: {
+                        sx: {
+                            position: 'relative',
+                            // Give the new 2-col layout room even on larger screens.
+                            width: { xs: '100%', md: 'min(980px, 100%)' },
+                        },
+                    },
                 }}
             >
                 <DialogTitle id="ability-info-title" sx={{ pl: dialogNavGutterSx, pr: dialogNavGutterSx }}>
@@ -303,31 +349,111 @@ const Abilities = ({ abilities }: AbilitiesProps) => {
                     )}
 
                     {selectedFetchState.status === 'success' && (
-                        <Stack spacing={1.5}>
-                            {selectedShortEffect && (
-                                <Box>
-                                    <Typography variant="caption" color="textSecondary">Short effect</Typography>
-                                    <Typography>{selectedShortEffect}</Typography>
-                                </Box>
-                            )}
-                            {selectedEffect && (
-                                <Box>
-                                    <Typography variant="caption" color="textSecondary">Effect</Typography>
-                                    <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedEffect}</Typography>
-                                </Box>
-                            )}
-                            {selectedFlavorText && (
-                                <Box>
-                                    <Typography variant="caption" color="textSecondary">Flavor text</Typography>
-                                    <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedFlavorText}</Typography>
-                                </Box>
-                            )}
-                            {!selectedShortEffect && !selectedEffect && !selectedFlavorText && (
-                                <Typography color="textSecondary">
-                                    No English description available for this ability.
-                                </Typography>
-                            )}
-                        </Stack>
+                        <Box
+                            sx={{
+                                display: 'grid',
+                                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                                gap: 2,
+                                alignItems: 'start',
+                            }}
+                        >
+                            {/* Left column: ability text */}
+                            <Stack spacing={1.5}>
+                                {selectedShortEffect && (
+                                    <Box>
+                                        <Typography variant="caption" color="textSecondary">Short effect</Typography>
+                                        <Typography>{selectedShortEffect}</Typography>
+                                    </Box>
+                                )}
+                                {selectedEffect && (
+                                    <Box>
+                                        <Typography variant="caption" color="textSecondary">Effect</Typography>
+                                        <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedEffect}</Typography>
+                                    </Box>
+                                )}
+                                {selectedFlavorText && (
+                                    <Box>
+                                        <Typography variant="caption" color="textSecondary">Flavor text</Typography>
+                                        <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedFlavorText}</Typography>
+                                    </Box>
+                                )}
+                                {!selectedShortEffect && !selectedEffect && !selectedFlavorText && (
+                                    <Typography color="textSecondary">
+                                        No English description available for {selectedLabel}.
+                                    </Typography>
+                                )}
+                            </Stack>
+
+                            {/* Right column: pokemon list */}
+                            <Box>
+                                <Typography variant="caption" color="textSecondary">Pokémon with {selectedLabel}</Typography>
+
+                                {pokemonWithAbility.length === 0 ? (
+                                    <Typography color="textSecondary">
+                                        No known Pokémon with {selectedLabel}.
+                                    </Typography>
+                                ) : (
+                                    <Box
+                                        sx={{
+                                            maxHeight: { xs: 240, md: 420 },
+                                            overflow: 'auto',
+                                            pr: 1,
+                                            border: (theme) => `1px solid ${theme.palette.divider}`,
+                                            borderRadius: 1,
+                                            p: 1,
+                                        }}
+                                        onWheel={onPokemonListWheel}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: 'grid',
+                                                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+                                                columnGap: 2,
+                                                rowGap: 0.5,
+                                            }}
+                                        >
+                                            {pokemonWithAbility.map((poke) => (
+                                                <Tooltip title={poke.label} key={poke.name} placement="right" followCursor={true}>
+                                                    {pokemon.name !== poke.name ? (
+                                                        <Link
+                                                            key={poke.name}
+                                                            component={RouterLink}
+                                                            to={`/showcase?pokemon=${encodeURIComponent(poke.name)}`}
+                                                            onClick={() => closeAbilityDialog()}
+                                                            variant="body2"
+                                                            sx={{
+                                                                color: 'textPrimary',
+                                                                textDecoration: 'none',
+                                                                textWrap: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                '&:hover': { textDecoration: 'underline' },
+                                                            }}
+                                                            aria-label={`Go to ${poke.label} showcase page`}
+                                                        >
+                                                            {poke.label}
+                                                        </Link>
+                                                    ) : (
+                                                        <Typography
+                                                            variant="body2"
+                                                            sx={{
+                                                                color: 'textPrimary',
+                                                                textDecoration: 'none',
+                                                                textWrap: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                            }}
+                                                        >
+                                                            {poke.label}
+                                                        </Typography>
+                                                    )}
+                                                </Tooltip>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                )}
+                            </Box>
+                        </Box>
                     )}
                 </DialogContent>
             </Dialog>

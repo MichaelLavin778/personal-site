@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 
 type AbilityEffectEntry = {
@@ -13,10 +13,20 @@ type AbilityFlavorTextEntry = {
 	version_group?: { name: string }
 }
 
+type AbilityPokemonEntry = {
+	is_hidden?: boolean
+	slot?: number
+	pokemon?: {
+		name: string
+		url: string
+	}
+}
+
 export type AbilityApiResponse = {
 	name: string
 	effect_entries?: AbilityEffectEntry[]
 	flavor_text_entries?: AbilityFlavorTextEntry[]
+	pokemon?: AbilityPokemonEntry[]
 }
 
 export type AbilityFetchState =
@@ -56,9 +66,12 @@ export const abilitySlice = createSlice({
 				const url = action.meta.arg
 				state[url] = { status: 'loading' }
 			})
-			.addCase(loadAbilityDetails.fulfilled, (state, action: PayloadAction<{ url: string; ability: AbilityApiResponse }>) => {
-				state[action.payload.url] = { status: 'success', ability: action.payload.ability }
-			})
+			.addCase(
+				loadAbilityDetails.fulfilled,
+				(state, action: PayloadAction<{ url: string; ability: AbilityApiResponse }>) => {
+					state[action.payload.url] = { status: 'success', ability: action.payload.ability }
+				}
+			)
 			.addCase(loadAbilityDetails.rejected, (state, action) => {
 				const url = action.meta.arg
 				const message = (action.payload as string) ?? action.error.message ?? 'Failed to fetch ability'

@@ -1,5 +1,6 @@
 import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
@@ -21,12 +22,16 @@ const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
 );
 
 const Showcase = () => {
+	const location = useLocation();
+	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
 	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const initialPokemon = new URLSearchParams(window.location.search).get('pokemon');
-	const [currentPokemonName, setCurrentPokemonName] = useState<string>(initialPokemon?.trim().toLowerCase() ?? "bulbasaur");
+	const [currentPokemonName, setCurrentPokemonName] = useState<string>(() => {
+		const initialPokemon = new URLSearchParams(location.search).get('pokemon');
+		return initialPokemon?.trim().toLowerCase() ?? "bulbasaur";
+	});
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
 	const ref = useRef<HTMLDivElement>(null);
 	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
@@ -40,33 +45,17 @@ const Showcase = () => {
 		document.title = "Showcase - Pokemon";
 	}, []);
 
-	// read the initial pokemon from URL query param: ?pokemon=bulbasaur
+	// React to changes in the URL query param (e.g., clicking a link while already on /showcase)
 	useEffect(() => {
 		try {
-			const params = new URLSearchParams(window.location.search);
+			const params = new URLSearchParams(location.search);
 			const raw = params.get('pokemon');
 			const fromUrl = (raw ?? '').trim().toLowerCase();
-			if (fromUrl) setCurrentPokemonName(fromUrl);
+			if (fromUrl && fromUrl !== currentPokemonName) setCurrentPokemonName(fromUrl);
 		} catch {
 			// ignore malformed URL values
 		}
-		// run once on mount
-	}, []);
-
-	// keep the ?pokemon=... query param in sync with current selection
-	useEffect(() => {
-		try {
-			const url = new URL(window.location.href);
-			const pokemon = (currentPokemonName ?? '').trim().toLowerCase();
-			if (pokemon) url.searchParams.set('pokemon', pokemon);
-			else url.searchParams.delete('pokemon');
-			const next = url.pathname + url.search + url.hash;
-			const current = window.location.pathname + window.location.search + window.location.hash;
-			if (next !== current) window.history.replaceState({}, '', next);
-		} catch {
-			// ignore
-		}
-	}, [currentPokemonName]);
+	}, [currentPokemonName, location.search]);
 
 	// rerender on any window resizing
 	const handleResize = () => {
@@ -147,7 +136,23 @@ const Showcase = () => {
 								value={currentPokemon ?? undefined}
 								disableClearable={true}
 								onChange={(_event, value) => {
-									if (value?.name) setCurrentPokemonName(value.name);
+									if (!value?.name) return;
+									const nextPokemon = value.name.trim().toLowerCase();
+									setCurrentPokemonName(nextPokemon);
+									try {
+										const params = new URLSearchParams(location.search);
+										params.set('pokemon', nextPokemon);
+										navigate(
+											{
+												pathname: location.pathname,
+												search: `?${params.toString()}`,
+												hash: location.hash,
+											},
+											{ replace: true }
+										);
+									} catch {
+										// ignore
+									}
 								}}
 								sx={{ width: '100%', maxWidth: 400, justifySelf: 'center', mb: 0.5 }}
 							/>

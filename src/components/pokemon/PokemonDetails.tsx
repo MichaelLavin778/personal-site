@@ -210,7 +210,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         </Grid>
                         {/* Abilities */}
                         <Grid size={6}>
-                            <Abilities abilities={pokemon.abilities} />
+                            <Abilities pokemon={pokemon} />
                         </Grid>
 
                         {/* Stats chart */}
