@@ -20,3 +20,26 @@ test('showcase page', async ({ page }) => {
     // Footer content
     await verifyFooter(page);
 });
+
+test('ability modal pokemon links navigate', async ({ page }) => {
+    await page.goto('/showcase?pokemon=bulbasaur');
+
+    // Open the first ability info dialog
+    await page.getByLabel(/Open ability info for/i).first().click();
+    await expect(page.getByText(/Pokémon with/i)).toBeVisible();
+
+    // Click the first navigation link in the dialog (the current Pokémon is rendered as plain text)
+    const firstNavLink = page.getByLabel(/Go to .* showcase page/i).first();
+    await expect(firstNavLink).toBeVisible();
+    const href = await firstNavLink.getAttribute('href');
+    await firstNavLink.click();
+
+    // URL should reflect the clicked Pokémon
+    if (href) await page.waitForURL(`**${href}`);
+
+    // MUI Dialog marks the underlying page aria-hidden, so close it before asserting the combobox.
+    await page.keyboard.press('Escape');
+
+    // Selection should update (regression: query-string change on the same route wasn't applied)
+    await expect(page.getByRole('combobox')).not.toHaveValue(/bulbasaur/i);
+});
