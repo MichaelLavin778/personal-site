@@ -3,6 +3,8 @@ export type PokemonItemSimple = {
 	url: string
 }
 
+export type PokemonGender = 'male' | 'female' | 'both' | 'genderless' | 'unknown'
+
 export type PokemonAbility = {
 	ability: PokemonItemSimple
 	is_hidden: boolean
@@ -63,7 +65,7 @@ export type Pokemon = PokemonItemSimple & {
 	id: number | undefined
 	is_default: boolean | undefined
 	location_area_encounters: string | undefined
-	moves: PokemonsMove[]
+	moves: PokemonsMove[] | undefined
 	order: number | undefined
 	// past_abilities
 	// past_types
@@ -72,4 +74,6 @@ export type Pokemon = PokemonItemSimple & {
 	stats: PokemonStat[] | undefined
 	types: PokemonType[] | undefined
 	weight: number | undefined
+	// derived from /gender endpoints and merged into the state list after load
+	gender: PokemonGender | undefined
 }

@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
-import pokemonReducer from './state/pokemonSlice'
 import pokemonMovesReducer from './state/pokemonMovesSlice'
+import pokemonReducer from './state/pokemonSlice'
 import resumeReducer from './state/resumeSlice'
 
 const pokemonRootReducer = combineReducers({

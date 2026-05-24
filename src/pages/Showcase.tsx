@@ -1,21 +1,37 @@
 import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { headerFooterPadding } from "../model/common";
-import { loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
+import { loadGenderlessPokemonList, loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 
+
+type ShowcaseContainerProps = {
+	children: React.ReactNode;
+}
+const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
+	<Container
+		sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}
+	>
+		{children}
+	</Container>
+);
 
 const Showcase = () => {
+	const location = useLocation();
+	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
 	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const initialPokemon = new URLSearchParams(window.location.search).get('pokemon');
-	const [currentPokemonName, setCurrentPokemonName] = useState<string>(initialPokemon?.trim().toLowerCase() ?? "bulbasaur");
+	const [currentPokemonName, setCurrentPokemonName] = useState<string>(() => {
+		const initialPokemon = new URLSearchParams(location.search).get('pokemon');
+		return initialPokemon?.trim().toLowerCase() ?? "bulbasaur";
+	});
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
 	const ref = useRef<HTMLDivElement>(null);
 	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
@@ -29,33 +45,17 @@ const Showcase = () => {
 		document.title = "Showcase - Pokemon";
 	}, []);
 
-	// read the initial pokemon from URL query param: ?pokemon=bulbasaur
+	// React to changes in the URL query param (e.g., clicking a link while already on /showcase)
 	useEffect(() => {
 		try {
-			const params = new URLSearchParams(window.location.search);
+			const params = new URLSearchParams(location.search);
 			const raw = params.get('pokemon');
 			const fromUrl = (raw ?? '').trim().toLowerCase();
-			if (fromUrl) setCurrentPokemonName(fromUrl);
+			if (fromUrl && fromUrl !== currentPokemonName) setCurrentPokemonName(fromUrl);
 		} catch {
 			// ignore malformed URL values
 		}
-		// run once on mount
-	}, []);
-
-	// keep the ?pokemon=... query param in sync with current selection
-	useEffect(() => {
-		try {
-			const url = new URL(window.location.href);
-			const pokemon = (currentPokemonName ?? '').trim().toLowerCase();
-			if (pokemon) url.searchParams.set('pokemon', pokemon);
-			else url.searchParams.delete('pokemon');
-			const next = url.pathname + url.search + url.hash;
-			const current = window.location.pathname + window.location.search + window.location.hash;
-			if (next !== current) window.history.replaceState({}, '', next);
-		} catch {
-			// ignore
-		}
-	}, [currentPokemonName]);
+	}, [currentPokemonName, location.search]);
 
 	// rerender on any window resizing
 	const handleResize = () => {
@@ -94,11 +94,19 @@ const Showcase = () => {
 		}
 	}, [currentPokemon, dispatch, loaded]);
 
+	// load gender data and merge it into the already-loaded pokemon list
+	useEffect(() => {
+		if (!loaded) return;
+		dispatch(loadGenderlessPokemonList())
+			.unwrap()
+			.catch((message) => setError(new Error(String(message))));
+	}, [dispatch, loaded]);
+
 	// load pokemon's moves (more detailed)
 	useEffect(() => {
 		if (loaded && !!currentPokemon?.id) {
 			try {
-				const apis = currentPokemon.moves.map(m => m.move.url);
+				const apis = (currentPokemon.moves ?? []).map(m => m.move.url);
 				dispatch(loadAllPokemonMoves(apis));
 			} catch (err: unknown) {
 				setError(err as Error);
@@ -109,14 +117,14 @@ const Showcase = () => {
 	// error display
 	if (error) {
 		return (
-			<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>
+			<ShowcaseContainer>
 				<Typography color="error">Error loading Pokémon: {error.message}</Typography>
-			</Container>
+			</ShowcaseContainer>
 		);
 	}
 
 	return (
-		<Container sx={{ display: 'flex', flex: 1, width: '100%', minHeight: '100vh', paddingTop: headerFooterPadding, paddingBottom: headerFooterPadding, height: '100%' }}>
+		<ShowcaseContainer>
 			<Paper elevation={4} sx={{ width: '100%', p: 1.25 }} ref={ref}>
 				<ShowcaseBottomContext.Provider value={heightContextValue}>
 					{loaded && pokemonList.length > 0 ?
@@ -128,18 +136,38 @@ const Showcase = () => {
 								value={currentPokemon ?? undefined}
 								disableClearable={true}
 								onChange={(_event, value) => {
-									if (value?.name) setCurrentPokemonName(value.name);
+									if (!value?.name) return;
+									const nextPokemon = value.name.trim().toLowerCase();
+									setCurrentPokemonName(nextPokemon);
+									try {
+										const params = new URLSearchParams(location.search);
+										params.set('pokemon', nextPokemon);
+										navigate(
+											{
+												pathname: location.pathname,
+												search: `?${params.toString()}`,
+												hash: location.hash,
+											},
+											{ replace: true }
+										);
+									} catch {
+										// ignore
+									}
 								}}
 								sx={{ width: '100%', maxWidth: 400, justifySelf: 'center', mb: 0.5 }}
 							/>
-							{currentPokemon && <PokemonDetails pokemon={currentPokemon} />}
+							{currentPokemon && (
+								<PokemonDetails
+									pokemon={currentPokemon}
+								/>
+							)}
 						</>
 						:
 						<CircularProgress />
 					}
 				</ShowcaseBottomContext.Provider>
 			</Paper>
-		</Container>
+		</ShowcaseContainer>
 	);
 };
 
