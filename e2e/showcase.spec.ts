@@ -29,13 +29,16 @@ test('ability modal pokemon links navigate', async ({ page }) => {
     await expect(page.getByText(/Pokémon with/i)).toBeVisible();
 
     // Click the first navigation link in the dialog (the current Pokémon is rendered as plain text)
-    const firstNavLink = page.getByLabel(/Go to .* showcase page/i).first();
+    const firstNavLink = page.getByLabel(/Go to Ivysaur showcase page/i).first();
     await expect(firstNavLink).toBeVisible();
     const href = await firstNavLink.getAttribute('href');
     await firstNavLink.click();
 
     // URL should reflect the clicked Pokémon
-    if (href) await page.waitForURL(`**${href}`);
+    if (href) {
+        const expectedUrl = new URL(href, page.url()).toString();
+        await expect(page).toHaveURL(expectedUrl);
+    }
 
     // MUI Dialog marks the underlying page aria-hidden, so close it before asserting the combobox.
     await page.keyboard.press('Escape');
