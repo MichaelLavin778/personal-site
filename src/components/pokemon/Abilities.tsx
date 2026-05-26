@@ -13,8 +13,8 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { type WheelEvent as ReactWheelEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Link as RouterLink } from 'react-router-dom';
+import { type MouseEvent as ReactMouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { toTitleCase } from "../../helpers/common";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
@@ -26,12 +26,6 @@ interface AbilitiesProps {
 
 const Abilities = ({ pokemon }: AbilitiesProps) => {
     const abilities = pokemon.abilities;
-    const dispatch = useAppDispatch();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedAbility, setSelectedAbility] = useState<PokemonAbility | null>(null);
-    const dialogContentRef = useRef<HTMLDivElement | null>(null);
-    const lastWheelNavAtRef = useRef<number>(0);
-
     const displayedAbilities = useMemo(() => {
         if (!abilities || abilities.length === 0) return [];
 
@@ -47,6 +41,45 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
         const hidden = abilityLabels.find(a => a.is_hidden);
         return hidden ? [...nonHidden, hidden] : nonHidden;
     }, [abilities]);
+
+    const getAbilityParamValue = useCallback((ability: PokemonAbility) => {
+        const fromUrl = ability.ability.url.split('/').filter(Boolean).at(-1);
+        return fromUrl ?? ability.ability.name.trim().toLowerCase().replaceAll(' ', '-');
+    }, []);
+
+    const dispatch = useAppDispatch();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const initialAbilityParamRef = useRef(new URLSearchParams(location.search).get('ability'));
+    const hasAppliedInitialAbilityParamRef = useRef(false);
+    const initialAbility = displayedAbilities.find(
+        (ability) => getAbilityParamValue(ability) === initialAbilityParamRef.current
+    ) || null;
+    const [isDialogOpen, setIsDialogOpen] = useState(Boolean(initialAbility));
+    const [selectedAbility, setSelectedAbility] = useState<PokemonAbility | null>(initialAbility);
+    const dialogContentRef = useRef<HTMLDivElement | null>(null);
+    const pokemonListRef = useRef<HTMLDivElement | null>(null);
+    const lastWheelNavAtRef = useRef<number>(0);
+
+    const setAbilityUrlParam = useCallback((ability: PokemonAbility | null) => {
+        const params = new URLSearchParams(window.location.search || location.search);
+
+        if (ability) {
+            params.set('ability', getAbilityParamValue(ability));
+            params.delete('move');
+        } else
+            params.delete('ability');
+
+        const nextSearch = params.toString();
+        navigate(
+            {
+                pathname: location.pathname,
+                search: nextSearch ? `?${nextSearch}` : '',
+                hash: window.location.hash || location.hash,
+            },
+            { replace: true }
+        );
+    }, [getAbilityParamValue, location.hash, location.pathname, location.search, navigate]);
 
     const selectedUrl = selectedAbility?.ability.url ?? '';
     const selectedLabel = selectedAbility?.ability.name ?? '';
@@ -70,6 +103,25 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
     const dialogNavGutterSx = { xs: 6, sm: 7 };
 
     useEffect(() => {
+        if (hasAppliedInitialAbilityParamRef.current) return;
+
+        const initialAbilityParam = initialAbilityParamRef.current;
+        if (!initialAbilityParam) {
+            hasAppliedInitialAbilityParamRef.current = true;
+            return;
+        }
+
+        const abilityFromUrl = displayedAbilities.find(
+            (ability) => getAbilityParamValue(ability) === initialAbilityParam
+        );
+        if (!abilityFromUrl) return;
+
+        setSelectedAbility(abilityFromUrl);
+        setIsDialogOpen(true);
+        hasAppliedInitialAbilityParamRef.current = true;
+    }, [displayedAbilities, getAbilityParamValue]);
+
+    useEffect(() => {
         if (!isDialogOpen) return;
         if (!selectedUrl) return;
         if (selectedFetchState.status === 'loading' || selectedFetchState.status === 'success') return;
@@ -81,29 +133,52 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
     const openAbilityDialog = (ability: PokemonAbility) => {
         setSelectedAbility(ability);
         setIsDialogOpen(true);
+        setAbilityUrlParam(ability);
     };
 
     const closeAbilityDialog = () => {
         setIsDialogOpen(false);
+        setAbilityUrlParam(null);
     };
 
-    const toPrevAbility = () => {
+    const navigateToPokemon = useCallback((event: ReactMouseEvent, pokemonName: string) => {
+        event.preventDefault();
+        const params = new URLSearchParams(location.search);
+        params.set('pokemon', pokemonName);
+        params.delete('ability');
+        params.delete('move');
+
+        setIsDialogOpen(false);
+        navigate(
+            {
+                pathname: location.pathname,
+                search: `?${params.toString()}`,
+                hash: location.hash,
+            }
+        );
+    }, [location.hash, location.pathname, location.search, navigate]);
+
+    const toPrevAbility = useCallback(() => {
         if (!canNavigateAbilities) return;
         const prevIndex = selectedAbilityIndex === 0
             ? displayedAbilities.length - 1
             : selectedAbilityIndex - 1;
-        setSelectedAbility(displayedAbilities[prevIndex] ?? null);
-    };
+        const nextAbility = displayedAbilities[prevIndex] ?? null;
+        setSelectedAbility(nextAbility);
+        setAbilityUrlParam(nextAbility);
+    }, [canNavigateAbilities, displayedAbilities, selectedAbilityIndex, setAbilityUrlParam]);
 
-    const toNextAbility = () => {
+    const toNextAbility = useCallback(() => {
         if (!canNavigateAbilities) return;
         const nextIndex = selectedAbilityIndex === displayedAbilities.length - 1
             ? 0
             : selectedAbilityIndex + 1;
-        setSelectedAbility(displayedAbilities[nextIndex] ?? null);
-    };
+        const nextAbility = displayedAbilities[nextIndex] ?? null;
+        setSelectedAbility(nextAbility);
+        setAbilityUrlParam(nextAbility);
+    }, [canNavigateAbilities, displayedAbilities, selectedAbilityIndex, setAbilityUrlParam]);
 
-    const onDialogWheel = (e: ReactWheelEvent) => {
+    const onDialogWheel = useCallback((e: WheelEvent) => {
         if (!canNavigateAbilities) return;
 
         const el = dialogContentRef.current;
@@ -131,7 +206,7 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
             lastWheelNavAtRef.current = now;
             toNextAbility();
         }
-    };
+    }, [canNavigateAbilities, toNextAbility, toPrevAbility]);
 
     const { selectedShortEffect, selectedEffect, selectedFlavorText } = useMemo(() => {
         if (selectedFetchState.status !== 'success')
@@ -161,7 +236,7 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
             }));
     }, [selectedFetchState]);
 
-    const onPokemonListWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
+    const onPokemonListWheel = useCallback((e: WheelEvent) => {
         // Keep the dialog's wheel handler from firing while still enabling
         // ability navigation when the list itself can't scroll further.
         e.stopPropagation();
@@ -170,7 +245,9 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
         const now = Date.now();
         if (now - lastWheelNavAtRef.current < 250) return;
 
-        const el = e.currentTarget;
+        const el = pokemonListRef.current;
+        if (!el) return;
+
         const { scrollTop, scrollHeight, clientHeight } = el;
         const isScrollable = scrollHeight > clientHeight + 1;
         const atTop = scrollTop <= 0;
@@ -188,7 +265,23 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
             lastWheelNavAtRef.current = now;
             toNextAbility();
         }
-    };
+    }, [canNavigateAbilities, toNextAbility, toPrevAbility]);
+
+    useEffect(() => {
+        const el = dialogContentRef.current;
+        if (!el || !isDialogOpen) return;
+
+        el.addEventListener('wheel', onDialogWheel, { passive: false });
+        return () => el.removeEventListener('wheel', onDialogWheel);
+    }, [isDialogOpen, onDialogWheel]);
+
+    useEffect(() => {
+        const el = pokemonListRef.current;
+        if (!el || !isDialogOpen) return;
+
+        el.addEventListener('wheel', onPokemonListWheel, { passive: false });
+        return () => el.removeEventListener('wheel', onPokemonListWheel);
+    }, [isDialogOpen, onPokemonListWheel]);
 
     const renderAbilities = () => {
         const hiddenAbility = displayedAbilities.find(a => a.is_hidden);
@@ -262,6 +355,9 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
                             position: 'relative',
                             // Give the new 2-col layout room even on larger screens.
                             width: { xs: '100%', md: 'min(980px, 100%)' },
+                            minHeight: '542px',
+                            display: 'flex',
+                            flexDirection: 'column',
                         },
                     },
                 }}
@@ -331,25 +427,22 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
                 {/* Ability info content */}
                 <DialogContent
                     dividers
-                    sx={{ px: dialogNavGutterSx }}
-                    onWheel={onDialogWheel}
+                    sx={{ px: dialogNavGutterSx, flex: 1 }}
                     ref={dialogContentRef}
                 >
                     {selectedFetchState.status === 'loading' && (
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
                             <CircularProgress size={18} />
-                            <Typography>Loading ability info…</Typography>
                         </Stack>
                     )}
 
                     {selectedFetchState.status === 'error' && (
-                        <Typography color="error">
+                        <Typography color="error" sx={{ mb: 2 }}>
                             {selectedFetchState.message}
                         </Typography>
                     )}
 
-                    {selectedFetchState.status === 'success' && (
-                        <Box
+                    <Box
                             sx={{
                                 display: 'grid',
                                 gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
@@ -359,40 +452,30 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
                         >
                             {/* Left column: ability text */}
                             <Stack spacing={1.5}>
-                                {selectedShortEffect && (
-                                    <Box>
-                                        <Typography variant="caption" color="textSecondary">Short effect</Typography>
-                                        <Typography>{selectedShortEffect}</Typography>
-                                    </Box>
-                                )}
-                                {selectedEffect && (
-                                    <Box>
-                                        <Typography variant="caption" color="textSecondary">Effect</Typography>
-                                        <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedEffect}</Typography>
-                                    </Box>
-                                )}
-                                {selectedFlavorText && (
-                                    <Box>
-                                        <Typography variant="caption" color="textSecondary">Flavor text</Typography>
-                                        <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedFlavorText}</Typography>
-                                    </Box>
-                                )}
-                                {!selectedShortEffect && !selectedEffect && !selectedFlavorText && (
-                                    <Typography color="textSecondary">
-                                        No English description available for {selectedLabel}.
-                                    </Typography>
-                                )}
+                                <Box>
+                                    <Typography variant="caption" color="textSecondary">Short effect</Typography>
+                                    <Typography>{selectedShortEffect || '-'}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="caption" color="textSecondary">Effect</Typography>
+                                    <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedEffect || '-'}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="caption" color="textSecondary">Flavor text</Typography>
+                                    <Typography sx={{ whiteSpace: 'pre-wrap' }}>{selectedFlavorText || '-'}</Typography>
+                                </Box>
                             </Stack>
 
                             {/* Right column: pokemon list */}
                             <Box>
                                 <Typography variant="caption" color="textSecondary">Pokémon with {selectedLabel}</Typography>
 
-                                {pokemonWithAbility.length === 0 ? (
+                                {selectedFetchState.status === 'success' && pokemonWithAbility.length === 0 && (
                                     <Typography color="textSecondary">
                                         No known Pokémon with {selectedLabel}.
                                     </Typography>
-                                ) : (
+                                )}
+                                {selectedFetchState.status === 'success' && pokemonWithAbility.length > 0 && (
                                     <Box
                                         sx={{
                                             maxHeight: { xs: 240, md: 420 },
@@ -402,7 +485,7 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
                                             borderRadius: 1,
                                             p: 1,
                                         }}
-                                        onWheel={onPokemonListWheel}
+                                        ref={pokemonListRef}
                                     >
                                         <Box
                                             sx={{
@@ -419,7 +502,7 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
                                                             key={poke.name}
                                                             component={RouterLink}
                                                             to={`/showcase?pokemon=${encodeURIComponent(poke.name)}`}
-                                                            onClick={() => closeAbilityDialog()}
+                                                            onClick={(event) => navigateToPokemon(event, poke.name)}
                                                             variant="body2"
                                                             sx={{
                                                                 color: 'textPrimary',
@@ -453,8 +536,7 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
                                     </Box>
                                 )}
                             </Box>
-                        </Box>
-                    )}
+                    </Box>
                 </DialogContent>
             </Dialog>
         </>

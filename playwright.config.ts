@@ -1,8 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
-import { getPlaywrightBaseUrl } from './playwright/playwrightEnv';
+import { getPlaywrightBaseUrl, getPlaywrightEnv } from './playwright/playwrightEnv';
 
 // eslint-disable-next-line no-undef
 const CI = !!process.env.CI;
+const isLocal = getPlaywrightEnv() === 'local';
+const baseURL = getPlaywrightBaseUrl();
 
 /**
  * Read environment variables from file.
@@ -30,14 +32,14 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: getPlaywrightBaseUrl(),
+    baseURL,
 
     // Apply to all tests: disable tutorial popovers (avoids click interception).
     storageState: {
       cookies: [],
       origins: [
         {
-          origin: getPlaywrightBaseUrl().replace(/\/$/, ''),
+          origin: baseURL.replace(/\/$/, ''),
           localStorage: [
             { name: 'TUTORIAL', value: 'false' },
             { name: 'THEME_MODE', value: 'light' },
@@ -89,9 +91,11 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: isLocal
+    ? {
+        command: 'npm run dev',
+        url: baseURL,
+        reuseExistingServer: !CI,
+      }
+    : undefined,
 });

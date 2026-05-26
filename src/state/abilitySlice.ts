@@ -38,6 +38,7 @@ export type AbilityFetchState =
 type AbilityState = Record<string, AbilityFetchState> // keyed by ability URL
 
 const initialState: AbilityState = {}
+const idleAbilityFetchState: AbilityFetchState = { status: 'idle' }
 
 export const loadAbilityDetails = createAsyncThunk<
 	{ url: string; ability: AbilityApiResponse },
@@ -82,7 +83,7 @@ export const abilitySlice = createSlice({
 
 export const selectAbilityCache = (state: RootState) => state.pokemon.abilities
 export const selectAbilityFetchStateByUrl = (state: RootState, url?: string) =>
-	(url ? (state.pokemon.abilities[url] ?? { status: 'idle' }) : ({ status: 'idle' } as AbilityFetchState))
+	(url ? (state.pokemon.abilities[url] ?? idleAbilityFetchState) : idleAbilityFetchState)
 
 export default abilitySlice.reducer
 
