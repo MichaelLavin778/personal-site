@@ -179,12 +179,16 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const columnHeaderSize = 55;
     const rowSize = 52;
     const gridFooterSize = 52;
+    const mobileMinTableRows = 7;
     const contBuffer = windowWidth >= 1200 ? 23 : 50;
     const targetBottom = windowWidth >= 1200
         ? Math.max(pageBottom - contBuffer, lefColBottom)
         : windowHeight - headerFooterPaddingPx - contBuffer;
+    const minAvailableTableHeight = windowWidth >= 1200
+        ? 0
+        : columnHeaderSize + gridFooterSize + rowSize * mobileMinTableRows;
     const availableTableHeight = tableRect.top > 0
-        ? Math.max(0, targetBottom - tableRect.top)
+        ? Math.max(minAvailableTableHeight, targetBottom - tableRect.top)
         : columnHeaderSize + gridFooterSize + rowSize * 4;
     const gridChromeSize = columnHeaderSize + gridFooterSize;
     const pageSize = Math.max(1, Math.floor((availableTableHeight - gridChromeSize) / rowSize));

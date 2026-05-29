@@ -5,9 +5,10 @@ import { spriteSize } from "./SpriteImage";
 type SpriteCardProps = {
     background: string;
     children: ReactNode;
+    compact?: boolean;
 }
 
-const SpriteCard = ({ background, children }: SpriteCardProps) => (
+const SpriteCard = ({ background, children, compact = false }: SpriteCardProps) => (
     <Box
         component="span"
         sx={{
@@ -15,9 +16,15 @@ const SpriteCard = ({ background, children }: SpriteCardProps) => (
             borderRadius: 2,
             display: 'inline-flex',
             alignItems: 'center',
-            marginX: 0.5,
             border: '1px solid gray',
-            minHeight: spriteSize,
+            boxSizing: 'border-box',
+            flex: compact ? { xs: '1 1 calc(50% - 4px)', sm: '0 0 auto' } : '0 0 auto',
+            width: compact ? { xs: 'calc(50% - 4px)', sm: 'auto' } : 'auto',
+            maxWidth: compact ? { xs: spriteSize * 2, sm: 'none' } : 'none',
+            minWidth: 0,
+            minHeight: compact ? { xs: 0, sm: spriteSize } : spriteSize,
+            aspectRatio: compact ? { xs: '2 / 1', sm: 'auto' } : 'auto',
+            overflow: 'hidden',
             position: 'relative',
             verticalAlign: 'middle',
         }}

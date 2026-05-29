@@ -25,6 +25,7 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import { toTitleCase } from "../../helpers/common";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import { useHorizontalSwipeNavigation } from "../../hooks/useHorizontalSwipeNavigation";
 import { loadMove, selectAllMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
 
@@ -111,6 +112,12 @@ const MoveModal = ({
         const nextMove = rows[nextIndex] ?? null;
         setMove(nextMove);
     }, [canNavigateMoves, rows, selectedMoveIndex, setMove]);
+
+    const swipeHandlers = useHorizontalSwipeNavigation({
+        canNavigate: canNavigateMoves,
+        onSwipeLeft: toNextMove,
+        onSwipeRight: toPrevMove,
+    });
 
     const onDialogWheel = useCallback((e: WheelEvent) => {
         if (!canNavigateMoves) return;
@@ -286,8 +293,9 @@ const MoveModal = ({
 
                 <DialogContent
                     dividers
-                    sx={{ px: dialogNavGutterSx, flex: 1 }}
+                    sx={{ px: dialogNavGutterSx, flex: 1, touchAction: 'pan-y' }}
                     ref={dialogContentRef}
+                    {...swipeHandlers}
                 >
                     {selectedMoveStatus === 'loading' && (
                         <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>

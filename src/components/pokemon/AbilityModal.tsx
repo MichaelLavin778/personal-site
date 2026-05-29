@@ -17,6 +17,7 @@ import { type Dispatch, type MouseEvent as ReactMouseEvent, useCallback, useEffe
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { toTitleCase } from "../../helpers/common";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import { useHorizontalSwipeNavigation } from "../../hooks/useHorizontalSwipeNavigation";
 import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
 import { type AbilityFetchState, loadAbilityDetails, selectAbilityFetchStateByUrl } from "../../state/abilitySlice";
 
@@ -134,6 +135,12 @@ const AbilityModal = ({
         const nextAbility = displayedAbilities[nextIndex] ?? null;
         setAbility(nextAbility);
     }, [canNavigateAbilities, displayedAbilities, selectedAbilityIndex, setAbility]);
+
+    const swipeHandlers = useHorizontalSwipeNavigation({
+        canNavigate: canNavigateAbilities,
+        onSwipeLeft: toNextAbility,
+        onSwipeRight: toPrevAbility,
+    });
 
     const onDialogWheel = useCallback((e: WheelEvent) => {
         if (!canNavigateAbilities) return;
@@ -297,8 +304,9 @@ const AbilityModal = ({
                 {/* Ability info content */}
                 <DialogContent
                     dividers
-                    sx={{ px: dialogNavGutterSx, flex: 1 }}
+                    sx={{ px: dialogNavGutterSx, flex: 1, touchAction: 'pan-y' }}
                     ref={dialogContentRef}
+                    {...swipeHandlers}
                 >
                     {selectedFetchState.status === 'loading' && (
                         <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
