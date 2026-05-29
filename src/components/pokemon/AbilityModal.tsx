@@ -46,7 +46,7 @@ const AbilityModal = ({
     const pokemonListRef = useRef<HTMLDivElement | null>(null);
     const lastWheelNavAtRef = useRef<number>(0);
 
-    const navigateToPokemon = useCallback((event: ReactMouseEvent, pokemonName: string) => {
+    const navigateToPokemon = useCallback((event: ReactMouseEvent<HTMLAnchorElement>, pokemonName: string) => {
         event.preventDefault();
         const params = new URLSearchParams(location.search);
         params.set('pokemon', pokemonName);
@@ -56,12 +56,12 @@ const AbilityModal = ({
         setAbility(null);
         navigate(
             {
-                pathname: location.pathname,
+                pathname: event.currentTarget.pathname,
                 search: `?${params.toString()}`,
                 hash: location.hash,
             }
         );
-    }, [location.hash, location.pathname, location.search, navigate, setAbility]);
+    }, [location.hash, location.search, navigate, setAbility]);
 
     const selectedUrl = selectedAbility?.ability.url ?? '';
 
