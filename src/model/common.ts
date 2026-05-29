@@ -1,4 +1,5 @@
-export const headerFooterPadding = "50px";
+export const headerFooterPaddingPx = 50;
+export const headerFooterPadding = `${headerFooterPaddingPx}px`;
 
 export const ModeEnum = {
     light: 'light',

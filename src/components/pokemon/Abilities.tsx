@@ -3,7 +3,7 @@ import {
     Link,
     Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toTitleCase } from "../../helpers/common";
 import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
@@ -34,34 +34,34 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
         return hidden ? [...nonHidden, hidden] : nonHidden;
     }, [abilities]);
 
-    const hasAppliedInitialAbilityParamRef = useRef(false);
-    const initialAbilityParamRef = useRef(new URLSearchParams(location.search).get('ability'));
+    const selectedAbilityParam = useMemo(
+        () => new URLSearchParams(location.search).get('ability'),
+        [location.search]
+    );
     const getAbilityParamValue = useCallback((ability: PokemonAbility) => {
         const fromUrl = ability.ability.url.split('/').filter(Boolean).at(-1);
         return fromUrl ?? ability.ability.name.trim().toLowerCase().replaceAll(' ', '-');
     }, []);
     const initialAbility = displayedAbilities.find(
-        (ability) => getAbilityParamValue(ability) === initialAbilityParamRef.current
+        (ability) => getAbilityParamValue(ability) === selectedAbilityParam
     ) || null;
     const [selectedAbility, setSelectedAbility] = useState<PokemonAbility | null>(initialAbility);
 
     useEffect(() => {
-        if (hasAppliedInitialAbilityParamRef.current) return;
-
-        const initialAbilityParam = initialAbilityParamRef.current;
-        if (!initialAbilityParam) {
-            hasAppliedInitialAbilityParamRef.current = true;
+        if (!selectedAbilityParam) {
+            setSelectedAbility(null);
             return;
         }
 
         const abilityFromUrl = displayedAbilities.find(
-            (ability) => getAbilityParamValue(ability) === initialAbilityParam
+            (ability) => getAbilityParamValue(ability) === selectedAbilityParam
         );
         if (!abilityFromUrl) return;
 
-        setSelectedAbility(abilityFromUrl);
-        hasAppliedInitialAbilityParamRef.current = true;
-    }, [displayedAbilities, getAbilityParamValue]);
+        setSelectedAbility((current) =>
+            current?.ability.url === abilityFromUrl.ability.url ? current : abilityFromUrl
+        );
+    }, [displayedAbilities, getAbilityParamValue, selectedAbilityParam]);
 
     const setAbilityUrlParam = useCallback((ability: PokemonAbility | null) => {
         const params = new URLSearchParams(window.location.search || location.search);

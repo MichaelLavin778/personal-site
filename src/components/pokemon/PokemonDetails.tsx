@@ -1,5 +1,6 @@
 import { Box, Grid, Paper, type PaperProps, Stack, Typography } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
+import { useElementRect } from "../../hooks/useElementRect";
 import type { Pokemon } from "../../model/Pokemon";
 import Abilities from "./Abilities";
 import Cries from "./Cries";
@@ -60,25 +61,8 @@ type PokemonProps = {
 
 const PokemonDetails = ({ pokemon }: PokemonProps) => {
     // purpose of tracking this is to make right col the same height as the left
-    const [bottom, setBottom] = useState(0);
-    const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
     const leftColRef = useRef<HTMLDivElement>(null);
-    const rightColRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const refBottom = leftColRef.current?.getBoundingClientRect().bottom;
-        if (refBottom && pokemon.id) setBottom(refBottom);
-    }, [leftColRef, pokemon, rightColRef, windowHeight]);
-
-    // rerender on any window resizing
-    const handleResize = () => {
-        setWindowHeight(window.innerHeight);
-    };
-    useEffect(() => {
-        window.addEventListener('resize', handleResize);
-        // Cleanup
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const leftColumnRect = useElementRect(leftColRef);
 
     // hide until pokemon is loaded
     if (!pokemon) return null;
@@ -150,7 +134,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     return (
         <Grid container={true} spacing={2} alignItems="flex-start">
             {/* Sprites */}
-            <Grid size={12} textAlign="center" alignContent="center">
+            <Grid size={12} textAlign="center" alignContent="center" sx={{ minHeight: 104 }}>
                 {/* Male / Male+Female Sprite */}
                 {hasAnyMaleDefaultSprites && (
                     <SpriteCard background={backgroundMaleOrDefault}>
@@ -209,7 +193,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                             </>
                         </Grid>
                         {/* Abilities */}
-                        <Grid size={6}>
+                        <Grid size={6} sx={{ minHeight: 92 }}>
                             <Abilities pokemon={pokemon} />
                         </Grid>
 
@@ -256,11 +240,9 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
             </Grid>
 
             {/* Right column */}
-            <Grid size={{ md: 12, lg: 7 }} ref={rightColRef}>
-                <FullPaper>
-                    {bottom > 0 && (pokemon.moves?.length ?? 0) > 0 && (
-                        <Moves moves={pokemon.moves ?? []} lefColBottom={bottom} />
-                    )}
+            <Grid size={{ md: 12, lg: 7 }}>
+                <FullPaper sx={{ minHeight: { lg: leftColumnRect.height || 'auto' } }}>
+                    <Moves moves={pokemon.moves ?? []} lefColBottom={leftColumnRect.bottom} />
                 </FullPaper>
             </Grid>
         </Grid>

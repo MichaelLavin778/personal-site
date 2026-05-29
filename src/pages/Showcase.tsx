@@ -6,7 +6,9 @@ import PokemonNavigationButton from "../components/pokemon/PokemonNavigationButt
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
-import { headerFooterPadding } from "../model/common";
+import { useElementRect } from "../hooks/useElementRect";
+import { useViewportSize } from "../hooks/useViewportSize";
+import { headerFooterPadding, headerFooterPaddingPx } from "../model/common";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
 import { loadGenderlessPokemonList, loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
 
@@ -43,8 +45,15 @@ const Showcase = () => {
 		? pokemonList[currentPokemonIndex + 1]
 		: undefined;
 	const ref = useRef<HTMLDivElement>(null);
-	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
-	const [bottom, setBottom] = useState<number>(0);
+	const showcaseRect = useElementRect(ref);
+	const viewportSize = useViewportSize();
+	const bottom = useMemo(
+		() => {
+			if (!showcaseRect.bottom) return 0;
+			return Math.ceil(Math.min(showcaseRect.bottom, viewportSize.height - headerFooterPaddingPx));
+		},
+		[showcaseRect.bottom, viewportSize.height]
+	);
 	const heightContextValue = useMemo(() => ({
 		bottom
 	}), [bottom]);
@@ -92,21 +101,6 @@ const Showcase = () => {
 			// ignore malformed URL values
 		}
 	}, [currentPokemonName, location.search]);
-
-	// rerender on any window resizing
-	const handleResize = () => {
-		setWindowHeight(window.innerHeight);
-	};
-	useEffect(() => {
-		window.addEventListener('resize', handleResize);
-		// Cleanup
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
-
-	useEffect(() => {
-		const refBottom = ref.current?.getBoundingClientRect().bottom;
-		if (refBottom && currentPokemon?.id) setBottom(Math.min(refBottom, windowHeight - Number(headerFooterPadding.replace('px', ''))));
-	}, [currentPokemon, ref, windowHeight]);
 
 	// load list of pokemon and each pokemon info
 	useEffect(() => {
@@ -214,7 +208,6 @@ const Showcase = () => {
 							</Box>
 							{currentPokemon && (
 								<PokemonDetails
-									key={currentPokemon.name}
 									pokemon={currentPokemon}
 								/>
 							)}

@@ -12,7 +12,6 @@ import {
     useCallback,
     useContext,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
     useState
@@ -21,9 +20,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ShowcaseBottomContext from "../../context/ShowcaseBottomContext";
 import moveIdToLabel from "../../helpers/pokemonMoveLabeler";
 import { useAppSelector } from "../../hooks/hooks";
-import { headerFooterPadding } from "../../model/common";
+import { useElementRect } from "../../hooks/useElementRect";
+import { useViewportSize } from "../../hooks/useViewportSize";
+import { headerFooterPaddingPx } from "../../model/common";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
-import type { PokemonMove } from "../../model/PokemonMove";
+import type { EffectEntry } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves, selectAllMoves } from "../../state/pokemonMovesSlice";
 import TutorialPopover from "../TutorialPopover";
 import MoveModal, { type MoveRow } from "./MoveModal";
@@ -141,32 +142,16 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
     const allMovesByName = useAppSelector(selectAllMoves);
     const { bottom: pageBottom } = useContext(ShowcaseBottomContext);
-    const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
-    const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
+    const { height: windowHeight, width: windowWidth } = useViewportSize();
     const [selectedMoveRow, setSelectedMoveRow] = useState<MoveRow | null>(null);
-    const initialMoveParamRef = useRef(new URLSearchParams(location.search).get('move'));
-    const hasConsumedInitialMoveParamRef = useRef(false);
+    const selectedMoveParam = useMemo(
+        () => new URLSearchParams(location.search).get('move'),
+        [location.search]
+    );
 
     // for tutorial popover
     const containerRef = useRef<HTMLDivElement | null>(null);
-
-    // Keep column widths stable by computing pixel widths from the container width.
-    const [gridWidth, setGridWidth] = useState<number>(0);
-    useLayoutEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        const measure = () => {
-            const next = Math.floor(el.getBoundingClientRect().width);
-            setGridWidth((prev) => (prev === next ? prev : next));
-        };
-
-        measure();
-
-        const ro = new ResizeObserver(() => measure());
-        ro.observe(el);
-        return () => ro.disconnect();
-    }, []);
+    const tableRect = useElementRect(containerRef);
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
@@ -191,40 +176,33 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         : Math.min(100, Math.max(0, Math.round((loadedMovesCount / loadableMovesTotal) * 100)));
 
     // values for calc for dynamic page sizing
-    const headerSize = 55;
+    const columnHeaderSize = 55;
     const rowSize = 52;
-    const topSpace = (containerRef.current?.getBoundingClientRect().top || 0) + rowSize + headerSize;
+    const gridFooterSize = 52;
     const contBuffer = windowWidth >= 1200 ? 23 : 50;
-    const headerFooterPaddingValue = Number(headerFooterPadding.replace('px', ''));
-	const containerSize = windowWidth >= 1200
-		? (Math.max(pageBottom - contBuffer, lefColBottom) - topSpace)
-		: (windowHeight - headerSize - rowSize - contBuffer - headerFooterPaddingValue * 2);
-    const pageSize = Math.floor(containerSize / rowSize);
+    const targetBottom = windowWidth >= 1200
+        ? Math.max(pageBottom - contBuffer, lefColBottom)
+        : windowHeight - headerFooterPaddingPx - contBuffer;
+    const availableTableHeight = tableRect.top > 0
+        ? Math.max(0, targetBottom - tableRect.top)
+        : columnHeaderSize + gridFooterSize + rowSize * 4;
+    const gridChromeSize = columnHeaderSize + gridFooterSize;
+    const pageSize = Math.max(1, Math.floor((availableTableHeight - gridChromeSize) / rowSize));
+    const tableHeight = Math.min(availableTableHeight, gridChromeSize + pageSize * rowSize);
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
-    const [pageSizeOptions, setPageSizeOptions] = useState([pageSize]);
+    const pageSizeOptions = useMemo(() => [pageSize], [pageSize]);
 
     // keep paginationModel.pageSize in sync when calculated pageSize changes
     useEffect(() => {
         setPaginationModel((prev) => {
-            const maxPage = pageSize;
+            const maxPage = Math.max(0, Math.ceil(detailedMoves.length / pageSize) - 1);
             const newPage = Math.min(prev.page, maxPage);
+            if (prev.page === newPage && prev.pageSize === pageSize) return prev;
             return { ...prev, pageSize, page: newPage };
         });
-        setPageSizeOptions([pageSize]);
-    }, [pageSize, pageBottom, lefColBottom]);
-
-    // track window height and width
-    const handleResize = () => {
-        setWindowWidth(window.innerWidth);
-        setWindowHeight(window.innerHeight);
-    };
-    useEffect(() => {
-        window.addEventListener('resize', handleResize);
-        // Cleanup
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [detailedMoves.length, pageSize]);
 
     // intial sort and sort model controls
     const intialSort = { field: 'learned', sort: 'asc' as const };
@@ -275,14 +253,18 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         else setSortModel([]);
     };
 
-    // get version group details for a move - comes from pokemon's data
-    const getVGs = (mvs: PokemonsMove[], moveName: string) =>
-		mvs.find(move => move.move.name === moveName)?.version_group_details;
+    const pokemonMoveDetailsByName = useMemo(
+        () => new Map(moves.map((move) => [
+            move.move.name,
+            {
+                url: move.move.url,
+                versionGroupDetails: move.version_group_details,
+            },
+        ])),
+        [moves]
+    );
 
-    const getMoveUrl = (mvs: PokemonsMove[], moveName: string) =>
-        mvs.find(move => move.move.name === moveName)?.move.url ?? '';
-
-    const columnWidths = useMemo(() => computeMoveColumnWidths(gridWidth), [gridWidth]);
+    const columnWidths = useMemo(() => computeMoveColumnWidths(tableRect.width), [tableRect.width]);
 
     const setMoveUrlParam = useCallback((row: MoveRow | null) => {
         const params = new URLSearchParams(location.search);
@@ -394,7 +376,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         category: string,
         power: number | undefined,
         accuracy: number | undefined,
-        allMoves: PokemonMove[],
+        effectEntries: EffectEntry[] | undefined,
         url: string
     ): MoveRow => {
         // learned by and learned at
@@ -425,7 +407,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
         // accuracy
         let accuracyLabel: string | undefined = accuracy ? String(accuracy) : '-';
-        const effectEntries = allMoves.find((m => m.name === name))?.effect_entries;
         if (effectEntries?.some(entry => entry.short_effect === "Never misses."))
             accuracyLabel = '∞';
 
@@ -446,40 +427,43 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         () => (detailedMoves)
             .filter((m) => {
                 if (!moveTypeFilter?.value) return true;
-                return getVGs(moves, m.name)?.at(-1)?.move_learn_method.name === moveTypeFilter.value;
+                return pokemonMoveDetailsByName
+                    .get(m.name)
+                    ?.versionGroupDetails
+                    .at(-1)
+                    ?.move_learn_method
+                    .name === moveTypeFilter.value;
             })
             .map((m, i) => {
-                const vgs = getVGs(moves, m.name);
+                const pokemonMoveDetails = pokemonMoveDetailsByName.get(m.name);
                 return createData(
                     i,
-                    vgs,
+                    pokemonMoveDetails?.versionGroupDetails,
                     m.name,
                     m.type.name,
                     m.damage_class.name,
                     m.power,
                     m.accuracy,
-                    detailedMoves,
-                    getMoveUrl(moves, m.name)
+                    m.effect_entries,
+                    pokemonMoveDetails?.url ?? ''
                 );
             }),
-        [detailedMoves, moveTypeFilter, moves]
+        [detailedMoves, moveTypeFilter, pokemonMoveDetailsByName]
     );
 
     useEffect(() => {
-        if (hasConsumedInitialMoveParamRef.current) return;
-
-        const moveParam = initialMoveParamRef.current;
-        if (!moveParam) {
-            hasConsumedInitialMoveParamRef.current = true;
+        if (!selectedMoveParam) {
+            setSelectedMoveRow(null);
             return;
         }
 
-        const moveFromUrl = rows.find((row) => row.rawName === moveParam);
+        const moveFromUrl = rows.find((row) => row.rawName === selectedMoveParam);
         if (!moveFromUrl) return;
 
-        if (selectedMoveRow?.rawName !== moveParam) setMove(moveFromUrl);
-        hasConsumedInitialMoveParamRef.current = true;
-    }, [rows, selectedMoveRow, setMove]);
+        setSelectedMoveRow((current) =>
+            current?.rawName === moveFromUrl.rawName ? current : moveFromUrl
+        );
+    }, [rows, selectedMoveParam]);
 
     return (
         <>
@@ -531,10 +515,12 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
             </Box>
 
             {/* Moves Table */}
-            <Box ref={containerRef} minHeight={{ lg: containerSize }}>
+            <Box ref={containerRef} sx={{ height: tableHeight, minHeight: tableHeight, overflow: 'hidden' }}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
+                    rowHeight={rowSize}
+                    columnHeaderHeight={columnHeaderSize}
                     paginationModel={paginationModel}
                     onPaginationModelChange={(model) => setPaginationModel(model)}
                     pageSizeOptions={pageSizeOptions}
@@ -542,6 +528,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                     sortModel={sortModel}
                     onSortModelChange={(model) => setSortModel(model)}
                     sx={{
+                        height: '100%',
                         border: 0,
                         overflow: 'hidden',
                         // Hard-hide scrollbars inside the grid (native + MUI overlay).
@@ -557,6 +544,20 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
                         // MUI renders an overlay scrollbar element in some modes.
                         '& .MuiDataGrid-scrollbar': {
                             display: 'none',
+                        },
+                        '& .MuiDataGrid-footerContainer': {
+                            height: gridFooterSize,
+                            minHeight: gridFooterSize,
+                            maxHeight: gridFooterSize,
+                            overflow: 'hidden',
+                        },
+                        '& .MuiTablePagination-root': {
+                            overflow: 'hidden',
+                        },
+                        '& .MuiTablePagination-toolbar': {
+                            height: gridFooterSize,
+                            minHeight: gridFooterSize,
+                            overflow: 'hidden',
                         },
                     }}
                 />
