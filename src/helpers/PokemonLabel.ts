@@ -53,41 +53,41 @@ const getPokemonLabel = (name: string) => {
     // Special Cases
     switch (name) {
         case 'mr-mime':
-            return'Mr. Mime';
+            return 'Mr. Mime';
         case 'mr-rime':
-            return'Mr. Rime';
+            return 'Mr. Rime';
         case 'type-null':
-            return'Type: Null';  
+            return 'Type: Null';
         case 'jangmo-o':
-            return'Jangmo-o';
+            return 'Jangmo-o';
         case 'hakamo-o':
-            return'Hakamo-o';
+            return 'Hakamo-o';
         case 'kommo-o':
-            return'Kommo-o';
+            return 'Kommo-o';
         case 'nidoran-f':
-            return'Nidoran♀';
+            return 'Nidoran♀';
         case 'nidoran-m':
-            return'Nidoran♂';
+            return 'Nidoran♂';
         case 'farfetchd':
-            return"Farfetch'd";
+            return "Farfetch'd";
         case 'sirfetchd':
-            return"Sirfetch'd";
+            return "Sirfetch'd";
         case 'mime-jr':
-            return'Mime Jr.';
+            return 'Mime Jr.';
         case 'flabebe':
-            return'Flabébé';
+            return 'Flabébé';
         case 'tapu-koko':
-            return'Tapu Koko';
+            return 'Tapu Koko';
         case 'tapu-lele':
-            return'Tapu Lele';
+            return 'Tapu Lele';
         case 'tapu-bulu':
-            return'Tapu Bulu';
+            return 'Tapu Bulu';
         case 'tapu-fini':
-            return'Tapu Fini';
+            return 'Tapu Fini';
         case 'ho-oh':
-            return'Ho-Oh';
+            return 'Ho-Oh';
         case 'porygon-z':
-            return'Porygon-Z';
+            return 'Porygon-Z';
         case 'wo-chien':
             return 'Wo-Chien';
         case 'chien-pao':

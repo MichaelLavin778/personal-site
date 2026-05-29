@@ -1,8 +1,8 @@
-import { type PayloadAction, createAction, createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
+import { type PayloadAction, createAction, createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import pLimit from 'p-limit';
 import type { PokemonsMove } from '../model/Pokemon';
 import type { PokemonMove } from '../model/PokemonMove';
-import type { RootState } from './store'
+import type { RootState } from './store';
 
 const initialState: Record<string, PokemonMove> = {}
 
@@ -23,7 +23,7 @@ export const loadAllPokemonMoves = createAsyncThunk<
     const flushIntervalMs = 250; // flush every 200ms at least
 
     const flushBuffer = () => {
-        if (buffer.length === 0) return;        
+        if (buffer.length === 0) return;
         // capture and clear buffer atomically
         const payload = buffer.splice(0, Math.min(buffer.length, chunkSize));
         // dispatch the action created by the action creator so middleware/types behave
@@ -46,7 +46,7 @@ export const loadAllPokemonMoves = createAsyncThunk<
                 const move = json as PokemonMove;
                 // push into buffer for batched dispatch
                 buffer.push(move);
-                if (buffer.length >= chunkSize) flushBuffer();                
+                if (buffer.length >= chunkSize) flushBuffer();
 
                 return move;
             })
@@ -54,9 +54,9 @@ export const loadAllPokemonMoves = createAsyncThunk<
 
         // Wait for all to complete (we still flushed along the way). After all
         // completes, flush any remaining items.
-    const results = (await Promise.all(tasks)) as PokemonMove[];
+        const results = (await Promise.all(tasks)) as PokemonMove[];
 
-    return results;
+        return results;
     } catch (err: unknown) {
         const message = (err as Error)?.message ?? String(err);
         return thunkAPI.rejectWithValue(message);

@@ -16,7 +16,7 @@ const App = () => {
 	const volumeContextValue = useMemo(() => ({
 		volume,
 		setVolume
-	}), [volume, setVolume]);	
+	}), [volume, setVolume]);
 
 	return (
 		<TutorialModeProvider>

@@ -20,19 +20,19 @@ const Home = () => {
     const inTextIcon = <WebAssetIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />;
 
     return (
-		<Container
-			sx={{
-				display: 'flex',
-				flex: 1,
-				width: '100%',
-				height: '100%',
-				minHeight: '100vh',
-				paddingTop: headerFooterPadding,
-				paddingBottom: headerFooterPadding,
-				alignItems: 'center',
-				justifyContent: 'center',
-			}}
-		>
+        <Container
+            sx={{
+                display: 'flex',
+                flex: 1,
+                width: '100%',
+                height: '100%',
+                minHeight: '100vh',
+                paddingTop: headerFooterPadding,
+                paddingBottom: headerFooterPadding,
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
             <Stack spacing={4} textAlign="center" alignItems="center">
                 <Box ref={ref}>
                     <Typography variant="h1" fontSize="max(min(6vw, 74px), 32px)">Michael Lavin</Typography>
@@ -44,11 +44,11 @@ const Home = () => {
                     <GithubIconButton fontSize="large" />
                 </Stack>
             </Stack>
-			<TutorialPopover
-				anchorEl={ref.current}
-				anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-				transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			>
+            <TutorialPopover
+                anchorEl={ref.current}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
                 Welcome to my personal website! These popovers are here to explain some of the technical
                 details behind how the site was built. If you'd like to disable them, use the
                 {inTextIcon} toggle in the header.

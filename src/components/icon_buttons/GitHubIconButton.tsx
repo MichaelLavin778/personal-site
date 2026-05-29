@@ -1,16 +1,16 @@
-import { IconButton, type SvgIconProps } from "@mui/material";
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { IconButton, type SvgIconProps } from "@mui/material";
 
 const GithubIconButton = (props: SvgIconProps) => (
-		<IconButton
-			aria-label="Github"
-			href="https://github.com/MichaelLavin778"
-			target="_blank"
-			rel="noopener noreferrer"
-			color="inherit"
-		>
-			<GitHubIcon {...props} />
-		</IconButton>
-	);
+	<IconButton
+		aria-label="Github"
+		href="https://github.com/MichaelLavin778"
+		target="_blank"
+		rel="noopener noreferrer"
+		color="inherit"
+	>
+		<GitHubIcon {...props} />
+	</IconButton>
+);
 
 export default GithubIconButton;

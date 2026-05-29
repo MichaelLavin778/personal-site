@@ -95,26 +95,26 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
         return (
             <>
                 {nonHiddenAbilities.map(ability => (
-						<Link
-                            key={`${ability.ability.name}-${ability.slot}`}
-                            onClick={() => setAbility(ability)}
-                            component="span"
-                            variant="body1"
-                            sx={{
-                                display: 'block',
-                                width: 'fit-content',
-                                color: 'textPrimary',
-                                cursor: 'pointer',
-                                textDecoration: 'none',
-                                '&:hover': { textDecoration: 'underline' },
-                            }}
-                            aria-label={`Open ability info for ${ability.ability.name}`}
-                        >
-                            <Typography component="span" color="textPrimary">
-                                {ability.ability.name}
-                            </Typography>
-                        </Link>
-					))}
+                    <Link
+                        key={`${ability.ability.name}-${ability.slot}`}
+                        onClick={() => setAbility(ability)}
+                        component="span"
+                        variant="body1"
+                        sx={{
+                            display: 'block',
+                            width: 'fit-content',
+                            color: 'textPrimary',
+                            cursor: 'pointer',
+                            textDecoration: 'none',
+                            '&:hover': { textDecoration: 'underline' },
+                        }}
+                        aria-label={`Open ability info for ${ability.ability.name}`}
+                    >
+                        <Typography component="span" color="textPrimary">
+                            {ability.ability.name}
+                        </Typography>
+                    </Link>
+                ))}
                 {!!hiddenAbility && (
                     <Link
                         key={`${hiddenAbility.ability.name}-${hiddenAbility.slot}`}

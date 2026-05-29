@@ -1,6 +1,6 @@
-import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import type { RootState } from './store'
-import type { Pokemon, PokemonGender, PokemonItemSimple } from '../model/Pokemon'
+import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import type { Pokemon, PokemonGender, PokemonItemSimple } from '../model/Pokemon';
+import type { RootState } from './store';
 
 const initialState: Pokemon[] = [];
 
@@ -12,7 +12,7 @@ export const loadPokemonList = createAsyncThunk<
 		const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 		const res = await fetch(apiUrl);
 		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-		
+
 		const json = await res.json();
 		const results: PokemonItemSimple[] = Array.isArray(json?.results)
 			? json.results.map((p: Record<string, unknown>) => ({ name: String(p['name'] ?? ''), url: String(p['url'] ?? '') }))
@@ -75,7 +75,7 @@ export const loadPokemon = createAsyncThunk<
 	try {
 		const res = await fetch(apiUrl);
 		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-		
+
 		const json = await res.json();
 		const results: Pokemon = json;
 

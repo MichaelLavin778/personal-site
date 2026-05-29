@@ -1,6 +1,6 @@
 import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
 import { fetchPublicS3Blob } from '../loaders/S3FileDownloader'
+import type { RootState } from '../store'
 
 
 interface ResumeState {
@@ -23,7 +23,7 @@ export const loadResume = createAsyncThunk<
     try {
         const blob = await fetchPublicS3Blob('personal--site', 'resume.pdf');
         if (!blob) throw Error('Failed to download resume');
-        
+
         const objectUrl = URL.createObjectURL(blob);
         return objectUrl;
     } catch (err: unknown) {

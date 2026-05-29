@@ -2,11 +2,11 @@ import { Page, expect, test } from "@playwright/test";
 
 export const verifyTutorial = async (page: Page) => {
     let pageContext: '' | 'showcase' | 'resume' = '';
-    if (page.url().includes('/showcase')) 
+    if (page.url().includes('/showcase'))
         pageContext = 'showcase';
-     else if (page.url().includes('/resume')) 
+     else if (page.url().includes('/resume'))
         pageContext = 'resume';
-    
+
     let tutorialText = 'unknown page';
     switch (pageContext) {
         case 'showcase':

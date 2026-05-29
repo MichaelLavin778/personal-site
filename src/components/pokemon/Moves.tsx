@@ -155,8 +155,8 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     // move filter buttons
     const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
-	type MoveTypeFilterOption = { label: string; shortLabel?: string; value: string };
-	const [moveTypeFilter, setMoveTypeFilter] = useState<MoveTypeFilterOption | null>(levelOption);
+    type MoveTypeFilterOption = { label: string; shortLabel?: string; value: string };
+    const [moveTypeFilter, setMoveTypeFilter] = useState<MoveTypeFilterOption | null>(levelOption);
     const buttonOptions = [
         levelOption,
         { label: "TM", value: "machine" },
@@ -245,10 +245,10 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     });
 
     // handle move type filter change
-        const handleMoveTypeFilter = (
-		_event: ReactMouseEvent<HTMLElement, MouseEvent>,
-		newMoveTypeFilter: string | null
-	) => {
+    const handleMoveTypeFilter = (
+        _event: ReactMouseEvent<HTMLElement, MouseEvent>,
+        newMoveTypeFilter: string | null
+    ) => {
         const newOption = buttonOptions.find(opt => opt.value === newMoveTypeFilter) || null;
         setMoveTypeFilter(newOption);
         if (newMoveTypeFilter === "level-up") setSortModel([intialSort]);
@@ -579,4 +579,4 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     );
 }
 
-export default Moves;     
+export default Moves;

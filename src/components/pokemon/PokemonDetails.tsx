@@ -35,7 +35,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 pointerEvents: 'none',
                 zIndex: 1,
                 textShadow: '0 0 1px rgba(0,0,0,0.45)',
-                width:'100%'
+                width: '100%'
             }}
             aria-hidden
         >
@@ -83,8 +83,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
         // some pokemon that are female only are labeled as genderless while using the male sprite slot
         backgroundMaleOrDefault = femalePink;
         showFemaleSymbol = true;
-    }
-    else if (gender === 'both')
+    } else if (gender === 'both')
         backgroundMaleOrDefault = `linear-gradient(135deg, ${maleBlue} 0%, ${maleBlue} calc(50% - 1px), rgba(128, 128, 128, 0.5) 50%, ${femalePink} calc(50% + 1px), ${femalePink} 100%)`;
 
     const spriteCardCount = [
@@ -119,74 +118,74 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         width: '100%',
                     }}
                 >
-                {/* Male / Male+Female Sprite */}
-                {hasAnyMaleDefaultSprites && (
-                    <SpriteCard background={backgroundMaleOrDefault} compact={compactSprites}>
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.front_default || undefined}
-                            alt={pokemon.name}
-                        />
-                        {showMaleSymbol && cardSymbol('♂', 'self-start')}
-                        {showFemaleSymbol && cardSymbol('♀', 'self-start')}
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.back_default || undefined}
-                            alt={`${pokemon.name} back`}
-                        />
-                    </SpriteCard>
-                )}
-                {/* Shiny Sprite */}
-                {hasAnyShinySprites && (
-                    <SpriteCard background={backgroundMaleOrDefault} compact={compactSprites}>
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.front_shiny || undefined}
-                            alt={`${pokemon.name} shiny`}
-                        />
-                        {showMaleSymbol && cardSymbol('♂', 'self-start')}
-                        {showFemaleSymbol && cardSymbol('♀', 'self-start')}
-                        {cardSymbol('✨', 'self-end')}
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.back_shiny || undefined}
-                            alt={`${pokemon.name} shiny back`}
-                        />
-                    </SpriteCard>
-                )}
-                {/* Female Sprite */}
-                {hasAnyFemaleDefaultSprites && (
-                    <SpriteCard background={femalePink} compact={compactSprites}>
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.front_female || undefined}
-                            alt={`${pokemon.name} female`}
-                        />
-                        {cardSymbol('♀', 'self-start')}
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.back_female || undefined}
-                            alt={`${pokemon.name} female back`}
-                        />
-                    </SpriteCard>
-                )}
-                {/* Female Shiny Sprite */}
-                {hasAnyFemaleShinySprites && (
-                    <SpriteCard background={femalePink} compact={compactSprites}>
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.front_shiny_female || undefined}
-                            alt={`${pokemon.name} shiny female`}
-                        />
-                        {cardSymbol('♀', 'self-start')}
-                        {cardSymbol('✨', 'self-end')}
-                        <SpriteImage
-                            compact={compactSprites}
-                            src={pokemon.sprites?.back_shiny_female || undefined}
-                            alt={`${pokemon.name} shiny female back`}
-                        />
-                    </SpriteCard>
-                )}
+                    {/* Male / Male+Female Sprite */}
+                    {hasAnyMaleDefaultSprites && (
+                        <SpriteCard background={backgroundMaleOrDefault} compact={compactSprites}>
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.front_default || undefined}
+                                alt={pokemon.name}
+                            />
+                            {showMaleSymbol && cardSymbol('♂', 'self-start')}
+                            {showFemaleSymbol && cardSymbol('♀', 'self-start')}
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.back_default || undefined}
+                                alt={`${pokemon.name} back`}
+                            />
+                        </SpriteCard>
+                    )}
+                    {/* Shiny Sprite */}
+                    {hasAnyShinySprites && (
+                        <SpriteCard background={backgroundMaleOrDefault} compact={compactSprites}>
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.front_shiny || undefined}
+                                alt={`${pokemon.name} shiny`}
+                            />
+                            {showMaleSymbol && cardSymbol('♂', 'self-start')}
+                            {showFemaleSymbol && cardSymbol('♀', 'self-start')}
+                            {cardSymbol('✨', 'self-end')}
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.back_shiny || undefined}
+                                alt={`${pokemon.name} shiny back`}
+                            />
+                        </SpriteCard>
+                    )}
+                    {/* Female Sprite */}
+                    {hasAnyFemaleDefaultSprites && (
+                        <SpriteCard background={femalePink} compact={compactSprites}>
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.front_female || undefined}
+                                alt={`${pokemon.name} female`}
+                            />
+                            {cardSymbol('♀', 'self-start')}
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.back_female || undefined}
+                                alt={`${pokemon.name} female back`}
+                            />
+                        </SpriteCard>
+                    )}
+                    {/* Female Shiny Sprite */}
+                    {hasAnyFemaleShinySprites && (
+                        <SpriteCard background={femalePink} compact={compactSprites}>
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.front_shiny_female || undefined}
+                                alt={`${pokemon.name} shiny female`}
+                            />
+                            {cardSymbol('♀', 'self-start')}
+                            {cardSymbol('✨', 'self-end')}
+                            <SpriteImage
+                                compact={compactSprites}
+                                src={pokemon.sprites?.back_shiny_female || undefined}
+                                alt={`${pokemon.name} shiny female back`}
+                            />
+                        </SpriteCard>
+                    )}
                 </Box>
             </Grid>
 

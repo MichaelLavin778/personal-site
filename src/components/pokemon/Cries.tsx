@@ -1,9 +1,9 @@
 import { VolumeDown, VolumeUp } from "@mui/icons-material";
 import { Box, Slider, Stack, Typography } from "@mui/material";
 import { type RefObject, useContext, useEffect, useRef } from "react";
+import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.ogg";
 import VolumeContext from "../../context/VolumeContext";
 import type { PokemonCry } from "../../model/Pokemon";
-import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.ogg"
 import CryAudio from "./CryAudio";
 
 
@@ -43,7 +43,7 @@ const Cries = ({ cries }: CriesProps) => {
         applyVolume(newVolume)
     };
 
-    if (!cries?.latest && !cries?.legacy) return null;    
+    if (!cries?.latest && !cries?.legacy) return null;
 
     return (
         <>

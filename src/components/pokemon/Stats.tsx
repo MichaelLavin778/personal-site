@@ -27,14 +27,14 @@ const Stats = ({ stats }: StatsProps) => {
         { name: 'Sp. Def', max: 614 },
         { name: 'Speed', max: 504 }
     ];
-	const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({
-		base_stat: 0,
-		effort: 0,
-		stat: {
-			name: metric.name,
-			url: `https://pokeapi.co/api/v2/stat/${i + 1}/`,
-		},
-	}));
+    const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({
+        base_stat: 0,
+        effort: 0,
+        stat: {
+            name: metric.name,
+            url: `https://pokeapi.co/api/v2/stat/${i + 1}/`,
+        },
+    }));
 
     const calcMinStat = (name: string, base: number) => {
         let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
@@ -44,9 +44,9 @@ const Stats = ({ stats }: StatsProps) => {
     };
 
     const calcMaxStat = (name: string, base: number) => {
-		let max = Math.floor(
-			(Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature
-		);
+        let max = Math.floor(
+            (Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + 5) * goodNature
+        );
         if (name.toLowerCase() === 'hp')
             max = Math.floor(((2 * base + maxIVs + Math.floor(maxEVs / 4)) * maxLevel) / 100) + maxLevel + 10;
         return max;

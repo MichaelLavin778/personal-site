@@ -31,7 +31,7 @@ export type Meta = {
     flinch_chance: number
     healing: number
     max_hits: number | undefined
-    max_turns: number| undefined
+    max_turns: number | undefined
     min_hits: number | undefined
     min_turns: number | undefined
     stat_chance: number
@@ -44,7 +44,7 @@ export type StatChange = {
 
 export type PokemonMove = {
     accuracy: number | undefined
-    // contest_combos 
+    // contest_combos
     // contest_effect
     // contest_type
     damage_class: PokemonItemSimple

@@ -2,7 +2,7 @@ import { type Dispatch, type SetStateAction, createContext } from "react";
 
 const TutorialContext = createContext<{
     showTutorial: boolean;
-    toggleTutorial: () => void;
+    toggleTutorial:() => void;
     setShowTutorial: Dispatch<SetStateAction<boolean>>;
 }>({
     showTutorial: false,
