@@ -101,7 +101,10 @@ export const pokemonSlice = createSlice({
 					} as Pokemon);
 				}
 			})
-			.addCase(loadPokemonGenderData.fulfilled, (state, action: PayloadAction<{ male: string[]; female: string[] }>) => {
+			.addCase(loadPokemonGenderData.fulfilled, (state, action: PayloadAction<{
+				male: string[];
+				female: string[];
+			}>) => {
 				const maleSet = new Set(action.payload.male);
 				const femaleSet = new Set(action.payload.female);
 

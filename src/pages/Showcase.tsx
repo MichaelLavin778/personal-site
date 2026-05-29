@@ -1,7 +1,8 @@
-import { Autocomplete, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Autocomplete, Box, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
+import PokemonNavigationButton from "../components/pokemon/PokemonNavigationButton";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
@@ -21,6 +22,9 @@ const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
 	</Container>
 );
 
+const getPokemonNameFromSearch = (search: string) =>
+	new URLSearchParams(search).get('pokemon')?.trim().toLowerCase() || null;
+
 const Showcase = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -28,17 +32,46 @@ const Showcase = () => {
 	const pokemonList = useAppSelector(selectPokemon);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const [currentPokemonName, setCurrentPokemonName] = useState<string>(() => {
-		const initialPokemon = new URLSearchParams(location.search).get('pokemon');
-		return initialPokemon?.trim().toLowerCase() ?? "bulbasaur";
-	});
+	const [currentPokemonName, setCurrentPokemonName] = useState<string>(
+		() => getPokemonNameFromSearch(location.search) ?? "bulbasaur"
+	);
+	const pendingPokemonNameRef = useRef<string | null>(null);
 	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
+	const currentPokemonIndex = pokemonList.findIndex((p) => p.name === currentPokemonName);
+	const previousPokemon = currentPokemonIndex > 0 ? pokemonList[currentPokemonIndex - 1] : undefined;
+	const nextPokemon = currentPokemonIndex >= 0 && currentPokemonIndex < pokemonList.length - 1
+		? pokemonList[currentPokemonIndex + 1]
+		: undefined;
 	const ref = useRef<HTMLDivElement>(null);
 	const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
 	const [bottom, setBottom] = useState<number>(0);
 	const heightContextValue = useMemo(() => ({
 		bottom
 	}), [bottom]);
+
+	const selectPokemonName = useCallback((pokemonName: string) => {
+		const nextPokemonName = pokemonName.trim().toLowerCase();
+		if (!nextPokemonName) return;
+
+		setCurrentPokemonName(nextPokemonName);
+		try {
+			const params = new URLSearchParams(location.search);
+			params.set('pokemon', nextPokemonName);
+			params.delete('ability');
+			params.delete('move');
+			pendingPokemonNameRef.current = nextPokemonName;
+			navigate(
+				{
+					pathname: location.pathname,
+					search: `?${params.toString()}`,
+					hash: location.hash,
+				},
+				{ replace: true }
+			);
+		} catch {
+			// ignore
+		}
+	}, [location.hash, location.pathname, location.search, navigate]);
 
 	// Set the tab name
 	useEffect(() => {
@@ -48,9 +81,12 @@ const Showcase = () => {
 	// React to changes in the URL query param (e.g., clicking a link while already on /showcase)
 	useEffect(() => {
 		try {
-			const params = new URLSearchParams(location.search);
-			const raw = params.get('pokemon');
-			const fromUrl = (raw ?? '').trim().toLowerCase();
+			const fromUrl = getPokemonNameFromSearch(location.search);
+			const pendingPokemonName = pendingPokemonNameRef.current;
+
+			if (pendingPokemonName && fromUrl !== pendingPokemonName) return;
+			if (pendingPokemonName && fromUrl === pendingPokemonName) pendingPokemonNameRef.current = null;
+
 			if (fromUrl && fromUrl !== currentPokemonName) setCurrentPokemonName(fromUrl);
 		} catch {
 			// ignore malformed URL values
@@ -128,40 +164,61 @@ const Showcase = () => {
 			<Paper elevation={4} sx={{ width: '100%', p: 1.25 }} ref={ref}>
 				<ShowcaseBottomContext.Provider value={heightContextValue}>
 					{loaded && pokemonList.length > 0 ?
-						<>
-							<Autocomplete
-								options={pokemonList}
-								getOptionLabel={(option) => getPokemonLabel(option.name) ?? option.name}
-								renderInput={(params) => <TextField {...params} />}
-								value={currentPokemon ?? undefined}
-								disableClearable={true}
-								onChange={(_event, value) => {
-									if (!value?.name) return;
-									const nextPokemon = value.name.trim().toLowerCase();
-									setCurrentPokemonName(nextPokemon);
-									try {
-										const params = new URLSearchParams(location.search);
-										params.set('pokemon', nextPokemon);
-										navigate(
-											{
-												pathname: location.pathname,
-												search: `?${params.toString()}`,
-												hash: location.hash,
-											},
-											{ replace: true }
-										);
-									} catch {
-										// ignore
-									}
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+							<Box
+								sx={{
+									display: 'grid',
+									gridTemplateColumns: {
+										xs: 'minmax(0, 1fr) minmax(0, 1fr)',
+										sm: 'minmax(126px, 1fr) minmax(220px, 400px) minmax(126px, 1fr)',
+									},
+									gridTemplateAreas: {
+										xs: '"selector selector" "previous next"',
+										sm: '"previous selector next"',
+									},
+									gap: 1,
+									alignItems: 'center',
+									width: '100%',
+									maxWidth: 850,
+									mx: 'auto',
 								}}
-								sx={{ width: '100%', maxWidth: 400, justifySelf: 'center', mb: 0.5 }}
-							/>
+							>
+								<Box sx={{ gridArea: 'previous', minWidth: 0 }}>
+									<PokemonNavigationButton
+										direction="previous"
+										pokemon={previousPokemon}
+										onClick={() => previousPokemon && selectPokemonName(previousPokemon.name)}
+									/>
+								</Box>
+								<Box sx={{ gridArea: 'selector', minWidth: 0 }}>
+									<Autocomplete
+										options={pokemonList}
+										getOptionLabel={(option) => getPokemonLabel(option.name) ?? option.name}
+										renderInput={(params) => <TextField {...params} />}
+										value={currentPokemon ?? undefined}
+										disableClearable={true}
+										onChange={(_event, value) => {
+											if (!value?.name) return;
+											selectPokemonName(value.name);
+										}}
+										sx={{ width: '100%' }}
+									/>
+								</Box>
+								<Box sx={{ gridArea: 'next', minWidth: 0 }}>
+									<PokemonNavigationButton
+										direction="next"
+										pokemon={nextPokemon}
+										onClick={() => nextPokemon && selectPokemonName(nextPokemon.name)}
+									/>
+								</Box>
+							</Box>
 							{currentPokemon && (
 								<PokemonDetails
+									key={currentPokemon.name}
 									pokemon={currentPokemon}
 								/>
 							)}
-						</>
+						</Box>
 						:
 						<CircularProgress />
 					}
