@@ -1,59 +1,15 @@
-import { Box, Grid, Paper, type PaperProps, Stack, Typography } from "@mui/material";
-import React, { useRef } from "react";
+import { Box, Grid, Stack, Typography } from "@mui/material";
+import { useRef } from "react";
 import { useElementRect } from "../../hooks/useElementRect";
 import type { Pokemon } from "../../model/Pokemon";
+import FullPaper from "../FullPaper";
 import Abilities from "./Abilities";
 import Cries from "./Cries";
 import Moves from "./Moves";
+import SpriteCard from "./SpriteCard";
+import SpriteImage from "./SpriteImage";
 import Stats from "./Stats";
 import Type from "./Type";
-
-
-type SpriteCardProps = {
-    background: string;
-    children: React.ReactNode;
-}
-
-const SpriteCard = ({ background, children }: SpriteCardProps) => (
-    <Box
-        component="span"
-        sx={{
-            background,
-            borderRadius: 2,
-            display: 'inline-flex',
-            alignItems: 'center',
-            marginX: 0.5,
-            border: '1px solid gray',
-            position: 'relative',
-        }}
-    >
-        {children}
-    </Box>
-);
-
-const FullPaper = ({ children, ...props }: PaperProps) => {
-    const sx = props.sx || {};
-    return (
-        <Paper
-            {...props}
-            variant="elevation"
-            sx={{
-                p: 2,
-                ...sx,
-                // MUI "elevation" shadows are intentionally directional (drop-shadow style).
-                // Override to make the shadow feel even on all sides.
-                boxShadow: (theme) =>
-                    theme.palette.mode === 'dark'
-                        ? '0 0 4px rgba(0,0,0,0.65)'
-                        : '0 0 4px rgba(0,0,0,0.22)',
-            }}
-            elevation={0}
-            
-        >
-            {children}
-        </Paper>
-    );
-};
 
 type PokemonProps = {
     pokemon: Pokemon;
@@ -138,39 +94,37 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 {/* Male / Male+Female Sprite */}
                 {hasAnyMaleDefaultSprites && (
                     <SpriteCard background={backgroundMaleOrDefault}>
-                        <img src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
+                        <SpriteImage src={pokemon.sprites?.front_default || undefined} alt={pokemon.name} />
                         {showMaleSymbol && cardSymbol('♂', 'self-start')}
                         {showFemaleSymbol && cardSymbol('♀', 'self-start')}
-                        {!!pokemon.sprites?.back_default && (
-                            <img src={pokemon.sprites.back_default} alt={`${pokemon.name} back`} />
-                        )}
+                        <SpriteImage src={pokemon.sprites?.back_default || undefined} alt={`${pokemon.name} back`} />
                     </SpriteCard>
                 )}
                 {/* Shiny Sprite */}
                 {hasAnyShinySprites && (
                     <SpriteCard background={backgroundMaleOrDefault}>
-                        {!!pokemon.sprites?.front_shiny && <img src={pokemon.sprites.front_shiny} />}
+                        <SpriteImage src={pokemon.sprites?.front_shiny || undefined} alt={`${pokemon.name} shiny`} />
                         {showMaleSymbol && cardSymbol('♂', 'self-start')}
                         {showFemaleSymbol && cardSymbol('♀', 'self-start')}
                         {cardSymbol('✨', 'self-end')}
-                        {!!pokemon.sprites?.back_shiny && <img src={pokemon.sprites.back_shiny} />}
+                        <SpriteImage src={pokemon.sprites?.back_shiny || undefined} alt={`${pokemon.name} shiny back`} />
                     </SpriteCard>
                 )}
                 {/* Female Sprite */}
                 {hasAnyFemaleDefaultSprites && (
                     <SpriteCard background={femalePink}>
-                        {!!pokemon.sprites?.front_female && <img src={pokemon.sprites.front_female} />}
+                        <SpriteImage src={pokemon.sprites?.front_female || undefined} alt={`${pokemon.name} female`} />
                         {cardSymbol('♀', 'self-start')}
-                        {!!pokemon.sprites?.back_female && <img src={pokemon.sprites.back_female} />}
+                        <SpriteImage src={pokemon.sprites?.back_female || undefined} alt={`${pokemon.name} female back`} />
                     </SpriteCard>
                 )}
                 {/* Female Shiny Sprite */}
                 {hasAnyFemaleShinySprites && (
                     <SpriteCard background={femalePink}>
-                        {!!pokemon.sprites?.front_shiny_female && <img src={pokemon.sprites.front_shiny_female} />}
+                        <SpriteImage src={pokemon.sprites?.front_shiny_female || undefined} alt={`${pokemon.name} shiny female`} />
                         {cardSymbol('♀', 'self-start')}
                         {cardSymbol('✨', 'self-end')}
-                        {!!pokemon.sprites?.back_shiny_female && <img src={pokemon.sprites.back_shiny_female} />}
+                        <SpriteImage src={pokemon.sprites?.back_shiny_female || undefined} alt={`${pokemon.name} shiny female back`} />
                     </SpriteCard>
                 )}
             </Grid>
