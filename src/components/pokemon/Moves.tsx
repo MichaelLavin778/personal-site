@@ -76,6 +76,61 @@ const learnSorter: GridComparatorFn = (v1: string, v2: string) => {
     return String(v1).localeCompare(String(v2));
 };
 
+const createData = (
+    id: number,
+    vgs: VersionGroupDetails[] | undefined,
+    name: string,
+    type: string,
+    category: string,
+    power: number | undefined,
+    accuracy: number | undefined,
+    effectEntries: EffectEntry[] | undefined,
+    url: string
+): MoveRow => {
+    // learned by and learned at
+    const vg = vgs?.at(-1);
+    let learned: string;
+    switch (vg?.move_learn_method.name) {
+        case "level-up":
+            learned = `${vg?.level_learned_at || 0}`;
+            break;
+        case "machine":
+            learned = "TM";
+            break;
+        case "tutor":
+            learned = "Tutor";
+            break;
+        case "egg":
+            learned = "Egg";
+            break;
+        default:
+            learned = "Other";
+    }
+
+    // name
+    const nameLabel = moveIdToLabel(name);
+
+    // power
+    const powerLabel = power ? String(power) : '-';
+
+    // accuracy
+    let accuracyLabel: string | undefined = accuracy ? String(accuracy) : '-';
+    if (effectEntries?.some(entry => entry.short_effect === "Never misses."))
+        accuracyLabel = '∞';
+
+    return {
+        id,
+        learned,
+        name: nameLabel,
+        rawName: name,
+        url,
+        type,
+        category,
+        power: powerLabel,
+        accuracy: accuracyLabel,
+    };
+}
+
 type MoveColumnWidths = {
     learned: number;
     name: number;
@@ -137,16 +192,56 @@ interface MovesProps {
 const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const location = useLocation();
     const navigate = useNavigate();
+
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
     const allMovesByName = useAppSelector(selectAllMoves);
-    const { bottom: pageBottom } = useContext(ShowcaseBottomContext);
-    const { height: windowHeight, width: windowWidth } = useViewportSize();
-    const [selectedMoveRow, setSelectedMoveRow] = useState<MoveRow | null>(null);
+
+    const pokemonMoveDetailsByName = useMemo(
+        () => new Map(moves.map((move) => [
+            move.move.name,
+            {
+                url: move.move.url,
+                versionGroupDetails: move.version_group_details,
+            },
+        ])),
+        [moves]
+    );
+    const allRows = useMemo(
+        () => (detailedMoves)
+            .filter((m) => pokemonMoveDetailsByName
+                .get(m.name)
+                ?.versionGroupDetails
+                .at(-1))
+            .map((m, i) => {
+                const pokemonMoveDetails = pokemonMoveDetailsByName.get(m.name);
+                return createData(
+                    i,
+                    pokemonMoveDetails?.versionGroupDetails,
+                    m.name,
+                    m.type.name,
+                    m.damage_class.name,
+                    m.power,
+                    m.accuracy,
+                    m.effect_entries,
+                    pokemonMoveDetails?.url ?? ''
+                );
+            }),
+        [detailedMoves, pokemonMoveDetailsByName]
+    );
     const selectedMoveParam = useMemo(
         () => new URLSearchParams(location.search).get('move'),
         [location.search]
     );
+
+    const selectedMoveRow = useMemo(
+        () => allRows.find((row) => row.rawName === selectedMoveParam) ?? null,
+        [allRows, selectedMoveParam]
+    );
+
+    // size controls
+    const { bottom: pageBottom } = useContext(ShowcaseBottomContext);
+    const { height: windowHeight, width: windowWidth } = useViewportSize();
 
     // for tutorial popover
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -195,7 +290,10 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
     // controlled pagination model so we can programmatically change pages
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize });
-    const pageSizeOptions = useMemo(() => [pageSize], [pageSize]);
+    const pageSizeOptions = useMemo(
+        () => Array.from(new Set([paginationModel.pageSize, pageSize])),
+        [paginationModel.pageSize, pageSize]
+    );
 
     // keep paginationModel.pageSize in sync when calculated pageSize changes
     useEffect(() => {
@@ -256,17 +354,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         else setSortModel([]);
     };
 
-    const pokemonMoveDetailsByName = useMemo(
-        () => new Map(moves.map((move) => [
-            move.move.name,
-            {
-                url: move.move.url,
-                versionGroupDetails: move.version_group_details,
-            },
-        ])),
-        [moves]
-    );
-
     const columnWidths = useMemo(() => computeMoveColumnWidths(tableRect.width), [tableRect.width]);
 
     const setMoveUrlParam = useCallback((row: MoveRow | null) => {
@@ -290,7 +377,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     }, [location.hash, location.pathname, location.search, navigate]);
 
     const setMove = useCallback((row: MoveRow | null = null) => {
-        setSelectedMoveRow(row);
         setMoveUrlParam(row);
     }, [setMoveUrlParam]);
 
@@ -371,102 +457,13 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         },
     ], [columnWidths, moveTypeFilter?.label, moveTypeFilter?.shortLabel, setMove]);
 
-    const createData = (
-        id: number,
-        vgs: VersionGroupDetails[] | undefined,
-        name: string,
-        type: string,
-        category: string,
-        power: number | undefined,
-        accuracy: number | undefined,
-        effectEntries: EffectEntry[] | undefined,
-        url: string
-    ): MoveRow => {
-        // learned by and learned at
-        const vg = vgs?.at(-1);
-        let learned: string;
-        switch (vg?.move_learn_method.name) {
-            case "level-up":
-                learned = `${vg?.level_learned_at || 0}`;
-                break;
-            case "machine":
-                learned = "TM";
-                break;
-            case "tutor":
-                learned = "Tutor";
-                break;
-            case "egg":
-                learned = "Egg";
-                break;
-            default:
-                learned = "Other";
-        }
-
-        // name
-        const nameLabel = moveIdToLabel(name);
-
-        // power
-        const powerLabel = power ? String(power) : '-';
-
-        // accuracy
-        let accuracyLabel: string | undefined = accuracy ? String(accuracy) : '-';
-        if (effectEntries?.some(entry => entry.short_effect === "Never misses."))
-            accuracyLabel = '∞';
-
-        return {
-            id,
-            learned,
-            name: nameLabel,
-            rawName: name,
-            url,
-            type,
-            category,
-            power: powerLabel,
-            accuracy: accuracyLabel,
-        };
-    }
-
     const rows = useMemo(
-        () => (detailedMoves)
-            .filter((m) => {
-                if (!moveTypeFilter?.value) return true;
-                return pokemonMoveDetailsByName
-                    .get(m.name)
-                    ?.versionGroupDetails
-                    .at(-1)
-                    ?.move_learn_method
-                    .name === moveTypeFilter.value;
-            })
-            .map((m, i) => {
-                const pokemonMoveDetails = pokemonMoveDetailsByName.get(m.name);
-                return createData(
-                    i,
-                    pokemonMoveDetails?.versionGroupDetails,
-                    m.name,
-                    m.type.name,
-                    m.damage_class.name,
-                    m.power,
-                    m.accuracy,
-                    m.effect_entries,
-                    pokemonMoveDetails?.url ?? ''
-                );
-            }),
-        [detailedMoves, moveTypeFilter, pokemonMoveDetailsByName]
-    );
-
-    useEffect(() => {
-        if (!selectedMoveParam) {
-            setSelectedMoveRow(null);
-            return;
-        }
-
-        const moveFromUrl = rows.find((row) => row.rawName === selectedMoveParam);
-        if (!moveFromUrl) return;
-
-        setSelectedMoveRow((current) =>
-            current?.rawName === moveFromUrl.rawName ? current : moveFromUrl
-        );
-    }, [rows, selectedMoveParam]);
+        () => moveTypeFilter?.value ? allRows.filter((m) => pokemonMoveDetailsByName
+            .get(m.rawName)
+            ?.versionGroupDetails
+            .at(-1)
+            ?.move_learn_method
+            .name === moveTypeFilter.value) : allRows, [allRows, moveTypeFilter, pokemonMoveDetailsByName]);
 
     return (
         <>

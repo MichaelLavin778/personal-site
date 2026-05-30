@@ -1,4 +1,5 @@
 import { Page, expect, test } from "@playwright/test";
+import { mockShowcaseApi } from "./common/showcase";
 
 export const verifyTutorial = async (page: Page) => {
     let pageContext: '' | 'showcase' | 'resume' = '';
@@ -70,6 +71,7 @@ test('tutorial functionality', async ({ page }) => {
     await verifyTutorial(page);
 
     // showcase
+    await mockShowcaseApi(page);
     await page.goto('/showcase');
     await page.getByText('Abilities').waitFor(); // Ensure page is loaded
     await verifyTutorial(page);

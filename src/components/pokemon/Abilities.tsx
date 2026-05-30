@@ -3,7 +3,7 @@ import {
     Link,
     Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toTitleCase } from "../../helpers/common";
 import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
@@ -42,26 +42,12 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
         const fromUrl = ability.ability.url.split('/').filter(Boolean).at(-1);
         return fromUrl ?? ability.ability.name.trim().toLowerCase().replaceAll(' ', '-');
     }, []);
-    const initialAbility = displayedAbilities.find(
-        (ability) => getAbilityParamValue(ability) === selectedAbilityParam
-    ) || null;
-    const [selectedAbility, setSelectedAbility] = useState<PokemonAbility | null>(initialAbility);
-
-    useEffect(() => {
-        if (!selectedAbilityParam) {
-            setSelectedAbility(null);
-            return;
-        }
-
-        const abilityFromUrl = displayedAbilities.find(
+    const selectedAbility = useMemo(
+        () => displayedAbilities.find(
             (ability) => getAbilityParamValue(ability) === selectedAbilityParam
-        );
-        if (!abilityFromUrl) return;
-
-        setSelectedAbility((current) =>
-            current?.ability.url === abilityFromUrl.ability.url ? current : abilityFromUrl
-        );
-    }, [displayedAbilities, getAbilityParamValue, selectedAbilityParam]);
+        ) ?? null,
+        [displayedAbilities, getAbilityParamValue, selectedAbilityParam]
+    );
 
     const setAbilityUrlParam = useCallback((ability: PokemonAbility | null) => {
         const params = new URLSearchParams(window.location.search || location.search);
@@ -83,10 +69,9 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
         );
     }, [getAbilityParamValue, location.hash, location.pathname, location.search, navigate]);
 
-    const setAbility = (ability: PokemonAbility | null = null) => {
-        setSelectedAbility(ability);
+    const setAbility = useCallback((ability: PokemonAbility | null = null) => {
         setAbilityUrlParam(ability);
-    }
+    }, [setAbilityUrlParam]);
 
     const renderAbilities = () => {
         const hiddenAbility = displayedAbilities.find(a => a.is_hidden);

@@ -1,48 +1,57 @@
 import { expect, test } from '@playwright/test';
 import { verifyFooter, verifyHeader } from './common/helpers';
+import { expectSearchParam, getPokemonSelector, openMockedShowcase } from './common/showcase';
 
-test('showcase page', async ({ page }) => {
-    await page.goto('/showcase');
+test('showcase page renders core UX controls and details', async ({ page }) => {
+    await openMockedShowcase(page, { pokemon: 'pikachu' });
 
-    // Title
-    await expect(page).toHaveTitle(/Showcase - Pokemon/i);
+    await expect(page.getByRole('button', { name: 'Previous Pokemon: Arbok' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Next Pokemon: Raichu' })).toBeVisible();
 
-    // Core content
-    // Ensure we can deep-link to a specific pokemon via query param
-    await page.goto('/showcase?pokemon=pikachu');
+    for (const label of [
+        'Type',
+        'Abilities',
+        'Stats',
+        'Base Experience',
+        'Height',
+        'Weight',
+        'Cries',
+        'Moves',
+    ])
+        await expect(page.locator('label').getByText(label, { exact: true })).toBeVisible();
 
-    // Current selection should reflect the URL param
-    await expect(page.getByRole('combobox')).toHaveValue(/pikachu/i);
+    await expect(page.getByRole('button', { name: 'series Base' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'series Max' }).click();
+    await expect(page.getByRole('button', { name: 'series Max' })).toHaveAttribute('aria-pressed', 'true');
 
-    // Header navigation links
+    await expect(page.getByRole('button', { name: 'Latest' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Legacy' })).toBeVisible();
+    await expect(page.getByRole('slider', { name: 'Volume' })).toBeVisible();
+
     await verifyHeader(page);
-
-    // Footer content
     await verifyFooter(page);
 });
 
-test('ability modal pokemon links navigate', async ({ page }) => {
-    await page.goto('/showcase?pokemon=bulbasaur');
+test('previous and next Pokemon controls update the URL and selector', async ({ page }) => {
+    await openMockedShowcase(page, { pokemon: 'pikachu' });
 
-    // Open the first ability info dialog
-    await page.getByLabel(/Open ability info for/i).first().click();
-    await expect(page.getByText(/Pokémon with/i)).toBeVisible();
+    await page.getByRole('button', { name: 'Next Pokemon: Raichu' }).click();
+    await expectSearchParam(page, 'pokemon', 'raichu');
+    await expect(getPokemonSelector(page)).toHaveValue(/raichu/i);
 
-    // Click the first navigation link in the dialog (the current Pokémon is rendered as plain text)
-    const firstNavLink = page.getByLabel(/Go to Ivysaur showcase page/i).first();
-    await expect(firstNavLink).toBeVisible();
-    const href = await firstNavLink.getAttribute('href');
-    await firstNavLink.click();
+    await page.getByRole('button', { name: 'Previous Pokemon: Pikachu' }).click();
+    await expectSearchParam(page, 'pokemon', 'pikachu');
+    await expect(getPokemonSelector(page)).toHaveValue(/pikachu/i);
+});
 
-    // URL should reflect the clicked Pokémon
-    if (href) {
-        const expectedUrl = new URL(href, page.url()).toString();
-        await expect(page).toHaveURL(expectedUrl);
-    }
+test('Pokemon selector updates the URL and details', async ({ page }) => {
+    await openMockedShowcase(page);
 
-    // MUI Dialog marks the underlying page aria-hidden, so close it before asserting the combobox.
-    await page.keyboard.press('Escape');
+    const selector = getPokemonSelector(page);
+    await selector.fill('charmander');
+    await page.getByRole('option', { name: 'Charmander', exact: true }).click();
 
-    // Selection should update (regression: query-string change on the same route wasn't applied)
-    await expect(page.getByRole('combobox')).not.toHaveValue(/bulbasaur/i);
+    await expectSearchParam(page, 'pokemon', 'charmander');
+    await expect(selector).toHaveValue(/charmander/i);
+    await expect(page.getByLabel('Open ability info for Blaze')).toBeVisible();
 });
