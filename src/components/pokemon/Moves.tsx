@@ -129,7 +129,6 @@ const computeMoveColumnWidths = (containerWidth: number): MoveColumnWidths => {
     return widths;
 };
 
-
 interface MovesProps {
     moves: PokemonsMove[];
     lefColBottom: number;
@@ -175,7 +174,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         ? 100
         : Math.min(100, Math.max(0, Math.round((loadedMovesCount / loadableMovesTotal) * 100)));
 
-    // values for calc for dynamic page sizing
+    // values for calculating dynamic page sizing
     const columnHeaderSize = 55;
     const rowSize = 52;
     const gridFooterSize = 52;

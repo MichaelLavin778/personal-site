@@ -29,7 +29,6 @@ import { useHorizontalSwipeNavigation } from "../../hooks/useHorizontalSwipeNavi
 import { loadMove, selectAllMoves } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
 
-
 export type MoveRow = {
     id: number;
     learned: string;

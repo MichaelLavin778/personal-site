@@ -4,14 +4,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
 import PokemonNavigationButton from "../components/pokemon/PokemonNavigationButton";
 import ShowcaseBottomContext from "../context/ShowcaseBottomContext";
+import { getPokemonNameFromSearch } from "../helpers/common";
 import getPokemonLabel from "../helpers/PokemonLabel";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { useElementRect } from "../hooks/useElementRect";
 import { useViewportSize } from "../hooks/useViewportSize";
 import { headerFooterPadding, headerFooterPaddingPx } from "../model/common";
 import { loadAllPokemonMoves } from "../state/pokemonMovesSlice";
-import { loadGenderlessPokemonList, loadPokemon, loadPokemonList, selectPokemon } from "../state/pokemonSlice";
-
+import { getNextPokemon, getPokemon, getPokemonList, getPreviousPokemon, loadGenderlessPokemonList, loadPokemon, loadPokemonList } from "../state/pokemonSlice";
 
 type ShowcaseContainerProps = {
 	children: React.ReactNode;
@@ -24,26 +24,23 @@ const ShowcaseContainer = ({ children }: ShowcaseContainerProps) => (
 	</Container>
 );
 
-const getPokemonNameFromSearch = (search: string) =>
-	new URLSearchParams(search).get('pokemon')?.trim().toLowerCase() || null;
-
 const Showcase = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
-	const pokemonList = useAppSelector(selectPokemon);
+
+	const [currentPokemonName, setCurrentPokemonName] = useState<string>(
+		() => getPokemonNameFromSearch(location.search)
+	);
 	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const [currentPokemonName, setCurrentPokemonName] = useState<string>(
-		() => getPokemonNameFromSearch(location.search) ?? "bulbasaur"
-	);
 	const pendingPokemonNameRef = useRef<string | null>(null);
-	const currentPokemon = pokemonList.find((p) => p.name === currentPokemonName);
-	const currentPokemonIndex = pokemonList.findIndex((p) => p.name === currentPokemonName);
-	const previousPokemon = currentPokemonIndex > 0 ? pokemonList[currentPokemonIndex - 1] : undefined;
-	const nextPokemon = currentPokemonIndex >= 0 && currentPokemonIndex < pokemonList.length - 1
-		? pokemonList[currentPokemonIndex + 1]
-		: undefined;
+
+	const pokemonList = useAppSelector(getPokemonList);
+	const currentPokemon = useAppSelector((state) => getPokemon(state, currentPokemonName));
+	const previousPokemon = useAppSelector((state) => getPreviousPokemon(state, currentPokemonName));
+	const nextPokemon = useAppSelector((state) => getNextPokemon(state, currentPokemonName));
+
 	const ref = useRef<HTMLDivElement>(null);
 	const showcaseRect = useElementRect(ref);
 	const viewportSize = useViewportSize();

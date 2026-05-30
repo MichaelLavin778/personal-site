@@ -128,6 +128,23 @@ export const pokemonSlice = createSlice({
 	},
 })
 
-export const selectPokemon = (state: RootState) => state.pokemon.pokemon
+// Selectors
+export const getPokemonList = (state: RootState) => state.pokemon.pokemon
+export const getPokemon = (state: RootState, pokemonName: string) =>
+	getPokemonList(state).find((p) => p.name === pokemonName)
+export const getPokemonIndex = (state: RootState, pokemonName: string) =>
+	getPokemonList(state).findIndex((p) => p.name === pokemonName)
+export const getPreviousPokemon = (state: RootState, pokemonName: string) => {
+	const pokemonList = getPokemonList(state);
+	const index = getPokemonIndex(state, pokemonName);
+	return index > 0 ? pokemonList[index - 1] : undefined;
+}
+export const getNextPokemon = (state: RootState, pokemonName: string) => {
+	const pokemonList = getPokemonList(state);
+	const index = getPokemonIndex(state, pokemonName);
+	return (index >= 0 && index < getPokemonList(state).length - 1
+		? pokemonList[index + 1]
+		: undefined);
+}
 
 export default pokemonSlice.reducer
