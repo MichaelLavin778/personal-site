@@ -1,6 +1,6 @@
 import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { fetchPublicS3Blob } from '../loaders/S3FileDownloader'
-import type { RootState } from '../store'
+import type { RootState } from './store'
 
 
 interface ResumeState {
@@ -18,7 +18,7 @@ const initialState: ResumeState = {
 export const loadResume = createAsyncThunk<
     string,
     undefined,
-    { rejectValue: string }
+    { rejectValue: string; state: RootState }
 >('resume/resume', async (_, thunkAPI) => {
     try {
         const blob = await fetchPublicS3Blob('personal--site', 'resume.pdf');
@@ -30,6 +30,11 @@ export const loadResume = createAsyncThunk<
         const message = (err as Error)?.message ?? String(err);
         return thunkAPI.rejectWithValue(message);
     }
+}, {
+    condition: (_, { getState }) => {
+        const resume = getState().resume;
+        return !resume.url && !resume.loading;
+    },
 })
 
 export const resumeSlice = createSlice({

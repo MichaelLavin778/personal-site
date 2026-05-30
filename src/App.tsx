@@ -1,40 +1,33 @@
-import { useMemo, useState } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import RouteFavicon from './components/RouteFavicon';
-import VolumeContext from './context/VolumeContext';
-import Home from './pages/Home';
-import Resume from './pages/Resume';
-import Showcase from './pages/Showcase';
 import TutorialModeProvider from './providers/TutorialModeProvider';
+import VolumeProvider from './providers/VolumeProvider';
 
 
-const App = () => {
-	// volume
-	const storedVolume = localStorage.getItem('VOLUME');
-	const [volume, setVolume] = useState<number>(storedVolume ? Number(storedVolume) : 50);
-	const volumeContextValue = useMemo(() => ({
-		volume,
-		setVolume
-	}), [volume, setVolume]);
+const Home = lazy(() => import('./pages/Home'));
+const Resume = lazy(() => import('./pages/Resume'));
+const Showcase = lazy(() => import('./pages/Showcase'));
 
-	return (
-		<TutorialModeProvider>
-			<VolumeContext.Provider value={volumeContextValue}>
-				<BrowserRouter>
-					<RouteFavicon />
-					<Header />
+const App = () => (
+	<TutorialModeProvider>
+		<VolumeProvider>
+			<BrowserRouter>
+				<RouteFavicon />
+				<Header />
+				<Suspense fallback={null}>
 					<Routes>
 						<Route path="/" element={<Home />} />
 						<Route path="/showcase" element={<Showcase />} />
 						<Route path="/resume" element={<Resume />} />
 					</Routes>
-					<Footer />
-				</BrowserRouter>
-			</VolumeContext.Provider>
-		</TutorialModeProvider>
-	);
-};
+				</Suspense>
+				<Footer />
+			</BrowserRouter>
+		</VolumeProvider>
+	</TutorialModeProvider>
+);
 
 export default App;

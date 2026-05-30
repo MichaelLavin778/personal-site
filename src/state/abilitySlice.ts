@@ -43,7 +43,7 @@ const idleAbilityFetchState: AbilityFetchState = { status: 'idle' }
 export const loadAbilityDetails = createAsyncThunk<
 	{ url: string; ability: AbilityApiResponse },
 	string,
-	{ rejectValue: string }
+	{ rejectValue: string; state: RootState }
 >('abilities/loadOne', async (apiUrl: string, thunkAPI) => {
 	try {
 		const res = await fetch(apiUrl)
@@ -55,6 +55,11 @@ export const loadAbilityDetails = createAsyncThunk<
 		const message = (err as Error)?.message ?? String(err)
 		return thunkAPI.rejectWithValue(message)
 	}
+}, {
+	condition: (apiUrl, { getState }) => {
+		const status = getState().pokemon.abilities[apiUrl]?.status
+		return status !== 'loading' && status !== 'success'
+	},
 })
 
 export const abilitySlice = createSlice({

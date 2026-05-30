@@ -1,9 +1,33 @@
 import { Box, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import type { HighlightItemData } from "@mui/x-charts";
 import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
-import { useEffect, useState } from "react";
+import { memo, useState } from "react";
 import type { PokemonStat } from "../../model/Pokemon";
 
+
+const maxLevel = 100;
+const badNature = 0.9;
+const goodNature = 1.1;
+const maxEVs = 252;
+const maxIVs = 31;
+
+// Max value for each stat
+const metrics = [
+    { name: 'HP', max: 714 },
+    { name: 'Attack', max: 526 },
+    { name: 'Defense', max: 614 },
+    { name: 'Sp. Att', max: 535 },
+    { name: 'Sp. Def', max: 614 },
+    { name: 'Speed', max: 504 }
+];
+const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({
+        base_stat: 0,
+        effort: 0,
+        stat: {
+            name: metric.name,
+            url: `https://pokeapi.co/api/v2/stat/${i + 1}/`,
+        },
+}));
 
 interface StatsProps {
     stats: PokemonStat[] | undefined;
@@ -11,30 +35,6 @@ interface StatsProps {
 
 const Stats = ({ stats }: StatsProps) => {
     const [highlightedItem, setHighlightedItem] = useState<HighlightItemData>({ seriesId: 'base' });
-
-    const maxLevel = 100;
-    const badNature = 0.9;
-    const goodNature = 1.1;
-    const maxEVs = 252;
-    const maxIVs = 31;
-
-    // Max value for each stat
-    const metrics = [
-        { name: 'HP', max: 714 },
-        { name: 'Attack', max: 526 },
-        { name: 'Defense', max: 614 },
-        { name: 'Sp. Att', max: 535 },
-        { name: 'Sp. Def', max: 614 },
-        { name: 'Speed', max: 504 }
-    ];
-    const fallbackStats: PokemonStat[] = metrics.map((metric, i) => ({
-        base_stat: 0,
-        effort: 0,
-        stat: {
-            name: metric.name,
-            url: `https://pokeapi.co/api/v2/stat/${i + 1}/`,
-        },
-    }));
 
     const calcMinStat = (name: string, base: number) => {
         let min = Math.floor((Math.floor(2 * base * maxLevel / 100) + 5) * badNature);
@@ -92,11 +92,6 @@ const Stats = ({ stats }: StatsProps) => {
             }));
         }
     };
-
-    // force base to be selected by default
-    useEffect(() => {
-        if (!highlightedItem) setHighlightedItem({ seriesId: 'base' });
-    }, [highlightedItem]);
 
     // stats as a list
     const renderStatChart = () => {
@@ -172,4 +167,4 @@ const Stats = ({ stats }: StatsProps) => {
     );
 }
 
-export default Stats;
+export default memo(Stats);

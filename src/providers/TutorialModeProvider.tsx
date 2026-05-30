@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import TutorialContext from '../context/TutorialContext';
 import { isMobile } from '../helpers/common';
 
 
 const TutorialModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const storedTutorialSetting = localStorage.getItem('TUTORIAL');
-	const [showTutorial, setShowTutorial] = useState<boolean>(storedTutorialSetting !== null ? storedTutorialSetting === 'true' : !isMobile());
+	const [showTutorial, setShowTutorial] = useState<boolean>(() => {
+		const storedTutorialSetting = localStorage.getItem('TUTORIAL');
+		return storedTutorialSetting !== null ? storedTutorialSetting === 'true' : !isMobile();
+	});
 
-    const toggleTutorial = () => {
-        setShowTutorial((show) => !show);
-        localStorage.setItem('TUTORIAL', String(!showTutorial));
-    };
+	const toggleTutorial = useCallback(() => {
+		const nextShowTutorial = !showTutorial;
+		setShowTutorial(nextShowTutorial);
+		localStorage.setItem('TUTORIAL', String(nextShowTutorial));
+	}, [showTutorial]);
+	const value = useMemo(() => ({
+		showTutorial,
+		toggleTutorial,
+		setShowTutorial,
+	}), [showTutorial, toggleTutorial]);
 
     return (
-        <TutorialContext.Provider value={{ showTutorial, toggleTutorial, setShowTutorial }}>
+        <TutorialContext.Provider value={value}>
             {children}
         </TutorialContext.Provider>
     );

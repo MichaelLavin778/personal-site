@@ -32,14 +32,18 @@ const Showcase = () => {
 	const [currentPokemonName, setCurrentPokemonName] = useState<string>(
 		() => getPokemonNameFromSearch(location.search)
 	);
-	const [loaded, setLoaded] = useState<boolean>(false);
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const pendingPokemonNameRef = useRef<string | null>(null);
 
 	const pokemonList = useAppSelector(getPokemonList);
+	const loaded = pokemonList.length > 0;
+	const needsGenderData = pokemonList.some((pokemon) => pokemon.gender === undefined);
 	const currentPokemon = useAppSelector((state) => getPokemon(state, currentPokemonName));
 	const previousPokemon = useAppSelector((state) => getPreviousPokemon(state, currentPokemonName));
 	const nextPokemon = useAppSelector((state) => getNextPokemon(state, currentPokemonName));
+	const currentPokemonId = currentPokemon?.id;
+	const currentPokemonMoves = currentPokemon?.moves;
+	const currentPokemonUrl = currentPokemon?.url;
 
 	const ref = useRef<HTMLDivElement>(null);
 	const showcaseRect = useElementRect(ref);
@@ -101,45 +105,46 @@ const Showcase = () => {
 
 	// load list of pokemon and each pokemon info
 	useEffect(() => {
-		if (!loaded) {
-			try {
-				dispatch(loadPokemonList()).then(() => setLoaded(true));
-			} catch (err: unknown) {
-				setError(err as Error);
-			}
-		}
+		if (loaded) return;
+
+		dispatch(loadPokemonList())
+			.unwrap()
+			.catch((message) => {
+				if ((message as Error)?.name !== 'ConditionError')
+					setError(new Error(String(message)));
+			});
 	}, [dispatch, loaded]);
 
 	// backup loader incase all or specific pokemon failed to load
 	useEffect(() => {
-		if (loaded && !!currentPokemon && !currentPokemon.id) {
-			try {
-				dispatch(loadPokemon(currentPokemon.url));
-			} catch (err: unknown) {
-				setError(err as Error);
-			}
+		if (loaded && currentPokemonUrl && !currentPokemonId) {
+			dispatch(loadPokemon(currentPokemonUrl))
+				.unwrap()
+				.catch((message) => {
+					if ((message as Error)?.name !== 'ConditionError')
+						setError(new Error(String(message)));
+				});
 		}
-	}, [currentPokemon, dispatch, loaded]);
+	}, [currentPokemonId, currentPokemonUrl, dispatch, loaded]);
 
 	// load gender data and merge it into the already-loaded pokemon list
 	useEffect(() => {
-		if (!loaded) return;
+		if (!loaded || !needsGenderData) return;
 		dispatch(loadGenderlessPokemonList())
 			.unwrap()
-			.catch((message) => setError(new Error(String(message))));
-	}, [dispatch, loaded]);
+			.catch((message) => {
+				if ((message as Error)?.name !== 'ConditionError')
+					setError(new Error(String(message)));
+			});
+	}, [dispatch, loaded, needsGenderData]);
 
 	// load pokemon's moves (more detailed)
 	useEffect(() => {
-		if (loaded && !!currentPokemon?.id) {
-			try {
-				const apis = (currentPokemon.moves ?? []).map(m => m.move.url);
-				dispatch(loadAllPokemonMoves(apis));
-			} catch (err: unknown) {
-				setError(err as Error);
-			}
+		if (loaded && !!currentPokemonId) {
+			const apis = (currentPokemonMoves ?? []).map(m => m.move.url);
+			dispatch(loadAllPokemonMoves(apis));
 		}
-	}, [currentPokemon, dispatch, loaded]);
+	}, [currentPokemonId, currentPokemonMoves, dispatch, loaded]);
 
 	// error display
 	if (error) {

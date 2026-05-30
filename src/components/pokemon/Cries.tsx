@@ -6,6 +6,16 @@ import VolumeContext from "../../context/VolumeContext";
 import type { PokemonCry } from "../../model/Pokemon";
 import CryAudio from "./CryAudio";
 
+const setRefVolume = (ref: RefObject<HTMLAudioElement | null>, volume: number) => {
+    // Volume range is 0.0 to 1.0
+    const calculatedVolume = volume / 100;
+    if (ref.current && ref.current.volume !== calculatedVolume)
+        ref.current.volume = calculatedVolume;
+}
+
+const applyVolume = (refs: RefObject<HTMLAudioElement | null>[], volume: number) => {
+    refs.forEach((ref) => setRefVolume(ref, volume));
+}
 
 type CriesProps = {
     cries: PokemonCry | undefined;
@@ -18,29 +28,16 @@ const Cries = ({ cries }: CriesProps) => {
     const audioDreadnawRef = useRef<HTMLAudioElement | null>(null);
     const showDreadnawEasterEgg = cries?.latest?.includes("latest/834.ogg");
 
-    const setRefVolume = (ref: RefObject<HTMLAudioElement | null>, v: number) => {
-        // Volume range is 0.0 to 1.0
-        const calcVolume = v / 100;
-        if (ref.current && ref.current.volume !== calcVolume)
-            ref.current.volume = calcVolume;
-    }
-
-    const applyVolume = (newVolume: number) => {
-        setRefVolume(audioLatestRef, newVolume);
-        setRefVolume(audioLegacyRef, newVolume);
-        setRefVolume(audioDreadnawRef, newVolume);
-    }
-
     // workaround to keep volume consistent across pokemon changes
     useEffect(() => {
-        applyVolume(volume);
-    });
+        applyVolume([audioLatestRef, audioLegacyRef, audioDreadnawRef], volume);
+    }, [cries?.latest, cries?.legacy, volume]);
 
     const handleVolumeChange = (_event: Event, value: number) => {
         const newVolume = value;
         setVolume(newVolume);
         localStorage.setItem('VOLUME', String(newVolume));
-        applyVolume(newVolume)
+        applyVolume([audioLatestRef, audioLegacyRef, audioDreadnawRef], newVolume)
     };
 
     if (!cries?.latest && !cries?.legacy) return null;

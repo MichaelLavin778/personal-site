@@ -25,7 +25,7 @@ import { useViewportSize } from "../../hooks/useViewportSize";
 import { headerFooterPaddingPx } from "../../model/common";
 import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
 import type { EffectEntry } from "../../model/PokemonMove";
-import { makeSelectPokemonMoves, selectAllMoves } from "../../state/pokemonMovesSlice";
+import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
 import TutorialPopover from "../TutorialPopover";
 import MoveModal, { type MoveRow } from "./MoveModal";
 import Type from "./Type";
@@ -189,13 +189,22 @@ interface MovesProps {
     lefColBottom: number;
 }
 
+type MoveTypeFilterOption = { label: string; shortLabel?: string; value: string };
+const levelOption: MoveTypeFilterOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
+const buttonOptions: MoveTypeFilterOption[] = [
+    levelOption,
+    { label: "TM", value: "machine" },
+    { label: "Egg", value: "egg" },
+    { label: "Tutor", shortLabel: "Ttr", value: "tutor" },
+];
+const intialSort = { field: 'learned', sort: 'asc' as const };
+
 const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const location = useLocation();
     const navigate = useNavigate();
 
     const selectPokemonMoves = useMemo(() => makeSelectPokemonMoves(), []);
     const detailedMoves = useAppSelector((state) => selectPokemonMoves(state, moves));
-    const allMovesByName = useAppSelector(selectAllMoves);
 
     const pokemonMoveDetailsByName = useMemo(
         () => new Map(moves.map((move) => [
@@ -248,22 +257,9 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     const tableRect = useElementRect(containerRef);
 
     // move filter buttons
-    const levelOption = { label: "Level", shortLabel: "Lv.", value: "level-up" };
-    type MoveTypeFilterOption = { label: string; shortLabel?: string; value: string };
     const [moveTypeFilter, setMoveTypeFilter] = useState<MoveTypeFilterOption | null>(levelOption);
-    const buttonOptions = [
-        levelOption,
-        { label: "TM", value: "machine" },
-        { label: "Egg", value: "egg" },
-        { label: "Tutor", shortLabel: "Ttr", value: "tutor" },
-    ];
 
-    // Some Pokémon move names may not exist in the global moves store (e.g., API list mismatch).
-    // Count only moves that are actually "loadable" based on what's in the store.
-    const loadableMovesTotal = useMemo(
-        () => moves.filter((m) => Boolean(m?.move?.name && allMovesByName[m.move.name])).length,
-        [moves, allMovesByName]
-    );
+    const loadableMovesTotal = moves.length;
     const loadedMovesCount = detailedMoves.length;
     const movesLoadedPercent = loadableMovesTotal === 0
         ? 100
@@ -306,7 +302,6 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
     }, [detailedMoves.length, pageSize]);
 
     // intial sort and sort model controls
-    const intialSort = { field: 'learned', sort: 'asc' as const };
     const [sortModel, setSortModel] = useState<GridSortModel>([intialSort]);
 
     // override scrolling in the table to turn the table pages instead
@@ -315,16 +310,20 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         if (!el) return;
 
         const goToNextPage = () => {
-            const { page, pageSize } = paginationModel;
             if (detailedMoves.length === 0) return;
 
-            const maxPage = Math.max(0, Math.ceil(detailedMoves.length / pageSize) - 1);
-            setPaginationModel({ ...paginationModel, page: Math.min(page + 1, maxPage) });
+            setPaginationModel((prev) => {
+                const maxPage = Math.max(0, Math.ceil(detailedMoves.length / prev.pageSize) - 1);
+                const page = Math.min(prev.page + 1, maxPage);
+                return page === prev.page ? prev : { ...prev, page };
+            });
         };
 
         const goToPrevPage = () => {
-            const { page } = paginationModel;
-            setPaginationModel({ ...paginationModel, page: Math.max(0, page - 1) });
+            setPaginationModel((prev) => {
+                const page = Math.max(0, prev.page - 1);
+                return page === prev.page ? prev : { ...prev, page };
+            });
         };
 
         const handler = (e: WheelEvent) => {
@@ -339,7 +338,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
 
         el.addEventListener('wheel', handler, { passive: false });
         return () => el.removeEventListener('wheel', handler);
-    });
+    }, [detailedMoves.length]);
 
     // handle move type filter change
     const handleMoveTypeFilter = (

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { verifyFooter, verifyHeader } from './common/helpers';
-import { expectSearchParam, getPokemonSelector, openMockedShowcase } from './common/showcase';
+import { expectSearchParam, getMovesGrid, getPokemonSelector, openMockedShowcase, waitForMoveRows } from './common/showcase';
 
 test('showcase page renders core UX controls and details', async ({ page }) => {
     await openMockedShowcase(page, { pokemon: 'pikachu' });
@@ -54,4 +54,31 @@ test('Pokemon selector updates the URL and details', async ({ page }) => {
     await expectSearchParam(page, 'pokemon', 'charmander');
     await expect(selector).toHaveValue(/charmander/i);
     await expect(page.getByLabel('Open ability info for Blaze')).toBeVisible();
+});
+
+test('returning to showcase reuses cached Pokemon API responses', async ({ page }) => {
+    const apiRequestCounts = new Map<string, number>();
+    page.on('request', (request) => {
+        const { origin, pathname } = new URL(request.url());
+        if (origin !== 'https://pokeapi.co') return;
+
+        apiRequestCounts.set(pathname, (apiRequestCounts.get(pathname) ?? 0) + 1);
+    });
+
+    await openMockedShowcase(page);
+    await waitForMoveRows(page);
+    await expect.poll(
+        () => [...apiRequestCounts.keys()].filter((pathname) => pathname.startsWith('/api/v2/move/')).length
+    ).toBe(20);
+
+    const firstVisitRequestCounts = new Map(apiRequestCounts);
+
+    await page.locator('header').getByText('Home', { exact: true }).click();
+    await expect(page).toHaveURL('/');
+    await page.locator('header').getByText('Showcase', { exact: true }).click();
+    await expect(getPokemonSelector(page)).toHaveValue(/bulbasaur/i);
+    await expect(getMovesGrid(page).getByLabel('Open move info for Tackle')).toBeVisible();
+    await page.waitForTimeout(250);
+
+    expect(apiRequestCounts).toEqual(firstVisitRequestCounts);
 });

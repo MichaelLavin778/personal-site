@@ -26,7 +26,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { toTitleCase } from "../../helpers/common";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { useHorizontalSwipeNavigation } from "../../hooks/useHorizontalSwipeNavigation";
-import { loadMove, selectAllMoves } from "../../state/pokemonMovesSlice";
+import { loadMove, selectMoveByName } from "../../state/pokemonMovesSlice";
 import Type from "./Type";
 
 export type MoveRow = {
@@ -54,14 +54,12 @@ const MoveModal = ({
 }: MoveModalProps) => {
     const dispatch = useAppDispatch();
 
-    const allMovesByName = useAppSelector(selectAllMoves);
-
     const [selectedMoveStatus, setSelectedMoveStatus] = useState<'idle' | 'loading' | 'error'>('idle');
     const [selectedMoveError, setSelectedMoveError] = useState('');
     const dialogContentRef = useRef<HTMLDivElement | null>(null);
     const lastWheelNavAtRef = useRef<number>(0);
 
-    const selectedMove = selectedMoveRow ? allMovesByName[selectedMoveRow.rawName] : undefined;
+    const selectedMove = useAppSelector((state) => selectMoveByName(state, selectedMoveRow?.rawName));
     const selectedMoveIndex = useMemo(() => {
         if (!selectedMoveRow) return -1;
         return rows.findIndex((row) => row.rawName === selectedMoveRow.rawName);

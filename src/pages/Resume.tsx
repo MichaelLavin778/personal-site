@@ -1,13 +1,14 @@
 import { Box } from "@mui/material";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
-import { loadResume, selectResumeUrl } from "../state/resumeSlice";
+import { loadResume, selectResumeLoading, selectResumeUrl } from "../state/resumeSlice";
 import TutorialPopover from "../components/TutorialPopover";
 
 
 const Resume = () => {
     const dispatch = useAppDispatch();
     const s3Resume = useAppSelector(selectResumeUrl);
+    const isResumeLoading = useAppSelector(selectResumeLoading);
 
     // Set the tab name
     useEffect(() => {
@@ -16,8 +17,8 @@ const Resume = () => {
 
     // grab resume from s3 and store blob URL in the Redux store
     useEffect(() => {
-        if (!s3Resume) dispatch(loadResume());
-    }, [dispatch, s3Resume]);
+        if (!s3Resume && !isResumeLoading) dispatch(loadResume());
+    }, [dispatch, isResumeLoading, s3Resume]);
 
     return (
         <>

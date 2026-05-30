@@ -3,11 +3,17 @@ import type { Pokemon, PokemonGender, PokemonItemSimple } from '../model/Pokemon
 import type { RootState } from './store';
 
 const initialState: Pokemon[] = [];
+let isPokemonListRequestInFlight = false;
+let isPokemonGenderDataRequestInFlight = false;
+const pokemonRequestsInFlight = new Set<string>();
 
 // Async thunk to fetch pokemon list
 export const loadPokemonList = createAsyncThunk<
-	PokemonItemSimple[]
->('pokemon/pokemonList', async (_, thunkAPI) => {
+	PokemonItemSimple[],
+	void,
+	{ rejectValue: string; state: RootState }
+>('pokemon/pokemonList', async (_: void, thunkAPI) => {
+	isPokemonListRequestInFlight = true;
 	try {
 		const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 		const res = await fetch(apiUrl);
@@ -22,7 +28,12 @@ export const loadPokemonList = createAsyncThunk<
 	} catch (err: unknown) {
 		const message = (err as Error)?.message ?? String(err);
 		return thunkAPI.rejectWithValue(message);
+	} finally {
+		isPokemonListRequestInFlight = false;
 	}
+}, {
+	condition: (_, { getState }) =>
+		!isPokemonListRequestInFlight && getState().pokemon.pokemon.length === 0,
 })
 
 const readGenderNames = async (apiUrl: string): Promise<string[]> => {
@@ -44,8 +55,9 @@ const readGenderNames = async (apiUrl: string): Promise<string[]> => {
 export const loadPokemonGenderData = createAsyncThunk<
 	{ male: string[]; female: string[] },
 	void,
-	{ rejectValue: string }
+	{ rejectValue: string; state: RootState }
 >('pokemon/genderData', async (_: void, thunkAPI) => {
+	isPokemonGenderDataRequestInFlight = true;
 	try {
 		// PokeAPI: 1=female, 2=male, 3=genderless
 		const [female, male] = await Promise.all([
@@ -60,7 +72,16 @@ export const loadPokemonGenderData = createAsyncThunk<
 	} catch (err: unknown) {
 		const message = (err as Error)?.message ?? String(err);
 		return thunkAPI.rejectWithValue(message);
+	} finally {
+		isPokemonGenderDataRequestInFlight = false;
 	}
+}, {
+	condition: (_, { getState }) => {
+		const pokemon = getState().pokemon.pokemon;
+		return !isPokemonGenderDataRequestInFlight &&
+			pokemon.length > 0 &&
+			pokemon.some((p) => p.gender === undefined);
+	},
 });
 
 // Backwards-compatible export name: this no longer loads "genderless" specifically.
@@ -70,8 +91,9 @@ export const loadGenderlessPokemonList = loadPokemonGenderData;
 export const loadPokemon = createAsyncThunk<
 	Pokemon,
 	string,
-	{ rejectValue: string }
+	{ rejectValue: string; state: RootState }
 >('pokemon/pokemon', async (apiUrl, thunkAPI) => {
+	pokemonRequestsInFlight.add(apiUrl);
 	try {
 		const res = await fetch(apiUrl);
 		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
@@ -83,7 +105,14 @@ export const loadPokemon = createAsyncThunk<
 	} catch (err: unknown) {
 		const message = (err as Error)?.message ?? String(err);
 		return thunkAPI.rejectWithValue(message);
+	} finally {
+		pokemonRequestsInFlight.delete(apiUrl);
 	}
+}, {
+	condition: (apiUrl, { getState }) => {
+		const cachedPokemon = getState().pokemon.pokemon.find((p) => p.url === apiUrl);
+		return !pokemonRequestsInFlight.has(apiUrl) && !cachedPokemon?.id;
+	},
 })
 
 export const pokemonSlice = createSlice({
@@ -94,11 +123,14 @@ export const pokemonSlice = createSlice({
 		builder
 			.addCase(loadPokemonList.fulfilled, (state, action: PayloadAction<PokemonItemSimple[]>) => {
 				const payload = action.payload;
+				const existingPokemonNames = new Set(state.map((p) => p.name));
 				for (const p of payload) {
+					if (existingPokemonNames.has(p.name)) continue;
 					state.push({
 						...p,
 						gender: undefined,
 					} as Pokemon);
+					existingPokemonNames.add(p.name);
 				}
 			})
 			.addCase(loadPokemonGenderData.fulfilled, (state, action: PayloadAction<{
@@ -123,7 +155,8 @@ export const pokemonSlice = createSlice({
 			})
 			.addCase(loadPokemon.fulfilled, (state, action: PayloadAction<Pokemon>) => {
 				const index = state.findIndex(p => p.name === action.payload.name);
-				state[index] = { ...state[index], ...action.payload };
+				if (index >= 0) state[index] = { ...state[index], ...action.payload };
+				else state.push(action.payload);
 			})
 	},
 })
