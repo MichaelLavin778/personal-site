@@ -157,7 +157,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         <Grid size={6}>
                             <>
                                 <Box>
-                                    <Typography component="label" variant="caption" color="textSecondary">Type</Typography>
+                                    <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
                                 </Box>
                                 {pokemon.types && pokemon.types.length > 0 ? (
                                     <Stack direction="row" spacing={1}>
@@ -181,7 +181,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         <Grid size={4}>
                             <>
                                 <Box>
-                                    <Typography component="label" variant="caption" color="textSecondary">Base Experience</Typography>
+                                    <Typography component="span" variant="caption" color="textSecondary">Base Experience</Typography>
                                 </Box>
                                 <Typography>{pokemon.base_experience ?? '-'}</Typography>
                             </>
@@ -190,7 +190,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         <Grid size={4}>
                             <>
                                 <Box>
-                                    <Typography component="label" variant="caption" color="textSecondary">Height</Typography>
+                                    <Typography component="span" variant="caption" color="textSecondary">Height</Typography>
                                 </Box>
                                 <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
                             </>
@@ -199,7 +199,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                         <Grid size={4}>
                             <>
                                 <Box>
-                                    <Typography component="label" variant="caption" color="textSecondary">Weight</Typography>
+                                    <Typography component="span" variant="caption" color="textSecondary">Weight</Typography>
                                 </Box>
                                 <Typography>{pokemon.weight ? pokemon.weight / 10 : '-'} kg</Typography>
                             </>

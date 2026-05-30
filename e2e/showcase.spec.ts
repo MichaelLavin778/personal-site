@@ -18,7 +18,7 @@ test('showcase page renders core UX controls and details', async ({ page }) => {
         'Cries',
         'Moves',
     ])
-        await expect(page.locator('label').getByText(label, { exact: true })).toBeVisible();
+        await expect(page.locator('span').getByText(label, { exact: true })).toBeVisible();
 
     await expect(page.getByRole('button', { name: 'series Base' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: 'series Max' }).click();

@@ -468,7 +468,7 @@ const Moves = ({ moves, lefColBottom }: MovesProps) => {
         <>
             {/* Label */}
             <Box>
-                <Typography component="label" variant="caption" color="textSecondary">Moves</Typography>
+                <Typography component="span" variant="caption" color="textSecondary">Moves</Typography>
             </Box>
 
             {/* Table Header */}

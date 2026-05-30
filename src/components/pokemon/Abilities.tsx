@@ -128,7 +128,7 @@ const Abilities = ({ pokemon }: AbilitiesProps) => {
     return (
         <>
             <Box>
-                <Typography component="label" variant="caption" color="textSecondary">Abilities</Typography>
+                <Typography component="span" variant="caption" color="textSecondary">Abilities</Typography>
             </Box>
             {displayedAbilities.length > 0 ? renderAbilities() : '-'}
             <AbilityModal

@@ -45,7 +45,7 @@ const Cries = ({ cries }: CriesProps) => {
     return (
         <>
             <Box>
-                <Typography component="label" variant="caption" color="textSecondary">Cries</Typography>
+                <Typography component="span" variant="caption" color="textSecondary">Cries</Typography>
             </Box>
             <Stack direction="row" spacing={1}>
                 {cries?.latest && (

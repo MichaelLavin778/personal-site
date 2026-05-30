@@ -108,7 +108,7 @@ const Stats = ({ stats }: StatsProps) => {
         <>
             {/* Label */}
             <Box>
-                <Typography component="label" variant="caption" color="textSecondary">Stats</Typography>
+                <Typography component="span" variant="caption" color="textSecondary">Stats</Typography>
             </Box>
 
             {/* Controls */}
