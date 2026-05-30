@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import Header from './components/Header';
+import RouteFavicon from './components/RouteFavicon';
 import VolumeContext from './context/VolumeContext';
 import Home from './pages/Home';
 import Resume from './pages/Resume';
@@ -22,6 +23,7 @@ const App = () => {
 		<TutorialModeProvider>
 			<VolumeContext.Provider value={volumeContextValue}>
 				<BrowserRouter>
+					<RouteFavicon />
 					<Header />
 					<Routes>
 						<Route path="/" element={<Home />} />

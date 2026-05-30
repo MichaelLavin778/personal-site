@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">ML monogram title icon</title>
+  <desc id="desc">A minimalist geometric ML monogram in muted sage green.</desc>
+  <g fill="none" stroke="#778873" stroke-width="54" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M106 362 V126 L256 278 L406 126 V338" />
+    <path d="M318 278 V386 H448" />
+  </g>
+</svg>
