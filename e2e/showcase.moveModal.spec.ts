@@ -17,8 +17,9 @@ test('move modal opens, navigates between moves, and closes', async ({ page }) =
     await expect(dialog.getByText('Tackle', { exact: true })).toBeVisible();
     await expectSearchParam(page, 'move', 'tackle');
 
-    await dialog.getByRole('button', { name: 'next move' }).click();
-    await expect.poll(() => new URL(page.url()).searchParams.get('move')).not.toBe('tackle');
+    await dialog.locator('.MuiDialogContent-root').dispatchEvent('wheel', { deltaY: 100 });
+    await expectSearchParam(page, 'move', 'growl');
+    await expect(dialog.getByText('Growl', { exact: true })).toBeVisible();
 
     await dialog.getByRole('button', { name: 'close move info' }).click();
     await expect(dialog).toBeHidden();

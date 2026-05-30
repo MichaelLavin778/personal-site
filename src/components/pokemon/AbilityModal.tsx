@@ -203,21 +203,17 @@ const AbilityModal = ({
         }
     }, [canNavigateAbilities, toNextAbility, toPrevAbility]);
 
-    useEffect(() => {
-        const el = dialogContentRef.current;
-        if (!el || !selectedAbility) return;
+    const setDialogContentRef = useCallback((el: HTMLDivElement | null) => {
+        dialogContentRef.current?.removeEventListener('wheel', onDialogWheel);
+        dialogContentRef.current = el;
+        el?.addEventListener('wheel', onDialogWheel, { passive: false });
+    }, [onDialogWheel]);
 
-        el.addEventListener('wheel', onDialogWheel, { passive: false });
-        return () => el.removeEventListener('wheel', onDialogWheel);
-    }, [selectedAbility, onDialogWheel]);
-
-    useEffect(() => {
-        const el = pokemonListRef.current;
-        if (!el || !selectedAbility) return;
-
-        el.addEventListener('wheel', onPokemonListWheel, { passive: false });
-        return () => el.removeEventListener('wheel', onPokemonListWheel);
-    }, [selectedAbility, onPokemonListWheel]);
+    const setPokemonListRef = useCallback((el: HTMLDivElement | null) => {
+        pokemonListRef.current?.removeEventListener('wheel', onPokemonListWheel);
+        pokemonListRef.current = el;
+        el?.addEventListener('wheel', onPokemonListWheel, { passive: false });
+    }, [onPokemonListWheel]);
 
     return (
         <Dialog
@@ -305,7 +301,7 @@ const AbilityModal = ({
             <DialogContent
                 dividers
                 sx={{ px: dialogNavGutterSx, flex: 1, touchAction: 'pan-y' }}
-                ref={dialogContentRef}
+                ref={setDialogContentRef}
                 {...swipeHandlers}
             >
                 {selectedFetchState.status === 'loading' && (
@@ -357,7 +353,7 @@ const AbilityModal = ({
                                 borderRadius: 1,
                                 p: 1,
                             }}
-                            ref={pokemonListRef}
+                            ref={setPokemonListRef}
                         >
                             <Box
                                 sx={{

@@ -10,7 +10,7 @@ test('ability modal opens, navigates between abilities, and closes', async ({ pa
     await expect(dialog.getByText('Overgrow', { exact: true })).toBeVisible();
     await expectSearchParam(page, 'ability', 'overgrow');
 
-    await dialog.getByRole('button', { name: 'next ability' }).click();
+    await dialog.locator('.MuiDialogContent-root').dispatchEvent('wheel', { deltaY: 100 });
     await expect(dialog.getByText('Chlorophyll', { exact: true })).toBeVisible();
     await expectSearchParam(page, 'ability', 'chlorophyll');
 

@@ -149,13 +149,11 @@ const MoveModal = ({
         }
     }, [canNavigateMoves, toNextMove, toPrevMove]);
 
-    useEffect(() => {
-        const el = dialogContentRef.current;
-        if (!el || !selectedMoveRow) return;
-
-        el.addEventListener('wheel', onDialogWheel, { passive: false });
-        return () => el.removeEventListener('wheel', onDialogWheel);
-    }, [selectedMoveRow, onDialogWheel]);
+    const setDialogContentRef = useCallback((el: HTMLDivElement | null) => {
+        dialogContentRef.current?.removeEventListener('wheel', onDialogWheel);
+        dialogContentRef.current = el;
+        el?.addEventListener('wheel', onDialogWheel, { passive: false });
+    }, [onDialogWheel]);
 
     const onPokemonListWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -293,7 +291,7 @@ const MoveModal = ({
             <DialogContent
                 dividers
                 sx={{ px: dialogNavGutterSx, flex: 1, touchAction: 'pan-y' }}
-                ref={dialogContentRef}
+                ref={setDialogContentRef}
                 {...swipeHandlers}
             >
                 {selectedMoveStatus === 'loading' && (
