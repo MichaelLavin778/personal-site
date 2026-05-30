@@ -5,6 +5,7 @@ import { getPlaywrightBaseUrl, getPlaywrightEnv } from './playwright/playwrightE
 const CI = !!process.env.CI;
 const isLocal = getPlaywrightEnv() === 'local';
 const baseURL = getPlaywrightBaseUrl();
+const mobileTestMatch = /.*\.mobile\.spec\.ts/;
 
 /**
  * Read environment variables from file.
@@ -56,28 +57,33 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: mobileTestMatch,
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testIgnore: mobileTestMatch,
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testIgnore: mobileTestMatch,
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    /* Playwright does not ship a Galaxy S8+ profile, so cover both requested fallbacks. */
+    {
+      name: 'mobile-iphone-13',
+      testMatch: mobileTestMatch,
+      use: { ...devices['iPhone 13'] },
+    },
+    {
+      name: 'mobile-galaxy-s8',
+      testMatch: mobileTestMatch,
+      use: { ...devices['Galaxy S8'] },
+    },
 
     /* Test against branded browsers. */
     // {

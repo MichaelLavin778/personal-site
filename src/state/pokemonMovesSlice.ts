@@ -55,6 +55,7 @@ export const loadAllPokemonMoves = createAsyncThunk<
         // Wait for all to complete (we still flushed along the way). After all
         // completes, flush any remaining items.
         const results = (await Promise.all(tasks)) as PokemonMove[];
+        while (buffer.length > 0) flushBuffer();
 
         return results;
     } catch (err: unknown) {
