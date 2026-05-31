@@ -1,4 +1,5 @@
-import { Autocomplete, Box, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { Autocomplete, Box, CircularProgress, Container, InputAdornment, Paper, TextField, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
@@ -189,13 +190,32 @@ const Showcase = () => {
 								<Box sx={{ gridArea: 'selector', minWidth: 0 }}>
 									<Autocomplete
 										options={pokemonList}
-										getOptionLabel={(option) => getPokemonLabel(option.name) ?? option.name}
-										renderInput={(params) => <TextField {...params} />}
+										getOptionLabel={(option) => {
+											const name = typeof option === 'string' ? option : option.name;
+											return getPokemonLabel(name) ?? name;
+										}}
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												slotProps={{
+													input: {
+														...params.InputProps,
+														startAdornment: (
+															<InputAdornment position="start">
+																<SearchIcon />
+															</InputAdornment>
+														),
+													},
+												}}
+											/>
+										)}
 										value={currentPokemon ?? undefined}
 										disableClearable={true}
+										freeSolo={true}
 										onChange={(_event, value) => {
-											if (!value?.name) return;
-											selectPokemonName(value.name);
+											const name = typeof value === 'string' ? value : value?.name;
+											if (!name) return;
+											selectPokemonName(name);
 										}}
 										sx={{ width: '100%' }}
 									/>

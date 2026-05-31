@@ -2,6 +2,19 @@ import { expect, test } from '@playwright/test';
 import { verifyFooter, verifyHeader } from './common/helpers';
 import { expectSearchParam, getMovesGrid, getPokemonSelector, openMockedShowcase, waitForMoveRows } from './common/showcase';
 
+test('showcase favicon survives direct navigation and refresh', async ({ page }) => {
+    const favicon = page.locator('link[rel="icon"]');
+    const expectShowcaseFavicon = () => expect.poll(async () =>
+        decodeURIComponent(await favicon.getAttribute('href') ?? '')
+    ).toContain('Pokédex Database Title Icon');
+
+    await page.goto('/showcase/');
+    await expectShowcaseFavicon();
+
+    await page.reload();
+    await expectShowcaseFavicon();
+});
+
 test('showcase page renders core UX controls and details', async ({ page }) => {
     await openMockedShowcase(page, { pokemon: 'pikachu' });
 
