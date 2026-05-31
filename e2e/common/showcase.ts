@@ -52,6 +52,74 @@ const pokemonNames = [
     'raichu',
 ];
 
+const pokemonTypeNames = [
+    'normal',
+    'fire',
+    'water',
+    'electric',
+    'grass',
+    'ice',
+    'fighting',
+    'poison',
+    'ground',
+    'flying',
+    'psychic',
+    'bug',
+    'rock',
+    'ghost',
+    'dragon',
+    'dark',
+    'steel',
+    'fairy',
+] as const;
+
+const typeEffectiveness: Record<string, { double?: string[]; half?: string[]; none?: string[] }> = {
+    normal: { half: ['rock', 'steel'], none: ['ghost'] },
+    fire: { double: ['grass', 'ice', 'bug', 'steel'], half: ['fire', 'water', 'rock', 'dragon'] },
+    water: { double: ['fire', 'ground', 'rock'], half: ['water', 'grass', 'dragon'] },
+    electric: { double: ['water', 'flying'], half: ['electric', 'grass', 'dragon'], none: ['ground'] },
+    grass: { double: ['water', 'ground', 'rock'], half: ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'] },
+    ice: { double: ['grass', 'ground', 'flying', 'dragon'], half: ['fire', 'water', 'ice', 'steel'] },
+    fighting: { double: ['normal', 'ice', 'rock', 'dark', 'steel'], half: ['poison', 'flying', 'psychic', 'bug', 'fairy'], none: ['ghost'] },
+    poison: { double: ['grass', 'fairy'], half: ['poison', 'ground', 'rock', 'ghost'], none: ['steel'] },
+    ground: { double: ['fire', 'electric', 'poison', 'rock', 'steel'], half: ['grass', 'bug'], none: ['flying'] },
+    flying: { double: ['grass', 'fighting', 'bug'], half: ['electric', 'rock', 'steel'] },
+    psychic: { double: ['fighting', 'poison'], half: ['psychic', 'steel'], none: ['dark'] },
+    bug: { double: ['grass', 'psychic', 'dark'], half: ['fire', 'fighting', 'poison', 'flying', 'ghost', 'steel', 'fairy'] },
+    rock: { double: ['fire', 'ice', 'flying', 'bug'], half: ['fighting', 'ground', 'steel'] },
+    ghost: { double: ['psychic', 'ghost'], half: ['dark'], none: ['normal'] },
+    dragon: { double: ['dragon'], half: ['steel'], none: ['fairy'] },
+    dark: { double: ['psychic', 'ghost'], half: ['fighting', 'dark', 'fairy'] },
+    steel: { double: ['ice', 'rock', 'fairy'], half: ['fire', 'water', 'electric', 'steel'] },
+    fairy: { double: ['fighting', 'dragon', 'dark'], half: ['fire', 'poison', 'steel'] },
+};
+
+const typeResources = (names: string[] = []) => names.map(name => apiItem('type', name));
+const attackingTypesWith = (defendingType: string, relation: 'double' | 'half' | 'none') =>
+    pokemonTypeNames.filter(name => typeEffectiveness[name][relation]?.includes(defendingType));
+const makeType = (name: string) => ({
+    name,
+    damage_relations: {
+        no_damage_to: typeResources(typeEffectiveness[name].none),
+        half_damage_to: typeResources(typeEffectiveness[name].half),
+        double_damage_to: typeResources(typeEffectiveness[name].double),
+        no_damage_from: typeResources(attackingTypesWith(name, 'none')),
+        half_damage_from: typeResources(attackingTypesWith(name, 'half')),
+        double_damage_from: typeResources(attackingTypesWith(name, 'double')),
+    },
+    sprites: {
+        'generation-ix': {
+            'scarlet-violet': {
+                name_icon: `${ASSET_ROOT}/types/${name}.png`,
+                symbol_icon: `${ASSET_ROOT}/types/${name}-symbol.png`,
+            },
+        },
+    },
+});
+const typesByName = new Map<string, ReturnType<typeof makeType>>(
+    pokemonTypeNames.map(name => [name, makeType(name)])
+);
+
 const pokemonMoves = moveFixtures.map((move) => ({
     move: apiItem('move', move.name),
     version_group_details: [{
@@ -80,6 +148,13 @@ const pokemonAbilities = (name: string) => {
 
 const getPokemonSprite = (name: string, variant: string) =>
     name === 'pikachu' ? `${ASSET_ROOT}/sprites/${name}-${variant}.png` : null;
+
+const getPokemonTypes = (name: string) => {
+    if (name === 'pikachu' || name === 'raichu') return ['electric'];
+    if (name === 'charmander') return ['fire'];
+    if (name === 'arbok') return ['poison'];
+    return ['grass', 'poison'];
+};
 
 const makePokemon = (name: string, index: number) => ({
     ...apiItem('pokemon', name),
@@ -114,7 +189,7 @@ const makePokemon = (name: string, index: number) => ({
         effort: 0,
         stat: apiItem('stat', String(stat || statIndex)),
     })),
-    types: [{ slot: 1, type: apiItem('type', name === 'pikachu' || name === 'raichu' ? 'electric' : 'grass') }],
+    types: getPokemonTypes(name).map((type, typeIndex) => ({ slot: typeIndex + 1, type: apiItem('type', type) })),
     weight: 69 + index,
 });
 
@@ -217,6 +292,12 @@ export const mockShowcaseApi = async (page: Page) => {
         const abilityName = getResourceName(pathname, 'ability');
         if (abilityName) {
             await route.fulfill({ json: makeAbility(abilityName) });
+            return;
+        }
+
+        const typeName = getResourceName(pathname, 'type');
+        if (typeName && typesByName.has(typeName)) {
+            await route.fulfill({ json: typesByName.get(typeName)! });
             return;
         }
 
