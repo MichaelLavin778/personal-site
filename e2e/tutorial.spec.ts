@@ -59,7 +59,7 @@ test('tutorial functionality', async ({ page }) => {
 
     // resume
     tutorialText = 'My resume is loaded from an S3 bucket. This way the resume can be updated without needing to redeploy the site.';
-    await page.goto('/resume');
+    await page.goto('/resume', { waitUntil: 'domcontentloaded' });
     await page.getByText('Powered by').waitFor(); // Ensure page is loaded
     await verifyTutorial(page, tutorialText);
 });

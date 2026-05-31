@@ -28,6 +28,7 @@ type SpriteBlockProps = {
     name: string;
     showFemaleSymbol: boolean;
     showMaleSymbol: boolean;
+    showShinySymbol?: boolean;
     spriteBack: string | undefined;
     spriteFront: string | undefined;
 }
@@ -38,6 +39,7 @@ const SpriteBlock = ({
     name,
     showFemaleSymbol,
     showMaleSymbol,
+    showShinySymbol,
     spriteBack,
     spriteFront,
 }: SpriteBlockProps) => (
@@ -49,6 +51,7 @@ const SpriteBlock = ({
             />
             {showMaleSymbol && cardSymbol('♂', 'self-start')}
             {showFemaleSymbol && cardSymbol('♀', 'self-start')}
+            {showShinySymbol && cardSymbol('✨', 'self-end')}
             <SpriteImage
                 compact={compact}
                 src={spriteBack || undefined}

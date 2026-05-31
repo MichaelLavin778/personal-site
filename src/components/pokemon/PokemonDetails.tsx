@@ -1,7 +1,8 @@
-import { Box, Grid, Stack, Typography } from "@mui/material";
-import { useRef } from "react";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
+import { Box, ButtonBase, Grid, Stack, Typography } from "@mui/material";
+import { useRef, useState } from "react";
 import { useElementRect } from "../../hooks/useElementRect";
-import type { Pokemon } from "../../model/Pokemon";
+import type { Pokemon, PokemonType } from "../../model/Pokemon";
 import FullPaper from "../FullPaper";
 import Abilities from "./Abilities";
 import Cries from "./Cries";
@@ -9,6 +10,7 @@ import Moves from "./Moves";
 import SpriteBlock from "./SpriteBlock";
 import Stats from "./Stats";
 import Type from "./Type";
+import TypeModal from "./TypeModal";
 
 type PokemonProps = {
     pokemon: Pokemon;
@@ -18,12 +20,14 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
     // purpose of tracking this is to make right col the same height as the left
     const leftColRef = useRef<HTMLDivElement>(null);
     const leftColumnRect = useElementRect(leftColRef);
+    const [typeModalTypes, setTypeModalTypes] = useState<PokemonType[] | null>(null);
 
     // hide until pokemon is loaded
     if (!pokemon) return null;
 
     const name = pokemon.name;
     const gender = pokemon.gender;
+    const displayedTypes = pokemon.types?.slice(0, 2) ?? [];
 
     // determine which sprites are available
     const hasAnyMaleDefaultSprites =
@@ -118,6 +122,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                             name={name}
                             showFemaleSymbol={showFemaleSymbol}
                             showMaleSymbol={showMaleSymbol}
+                            showShinySymbol={true}
                             spriteBack={pokemon.sprites?.back_shiny || undefined}
                             spriteFront={pokemon.sprites?.front_shiny || undefined}
                         />
@@ -142,6 +147,7 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                             name={name}
                             showFemaleSymbol={showFemaleSymbol}
                             showMaleSymbol={showMaleSymbol}
+                            showShinySymbol={true}
                             spriteBack={pokemon.sprites?.back_shiny_female || undefined}
                             spriteFront={pokemon.sprites?.front_shiny_female || undefined}
                         />
@@ -154,17 +160,44 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 <FullPaper>
                     <Grid container={true} spacing={1}>
                         {/* Type(s) */}
-                        <Grid size={6}>
-                            <>
+                        <Grid size={6} sx={{ display: 'flex' }}>
+                            <ButtonBase
+                                aria-label={`Open type matchup info for ${displayedTypes.map(t => t.type.name).join(' and ')}`}
+                                disabled={displayedTypes.length === 0}
+                                onClick={() => setTypeModalTypes(displayedTypes)}
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'flex-start',
+                                    width: '100%',
+                                    height: '100%',
+                                    textAlign: 'left',
+                                    transition: 'background-color 120ms ease, border-color 120ms ease, transform 120ms ease',
+                                    '&:hover': {
+                                        bgcolor: 'action.hover',
+                                        borderColor: 'primary.main',
+                                        transform: 'translateY(-1px)',
+                                    },
+                                    '&.Mui-focusVisible': {
+                                        outline: '2px solid',
+                                        outlineColor: 'primary.main',
+                                        outlineOffset: 2,
+                                    },
+                                }}
+                            >
                                 <Box>
                                     <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
                                 </Box>
-                                {pokemon.types && pokemon.types.length > 0 ? (
-                                    <Stack direction="row" spacing={1}>
-                                        {pokemon.types.map(t => <Type key={t.type.name} typeName={t.type.name} />)}
+                                {displayedTypes.length > 0 ? (
+                                    <Stack direction="row" spacing={1} width="100%" alignItems="center">
+                                        {displayedTypes.map(t => (
+                                            <Type key={t.type.name} typeName={t.type.name} sx={{ flexShrink: 0 }} />
+                                        ))}
+                                        <OpenInFullIcon sx={{ ml: 'auto', mr: 1, fontSize: '1rem', color: 'text.secondary' }} />
                                     </Stack>
                                 ) : '-'}
-                            </>
+                            </ButtonBase>
                         </Grid>
                         {/* Abilities */}
                         <Grid size={6} sx={{ minHeight: 92 }}>
@@ -212,6 +245,13 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                     </Grid>
                 </FullPaper>
             </Grid>
+
+            {typeModalTypes && (
+                <TypeModal
+                    initialTypes={typeModalTypes}
+                    onClose={() => setTypeModalTypes(null)}
+                />
+            )}
 
             {/* Right column */}
             <Grid size={{ md: 12, lg: 7 }}>
