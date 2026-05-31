@@ -2,7 +2,6 @@ import { configureStore } from '@reduxjs/toolkit'
 import { combineReducers } from 'redux'
 import pokemonMovesReducer from './state/pokemonMovesSlice'
 import pokemonReducer from './state/pokemonSlice'
-import resumeReducer from './state/resumeSlice'
 
 const pokemonRootReducer = combineReducers({
 	pokemon: pokemonReducer,
@@ -12,7 +11,6 @@ const pokemonRootReducer = combineReducers({
 const store = configureStore({
 	reducer: {
 		pokemon: pokemonRootReducer,
-		resume: resumeReducer,
 	},
 	devTools: false,
 })

@@ -8,7 +8,9 @@ test('resume page', async ({ page }) => {
     await expect(page).toHaveTitle(/Resume/i);
 
     // Core content
-    await expect(page.locator('object')).toHaveAttribute('type', 'application/pdf');
+    const resume = page.locator('object');
+    await expect(resume).toHaveAttribute('type', 'application/pdf');
+    await expect(resume).toHaveAttribute('data', 'https://personal--site.s3.us-east-2.amazonaws.com/resume.pdf');
 
     // Header navigation links
     await verifyHeader(page);

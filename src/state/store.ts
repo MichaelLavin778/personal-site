@@ -3,7 +3,6 @@ import { combineReducers } from 'redux'
 import abilityReducer from './abilitySlice'
 import pokemonMovesReducer from './pokemonMovesSlice'
 import pokemonReducer from './pokemonSlice'
-import resumeReducer from './resumeSlice'
 
 const pokemonRootReducer = combineReducers({
 	pokemon: pokemonReducer,
@@ -14,7 +13,6 @@ const pokemonRootReducer = combineReducers({
 const store = configureStore({
 	reducer: {
 		pokemon: pokemonRootReducer,
-		resume: resumeReducer,
 	},
 	devTools: false,
 })
