@@ -78,6 +78,9 @@ const pokemonAbilities = (name: string) => {
     return [{ ability: apiItem('ability', 'blaze'), is_hidden: false, slot: 1 }];
 };
 
+const getPokemonSprite = (name: string, variant: string) =>
+    name === 'pikachu' ? `${ASSET_ROOT}/sprites/${name}-${variant}.png` : null;
+
 const makePokemon = (name: string, index: number) => ({
     ...apiItem('pokemon', name),
     abilities: pokemonAbilities(name),
@@ -90,14 +93,14 @@ const makePokemon = (name: string, index: number) => ({
     id: index + 1,
     moves: name === 'bulbasaur' ? pokemonMoves : pokemonMoves.slice(0, 2),
     sprites: {
-        back_default: null,
-        back_female: null,
-        back_shiny: null,
-        back_shiny_female: null,
-        front_default: null,
-        front_female: null,
-        front_shiny: null,
-        front_shiny_female: null,
+        back_default: getPokemonSprite(name, 'back-default'),
+        back_female: getPokemonSprite(name, 'back-female'),
+        back_shiny: getPokemonSprite(name, 'back-shiny'),
+        back_shiny_female: getPokemonSprite(name, 'back-shiny-female'),
+        front_default: getPokemonSprite(name, 'front-default'),
+        front_female: getPokemonSprite(name, 'front-female'),
+        front_shiny: getPokemonSprite(name, 'front-shiny'),
+        front_shiny_female: getPokemonSprite(name, 'front-shiny-female'),
     },
     stats: [
         ['hp', 45],
@@ -174,7 +177,8 @@ const getResourceName = (pathname: string, resource: string) => {
 
 export const mockShowcaseApi = async (page: Page) => {
     await page.route(`${ASSET_ROOT}/**`, async (route) => {
-        await route.fulfill({ body: '', contentType: 'audio/ogg', status: 200 });
+        const contentType = route.request().url().endsWith('.png') ? 'image/png' : 'audio/ogg';
+        await route.fulfill({ body: '', contentType, status: 200 });
     });
 
     await page.route(`${API_ROOT}/**`, async (route) => {

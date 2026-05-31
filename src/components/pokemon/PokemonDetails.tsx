@@ -133,8 +133,8 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                             background={femalePink}
                             compact={compactSprites}
                             name={name}
-                            showFemaleSymbol={showFemaleSymbol}
-                            showMaleSymbol={showMaleSymbol}
+                            showFemaleSymbol={true}
+                            showMaleSymbol={false}
                             spriteBack={pokemon.sprites?.back_female || undefined}
                             spriteFront={pokemon.sprites?.front_female || undefined}
                         />
@@ -145,8 +145,8 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                             background={femalePink}
                             compact={compactSprites}
                             name={name}
-                            showFemaleSymbol={showFemaleSymbol}
-                            showMaleSymbol={showMaleSymbol}
+                            showFemaleSymbol={true}
+                            showMaleSymbol={false}
                             showShinySymbol={true}
                             spriteBack={pokemon.sprites?.back_shiny_female || undefined}
                             spriteFront={pokemon.sprites?.front_shiny_female || undefined}

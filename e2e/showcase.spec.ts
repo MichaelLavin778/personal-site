@@ -45,6 +45,24 @@ test('showcase page renders core UX controls and details', async ({ page }) => {
     await verifyFooter(page);
 });
 
+test('Pokemon sprite cards render front and back variants with gender and shiny symbols', async ({ page }) => {
+    await openMockedShowcase(page, { pokemon: 'pikachu' });
+
+    const spriteCard = (variant: string) =>
+        page.locator(`img[src$="/sprites/pikachu-front-${variant}.png"]`).locator('xpath=../..');
+
+    for (const variant of ['default', 'shiny', 'female', 'shiny-female']) {
+        const card = spriteCard(variant);
+        await expect(card).toHaveCount(1);
+        await expect(card.locator(`img[src$="/sprites/pikachu-back-${variant}.png"]`)).toBeVisible();
+    }
+
+    await expect(spriteCard('default')).toContainText('♂');
+    await expect(spriteCard('shiny')).toContainText('♂✨');
+    await expect(spriteCard('female')).toContainText('♀');
+    await expect(spriteCard('shiny-female')).toContainText('♀✨');
+});
+
 test('previous and next Pokemon controls update the URL and selector', async ({ page }) => {
     await openMockedShowcase(page, { pokemon: 'pikachu' });
 
