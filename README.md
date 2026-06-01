@@ -26,29 +26,30 @@ npm run dev
 
 ## Release pipeline (main -> production)
 
-This repo uses GitHub Actions to gate merges into `production`.
+This repo uses GitHub Actions to gate direct updates into `production`.
 
 ### Workflows
 
 - `CI` (`.github/workflows/ci.yml`): runs `npm ci`, `npm run lint`, `npm run build`, and `npx playwright test` on PRs, and on pushes to `main`.
-- `Promote main -> production` (`.github/workflows/promote-to-production.yml`): manual workflow that re-runs lint/build and then opens a PR from `main` into `production`.
-	- Includes Playwright E2E checks against the `production` URL.
+- `Promote main -> production` (`.github/workflows/promote-to-production.yml`): weekly and manually triggered workflow that re-runs lint/build and then pushes `main` directly to `production`.
+	- Includes Playwright E2E checks against the `main` URL.
+	- Runs every Friday at 4:17 PM `America/Denver`.
 
 ### One-time GitHub settings (required)
 
-In GitHub: `Settings` → `Branches` → `Branch protection rules` → add rule for `production`:
+In GitHub: `Settings` → `Branches` → `Branch protection rules`, ensure the workflow can update `production` directly:
 
-- Enable: "Require a pull request before merging"
-- Enable: "Require status checks to pass before merging"
-	- Select required check: `CI / Lint & Build`
-- (Recommended) Enable: "Require branches to be up to date before merging"
-- (Optional) Enable: "Include administrators"
+- Do not enable: "Require a pull request before merging"
+- Remove any branch protection or ruleset restriction that blocks direct pushes from this GitHub Actions workflow.
+- The workflow uses a normal fast-forward push and fails instead of overwriting divergent `production` history.
 
-### How to promote
+### How to promote manually
 
 1. Go to `Actions` → `Promote main -> production` → `Run workflow`.
 2. Wait for the workflow to pass.
-3. Open the PR it created and merge it into `production` (merge button will be blocked until checks are green).
+3. The workflow pushes `main` directly to `production`.
+
+The weekly scheduled promotion follows the same gated direct-push flow automatically.
 
 ## Authors
 
