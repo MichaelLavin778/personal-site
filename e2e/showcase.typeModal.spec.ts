@@ -4,7 +4,16 @@ import { openMockedShowcase } from './common/showcase';
 test('type modal defaults to Pokemon types, calculates dual-type matchups, and clears its second type', async ({ page }) => {
     await openMockedShowcase(page);
 
-    await page.getByRole('button', { name: 'Open type matchup info for grass and poison' }).click();
+    const typeInfoButton = page.getByRole('button', { name: 'Open type matchup info for grass and poison' });
+    const expandIconBox = await typeInfoButton.locator('.MuiSvgIcon-root').boundingBox();
+    const lastTypeBox = await typeInfoButton.getByText('poison', { exact: true }).boundingBox();
+    expect(expandIconBox).not.toBeNull();
+    expect(lastTypeBox).not.toBeNull();
+    expect(
+        Math.abs(expandIconBox!.x + expandIconBox!.width - lastTypeBox!.x - lastTypeBox!.width)
+    ).toBeLessThanOrEqual(1);
+
+    await typeInfoButton.click();
 
     const dialog = page.getByRole('dialog');
     const primaryType = dialog.getByRole('combobox', { name: 'Primary type' });

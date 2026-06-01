@@ -186,17 +186,23 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                                     },
                                 }}
                             >
-                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                    <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
-                                    <OpenInFullIcon sx={{ ml: 'auto', fontSize: '1rem', color: 'text.secondary' }} />
+                                <Box sx={{ display: 'grid', width: 'fit-content' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
+                                        <OpenInFullIcon sx={{ ml: 'auto', fontSize: '1rem', color: 'text.secondary' }} />
+                                    </Box>
+                                    {displayedTypes.length > 0 ? (
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            {displayedTypes.map(t => (
+                                                <Type
+                                                    key={t.type.name}
+                                                    typeName={t.type.name}
+                                                    sx={{ flexShrink: 0, width: 64 }}
+                                                />
+                                            ))}
+                                        </Stack>
+                                    ) : '-'}
                                 </Box>
-                                {displayedTypes.length > 0 ? (
-                                    <Stack direction="row" spacing={1} width="100%" alignItems="center">
-                                        {displayedTypes.map(t => (
-                                            <Type key={t.type.name} typeName={t.type.name} sx={{ flexShrink: 0 }} />
-                                        ))}
-                                    </Stack>
-                                ) : '-'}
                             </ButtonBase>
                         </Grid>
                         {/* Abilities */}
