@@ -29,7 +29,7 @@ const getMatchupLabel = (kind: 'Offensive' | 'Defensive', multiplier: MatchupMul
     return `${multiplier > 1 ? 'Weak' : 'Resists'} (x${formatMultiplier(multiplier)})`;
 };
 
-const MatchupTable = ({
+const TypeMatchupTable = ({
     kind,
     matchups,
     multipliers,
@@ -47,7 +47,7 @@ const MatchupTable = ({
             <Table
                 size="small"
                 aria-label={`${contextLabel} type matchups`}
-                sx={{ display: { xs: 'block', sm: 'table' } }}
+                sx={{ display: { xs: 'block', sm: 'table' }, height: { sm: '100%' } }}
             >
             <TableHead sx={{ display: { xs: 'block', sm: 'table-header-group' } }}>
                 <TableRow sx={{ display: { xs: 'block', sm: 'table-row' } }}>
@@ -119,4 +119,4 @@ const MatchupTable = ({
     );
 };
 
-export default MatchupTable;
+export default TypeMatchupTable;

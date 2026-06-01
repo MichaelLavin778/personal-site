@@ -21,7 +21,6 @@ import {
     loadPokemonTypeDetails,
     selectPokemonTypeFetchStateByName,
 } from "../../state/pokemonTypesSlice";
-import MatchupTable from "./MatchupTable";
 import {
     type MatchupMultiplier,
     buildDefensiveMatchups,
@@ -30,6 +29,7 @@ import {
     coreOffensiveMultipliers,
 } from "./helpers/matchups";
 import TypeAutocomplete from "./TypeAutocomplete";
+import TypeMatchupTable from "./TypeMatchupTable";
 
 type TypeModalProps = {
     initialTypes: PokemonType[];
@@ -112,7 +112,7 @@ const TypeModal = ({ initialTypes, onClose }: TypeModalProps) => {
     return (
         <Dialog open onClose={onClose} aria-labelledby="type-info-title" fullWidth maxWidth="lg">
             <DialogTitle id="type-info-title">
-                Type matchups
+                Type Matchups
                 <IconButton
                     aria-label="close type matchup info"
                     onClick={onClose}
@@ -161,7 +161,7 @@ const TypeModal = ({ initialTypes, onClose }: TypeModalProps) => {
                                 }}
                             >
                                 {offensiveMatchups.map(({ type, matchups }) => (
-                                    <MatchupTable
+                                    <TypeMatchupTable
                                         key={type.name}
                                         kind="Offensive"
                                         matchups={matchups}
@@ -170,7 +170,7 @@ const TypeModal = ({ initialTypes, onClose }: TypeModalProps) => {
                                     />
                                 ))}
                             </Box>
-                            <MatchupTable
+                            <TypeMatchupTable
                                 kind="Defensive"
                                 matchups={defensiveMatchups}
                                 multipliers={defensiveMultipliers}

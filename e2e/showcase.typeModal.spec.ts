@@ -19,7 +19,7 @@ test('type modal defaults to Pokemon types, calculates dual-type matchups, and c
     const primaryType = dialog.getByRole('combobox', { name: 'Primary type' });
     const secondaryType = dialog.getByRole('combobox', { name: 'Secondary type' });
 
-    await expect(dialog.getByText('Type matchups', { exact: true })).toBeVisible();
+    await expect(dialog.getByText('Type Matchups', { exact: true })).toBeVisible();
     await expect(primaryType).toHaveValue('');
     await expect(secondaryType).toHaveValue('');
     await expect(primaryType).toHaveAttribute('readonly', '');
@@ -44,6 +44,7 @@ test('type modal defaults to Pokemon types, calculates dual-type matchups, and c
     expect(grassOffensiveBox).not.toBeNull();
     expect(poisonOffensiveBox).not.toBeNull();
     expect(Math.abs(grassOffensiveBox!.y - poisonOffensiveBox!.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(grassOffensiveBox!.height - poisonOffensiveBox!.height)).toBeLessThanOrEqual(1);
 
     await primaryType.click();
     await page.getByRole('option', { name: 'Fire type', exact: true }).click();
