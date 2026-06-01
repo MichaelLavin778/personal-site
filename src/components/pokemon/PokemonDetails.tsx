@@ -186,15 +186,15 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                                     },
                                 }}
                             >
-                                <Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                     <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
+                                    <OpenInFullIcon sx={{ ml: 'auto', fontSize: '1rem', color: 'text.secondary' }} />
                                 </Box>
                                 {displayedTypes.length > 0 ? (
                                     <Stack direction="row" spacing={1} width="100%" alignItems="center">
                                         {displayedTypes.map(t => (
                                             <Type key={t.type.name} typeName={t.type.name} sx={{ flexShrink: 0 }} />
                                         ))}
-                                        <OpenInFullIcon sx={{ ml: 'auto', mr: 1, fontSize: '1rem', color: 'text.secondary' }} />
                                     </Stack>
                                 ) : '-'}
                             </ButtonBase>

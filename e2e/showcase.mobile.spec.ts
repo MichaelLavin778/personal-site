@@ -126,3 +126,35 @@ test('mobile ability modal fits the viewport and supports touch swipe navigation
     await expectSearchParam(page, 'ability', 'chlorophyll');
     await expect(dialog.getByText('Chlorophyll', { exact: true })).toBeVisible();
 });
+
+test('mobile type modal stacks matchup table columns vertically', async ({ page }) => {
+    await openMockedShowcase(page);
+
+    await page.getByRole('button', { name: 'Open type matchup info for grass and poison' }).click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByRole('button', { name: 'Clear' })).toBeVisible();
+    const expectCellsStacked = async (tableName: string, testIds: string[]) => {
+        const table = dialog.getByRole('table', { name: tableName });
+        const boxes = await Promise.all(testIds.map(async testId => {
+            const cell = table.getByTestId(testId);
+            await expect(cell).toBeVisible();
+            return cell.boundingBox();
+        }));
+
+        boxes.forEach(box => expect(box).not.toBeNull());
+        for (let index = 1; index < boxes.length; index += 1) {
+            expect(boxes[index]!.y).toBeGreaterThan(boxes[index - 1]!.y);
+            expect(Math.abs(boxes[index]!.x - boxes[index - 1]!.x)).toBeLessThanOrEqual(1);
+        }
+    };
+
+    await expectCellsStacked(
+        'grass offensive type matchups',
+        ['offensive-x2', 'offensive-x0_5', 'offensive-x0']
+    );
+    await expectCellsStacked(
+        'defensive type matchups',
+        ['defensive-x2', 'defensive-x0_5', 'defensive-x0']
+    );
+});

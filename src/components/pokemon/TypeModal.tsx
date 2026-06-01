@@ -6,14 +6,7 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    Paper,
     Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     Typography,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
@@ -21,8 +14,6 @@ import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import type { PokemonType } from "../../model/Pokemon";
 import {
     type PokemonTypeDetails,
-    type PokemonTypeName,
-    type PokemonTypeRelations,
     pokemonTypeNames,
 } from "../../model/PokemonTypeDetails";
 import {
@@ -30,150 +21,20 @@ import {
     loadPokemonTypeDetails,
     selectPokemonTypeFetchStateByName,
 } from "../../state/pokemonTypesSlice";
+import MatchupTable from "./MatchupTable";
+import {
+    type MatchupMultiplier,
+    buildDefensiveMatchups,
+    buildOffensiveMatchups,
+    coreDefensiveMultipliers,
+    coreOffensiveMultipliers,
+} from "./helpers/matchups";
 import TypeAutocomplete from "./TypeAutocomplete";
-import TypeBadge from "./TypeBadge";
 
 type TypeModalProps = {
     initialTypes: PokemonType[];
     onClose: () => void;
 }
-
-type MatchupMultiplier = 0 | 0.25 | 0.5 | 1 | 2 | 4;
-type Matchups = Record<MatchupMultiplier, PokemonTypeName[]>;
-
-const coreOffensiveMultipliers: MatchupMultiplier[] = [2, 0.5, 0];
-const coreDefensiveMultipliers: MatchupMultiplier[] = [2, 0.5, 0];
-
-const emptyMatchups = (): Matchups => ({
-    0: [],
-    0.25: [],
-    0.5: [],
-    1: [],
-    2: [],
-    4: [],
-});
-
-const getMultiplier = (
-    relations: PokemonTypeRelations,
-    otherType: string,
-    direction: 'to' | 'from'
-): MatchupMultiplier => {
-    if (relations[`no_damage_${direction}`].some(type => type.name === otherType)) return 0;
-    if (relations[`half_damage_${direction}`].some(type => type.name === otherType)) return 0.5;
-    if (relations[`double_damage_${direction}`].some(type => type.name === otherType)) return 2;
-    return 1;
-};
-
-const buildOffensiveMatchups = (type: PokemonTypeDetails): Matchups => {
-    const matchups = emptyMatchups();
-
-    pokemonTypeNames.forEach((defendingType) => {
-        const multiplier = getMultiplier(type.damage_relations, defendingType, 'to');
-        matchups[multiplier].push(defendingType);
-    });
-
-    return matchups;
-};
-
-const buildDefensiveMatchups = (types: PokemonTypeDetails[]): Matchups => {
-    const matchups = emptyMatchups();
-
-    pokemonTypeNames.forEach((attackingType) => {
-        const multiplier = types.reduce<number>(
-            (total, type) => total * getMultiplier(type.damage_relations, attackingType, 'from'),
-            1
-        ) as MatchupMultiplier;
-        matchups[multiplier].push(attackingType);
-    });
-
-    return matchups;
-};
-
-const formatMultiplier = (multiplier: MatchupMultiplier) => {
-    if (multiplier === 0.5) return '1/2';
-    if (multiplier === 0.25) return '1/4';
-    return String(multiplier);
-};
-
-const getMatchupLabel = (kind: 'Offensive' | 'Defensive', multiplier: MatchupMultiplier) => {
-    if (kind === 'Offensive') {
-        if (multiplier === 0) return 'No effect (x0)';
-        return `${multiplier > 1 ? 'Super effective' : 'Not very effective'} (x${formatMultiplier(multiplier)})`;
-    }
-
-    if (multiplier === 0) return 'Immune (x0)';
-    return `${multiplier > 1 ? 'Weak' : 'Resists'} (x${formatMultiplier(multiplier)})`;
-};
-
-const MatchupTable = ({
-    kind,
-    matchups,
-    multipliers,
-    typeName,
-}: {
-    kind: 'Offensive' | 'Defensive';
-    matchups: Matchups;
-    multipliers: MatchupMultiplier[];
-    typeName?: string;
-}) => {
-    const contextLabel = typeName ? `${typeName} ${kind.toLowerCase()}` : kind.toLowerCase();
-
-    return (
-        <TableContainer component={Paper} variant="outlined">
-            <Table size="small" aria-label={`${contextLabel} type matchups`}>
-            <TableHead>
-                <TableRow>
-                    <TableCell colSpan={multipliers.length} align="center">
-                        <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
-                            <Typography component="h3" variant="subtitle2">{kind} properties</Typography>
-                            {typeName && <TypeBadge typeName={typeName as PokemonTypeName} />}
-                        </Stack>
-                    </TableCell>
-                </TableRow>
-                <TableRow>
-                    {multipliers.map((multiplier, index) => (
-                        <TableCell
-                            key={multiplier}
-                            align="center"
-                            sx={{
-                                minWidth: 132,
-                                fontWeight: 700,
-                                borderRight: index < multipliers.length - 1 ? 1 : 0,
-                                borderRightColor: 'divider',
-                            }}
-                        >
-                            {getMatchupLabel(kind, multiplier)}
-                        </TableCell>
-                    ))}
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                <TableRow>
-                    {multipliers.map((multiplier, index) => (
-                        <TableCell
-                            key={multiplier}
-                            data-testid={`${kind.toLowerCase()}-x${String(multiplier).replace('.', '_')}`}
-                            sx={{
-                                verticalAlign: 'top',
-                                borderRight: index < multipliers.length - 1 ? 1 : 0,
-                                borderRightColor: 'divider',
-                            }}
-                        >
-                            <Stack spacing={0.5} alignItems="center">
-                                {matchups[multiplier].length > 0
-                                    ? matchups[multiplier].map(typeName => (
-                                        <TypeBadge key={typeName} typeName={typeName} />
-                                    ))
-                                    : '-'}
-                            </Stack>
-                        </TableCell>
-                    ))}
-                </TableRow>
-            </TableBody>
-            </Table>
-        </TableContainer>
-    );
-};
 
 const getRelatedTypeResources = (type: PokemonTypeDetails) => {
     const relationGroups = Object.values(type.damage_relations);

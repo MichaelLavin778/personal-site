@@ -26,7 +26,7 @@ const TypeBadge = ({ typeName }: TypeBadgeProps) => {
                     component="img"
                     src={spriteUrl}
                     alt=""
-                    sx={{ width: 22, height: 22, mr: -0.5, zIndex: 1 }}
+                    sx={{ width: 24, height: 24, mr: -0.5, zIndex: 1 }}
                 />
             )}
             <Type
