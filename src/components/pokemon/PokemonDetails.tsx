@@ -1,5 +1,5 @@
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import { Box, ButtonBase, Grid, Stack, Typography } from "@mui/material";
+import { Box, ButtonBase, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useElementRect } from "../../hooks/useElementRect";
 import type { PokemonType, PokemonVariant } from "../../model/PokemonVariant";
@@ -16,10 +16,20 @@ type PokemonProps = {
     pokemon: PokemonVariant;
 }
 
+type PokemonDetailsTab = 'battle' | 'description';
+
 const PokemonDetails = ({ pokemon }: PokemonProps) => {
     // purpose of tracking this is to make right col the same height as the left
     const leftColRef = useRef<HTMLDivElement>(null);
     const leftColumnRect = useElementRect(leftColRef);
+
+    // generation data
+    // const generations = useAppSelector(getGenerations);
+    // const [selectedGenerationId, setSelectedGenerationId] = useState<number>(generations.at(-1)?.id ?? 9);
+    // const selectedGenerationValue = generations.some((generation) => generation.id === selectedGenerationId)
+    //     ? selectedGenerationId
+    //     : '';
+    const [selectedTab, setSelectedTab] = useState<PokemonDetailsTab>('battle');
     const [typeModalTypes, setTypeModalTypes] = useState<PokemonType[] | null>(null);
 
     // hide until pokemon is loaded
@@ -155,115 +165,214 @@ const PokemonDetails = ({ pokemon }: PokemonProps) => {
                 </Box>
             </Grid>
 
-            {/* Left column */}
-            <Grid size={{ md: 12, lg: 5 }} ref={leftColRef}>
-                <FullPaper>
-                    <Grid container={true} spacing={1}>
-                        {/* Type(s) */}
-                        <Grid size={6} sx={{ display: 'flex' }}>
-                            <ButtonBase
-                                aria-label={`Open type matchup info for ${displayedTypes.map(t => t.type.name).join(' and ')}`}
-                                disabled={displayedTypes.length === 0}
-                                onClick={() => setTypeModalTypes(displayedTypes)}
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                    width: '100%',
-                                    height: '100%',
-                                    textAlign: 'left',
-                                    transition: 'background-color 120ms ease, border-color 120ms ease, transform 120ms ease',
-                                    '&:hover': {
-                                        bgcolor: 'action.hover',
-                                        borderColor: 'primary.main',
-                                        transform: 'translateY(-1px)',
-                                    },
-                                    '&.Mui-focusVisible': {
-                                        outline: '2px solid',
-                                        outlineColor: 'primary.main',
-                                        outlineOffset: 2,
-                                    },
-                                }}
+            <Grid size={12}>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: '72px minmax(0, 1fr) 72px',
+                        alignItems: 'center',
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Box />
+                    <Tabs
+                        aria-label="Pokemon details"
+                        centered
+                        onChange={(_event, tab: PokemonDetailsTab) => setSelectedTab(tab)}
+                        value={selectedTab}
+                        sx={{
+                            minWidth: 0,
+                            '& .MuiTab-root': {
+                                minWidth: { xs: 0, sm: 90 },
+                                px: { xs: 0.5, sm: 2 },
+                            },
+                        }}
+                    >
+                        <Tab
+                            aria-controls="pokemon-details-panel-battle"
+                            id="pokemon-details-tab-battle"
+                            label="Battle"
+                            value="battle"
+                        />
+                        <Tab
+                            aria-controls="pokemon-details-panel-description"
+                            id="pokemon-details-tab-description"
+                            label="Description"
+                            value="description"
+                            disabled={true}
+                        />
+                    </Tabs>
+                    {/* <Box sx={{ justifySelf: 'end' }}>
+                        <FormControl sx={{ minWidth: 72 }}>
+                        <InputLabel htmlFor="pokemon-generation-input" id="pokemon-generation-label">Gen</InputLabel>
+                            <Select
+                                id="pokemon-generation-select"
+                                inputProps={{ id: 'pokemon-generation-input' }}
+                                labelId="pokemon-generation-label"
+                                label="Gen"
+                                name="pokemon-generation"
+                                value={selectedGenerationValue}
+                                onChange={(event) => setSelectedGenerationId(Number(event.target.value))}
                             >
-                                <Box sx={{ display: 'grid', width: 'fit-content' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
-                                        <OpenInFullIcon sx={{ ml: 'auto', fontSize: '1rem', color: 'text.secondary' }} />
-                                    </Box>
-                                    {displayedTypes.length > 0 ? (
-                                        <Stack direction="row" spacing={1} alignItems="center">
-                                            {displayedTypes.map(t => (
-                                                <Type
-                                                    key={t.type.name}
-                                                    typeName={t.type.name}
-                                                    sx={{ flexShrink: 0, width: 64 }}
-                                                />
-                                            ))}
-                                        </Stack>
-                                    ) : '-'}
-                                </Box>
-                            </ButtonBase>
-                        </Grid>
-                        {/* Abilities */}
-                        <Grid size={6} sx={{ minHeight: 92 }}>
-                            <Abilities pokemon={pokemon} />
-                        </Grid>
-
-                        {/* Stats chart */}
-                        <Grid size={12}>
-                            <Stats stats={pokemon.stats} />
-                        </Grid>
-
-                        {/* Other info */}
-                        {/* Base exp */}
-                        <Grid size={4}>
-                            <>
-                                <Box>
-                                    <Typography component="span" variant="caption" color="textSecondary">Base Experience</Typography>
-                                </Box>
-                                <Typography>{pokemon.base_experience ?? '-'}</Typography>
-                            </>
-                        </Grid>
-                        {/* Height */}
-                        <Grid size={4}>
-                            <>
-                                <Box>
-                                    <Typography component="span" variant="caption" color="textSecondary">Height</Typography>
-                                </Box>
-                                <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
-                            </>
-                        </Grid>
-                        {/* Weight */}
-                        <Grid size={4}>
-                            <>
-                                <Box>
-                                    <Typography component="span" variant="caption" color="textSecondary">Weight</Typography>
-                                </Box>
-                                <Typography>{pokemon.weight ? pokemon.weight / 10 : '-'} kg</Typography>
-                            </>
-                        </Grid>
-
-                        {/* Cries */}
-                        <Grid size={12}>
-                            <Cries cries={pokemon.cries} />
-                        </Grid>
-                    </Grid>
-                </FullPaper>
+                                {generations.map((generation) => (
+                                    <MenuItem key={generation.id} value={generation.id}>
+                                        {generation.id}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box> */}
+                </Box>
             </Grid>
 
-            {typeModalTypes && (
-                <TypeModal
-                    initialTypes={typeModalTypes}
-                    onClose={() => setTypeModalTypes(null)}
-                />
-            )}
+            {/* Battle Info */}
+            <Grid
+                aria-labelledby="pokemon-details-tab-battle"
+                hidden={selectedTab !== 'battle'}
+                id="pokemon-details-panel-battle"
+                role="tabpanel"
+                size={12}
+            >
+                {selectedTab === 'battle' && (
+                    <Grid container={true} spacing={2} alignItems="flex-start">
+                        {/* Left column */}
+                        <Grid size={{ md: 12, lg: 5 }} ref={leftColRef}>
+                            <FullPaper>
+                                <Grid container={true} spacing={1}>
+                                    {/* Type(s) */}
+                                    <Grid size={6} sx={{ display: 'flex' }}>
+                                        <ButtonBase
+                                            aria-label={`Open type matchup info for ${displayedTypes.map(t => t.type.name).join(' and ')}`}
+                                            disabled={displayedTypes.length === 0}
+                                            onClick={() => setTypeModalTypes(displayedTypes)}
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'flex-start',
+                                                justifyContent: 'flex-start',
+                                                width: '100%',
+                                                height: '100%',
+                                                textAlign: 'left',
+                                                transition: 'background-color 120ms ease, border-color 120ms ease, transform 120ms ease',
+                                                '&:hover': {
+                                                    bgcolor: 'action.hover',
+                                                    borderColor: 'primary.main',
+                                                    transform: 'translateY(-1px)',
+                                                },
+                                                '&.Mui-focusVisible': {
+                                                    outline: '2px solid',
+                                                    outlineColor: 'primary.main',
+                                                    outlineOffset: 2,
+                                                },
+                                            }}
+                                        >
+                                            <Box sx={{ display: 'grid', width: 'fit-content' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Typography component="span" variant="caption" color="textSecondary">Type</Typography>
+                                                    <OpenInFullIcon sx={{ ml: 'auto', fontSize: '1rem', color: 'text.secondary' }} />
+                                                </Box>
+                                                {displayedTypes.length > 0 ? (
+                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                        {displayedTypes.map(t => (
+                                                            <Type
+                                                                key={t.type.name}
+                                                                typeName={t.type.name}
+                                                                sx={{ flexShrink: 0, width: 64 }}
+                                                            />
+                                                        ))}
+                                                    </Stack>
+                                                ) : '-'}
+                                            </Box>
+                                        </ButtonBase>
+                                    </Grid>
+                                    {/* Abilities */}
+                                    <Grid size={6} sx={{ minHeight: 92 }}>
+                                        <Abilities pokemon={pokemon} />
+                                    </Grid>
 
-            {/* Right column */}
-            <Grid size={{ md: 12, lg: 7 }}>
-                <FullPaper sx={{ minHeight: { lg: leftColumnRect.height || 'auto' } }}>
-                    <Moves moves={pokemon.moves ?? []} lefColBottom={leftColumnRect.bottom} />
-                </FullPaper>
+                                    {/* Stats chart */}
+                                    <Grid size={12}>
+                                        <Stats stats={pokemon.stats} />
+                                    </Grid>
+                                </Grid>
+                            </FullPaper>
+                        </Grid>
+
+                        {typeModalTypes && (
+                            <TypeModal
+                                initialTypes={typeModalTypes}
+                                onClose={() => setTypeModalTypes(null)}
+                            />
+                        )}
+
+                        {/* Right column */}
+                        <Grid size={{ md: 12, lg: 7 }}>
+                            <FullPaper sx={{ minHeight: { lg: leftColumnRect.height || 'auto' } }}>
+                                <Moves moves={pokemon.moves ?? []} lefColBottom={leftColumnRect.bottom} />
+                            </FullPaper>
+                        </Grid>
+                    </Grid>
+                )}
+            </Grid>
+
+            {/* Description */}
+            <Grid
+                aria-labelledby="pokemon-details-tab-description"
+                hidden={selectedTab !== 'description'}
+                id="pokemon-details-panel-description"
+                role="tabpanel"
+                size={12}
+            >
+                {selectedTab === 'description' && (
+                    <Grid container={true} spacing={2} alignItems="flex-start">
+                        {/* Left column */}
+                        <Grid size={{ md: 12, lg: 5 }} ref={leftColRef}>
+                            <FullPaper>
+                                <Grid container={true} spacing={1}>
+                                    {/* Base exp */}
+                                    <Grid size={4}>
+                                        <>
+                                            <Box>
+                                                <Typography component="span" variant="caption" color="textSecondary">Base Experience</Typography>
+                                            </Box>
+                                            <Typography>{pokemon.base_experience ?? '-'}</Typography>
+                                        </>
+                                    </Grid>
+                                    {/* Height */}
+                                    <Grid size={4}>
+                                        <>
+                                            <Box>
+                                                <Typography component="span" variant="caption" color="textSecondary">Height</Typography>
+                                            </Box>
+                                            <Typography>{pokemon.height ? pokemon.height / 10 : '-'} m</Typography>
+                                        </>
+                                    </Grid>
+                                    {/* Weight */}
+                                    <Grid size={4}>
+                                        <>
+                                            <Box>
+                                                <Typography component="span" variant="caption" color="textSecondary">Weight</Typography>
+                                            </Box>
+                                            <Typography>{pokemon.weight ? pokemon.weight / 10 : '-'} kg</Typography>
+                                        </>
+                                    </Grid>
+
+                                    {/* Cries */}
+                                    <Grid size={12}>
+                                        <Cries cries={pokemon.cries} />
+                                    </Grid>
+                                </Grid>
+                            </FullPaper>
+                        </Grid>
+
+                        {/* Right column */}
+                        <Grid size={{ md: 12, lg: 7 }}>
+                            <FullPaper sx={{ minHeight: { lg: leftColumnRect.height || 'auto' } }}>
+                            </FullPaper>
+                        </Grid>
+                    </Grid>
+                )}
             </Grid>
         </Grid>
     );

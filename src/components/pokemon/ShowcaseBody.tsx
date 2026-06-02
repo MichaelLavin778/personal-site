@@ -35,12 +35,6 @@ const ShowcaseBody = () => {
 	const currentPokemonVariantMoves = currentPokemonVariant?.moves;
 	const currentPokemonVariantUrl = currentPokemonVariant?.url;
 
-	// const generations = useAppSelector(getGenerations);
-	// const [selectedGenerationId, setSelectedGenerationId] = useState<number>(generations.at(-1)?.id ?? 9);
-	// const selectedGenerationValue = generations.some((generation) => generation.id === selectedGenerationId)
-	// 	? selectedGenerationId
-	// 	: '';
-
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const pendingPokemonNameRef = useRef<string | null>(null);
 
@@ -207,24 +201,6 @@ const ShowcaseBody = () => {
 									}}
 									sx={{ flex: 1, minWidth: 0 }}
 								/>
-								{/* <FormControl sx={{ flexShrink: 0, minWidth: 72 }}>
-						<InputLabel htmlFor="pokemon-generation-input" id="pokemon-generation-label">Gen</InputLabel>
-									<Select
-										id="pokemon-generation-select"
-										inputProps={{ id: 'pokemon-generation-input' }}
-										labelId="pokemon-generation-label"
-										label="Gen"
-										name="pokemon-generation"
-										value={selectedGenerationValue}
-										onChange={(event) => setSelectedGenerationId(Number(event.target.value))}
-									>
-										{generations.map((generation) => (
-											<MenuItem key={generation.id} value={generation.id}>
-												{generation.id}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl> */}
 							</Box>
 							<Box sx={{ gridArea: 'next' }}>
 								<PokemonNavigationButton
@@ -235,9 +211,7 @@ const ShowcaseBody = () => {
 							</Box>
 						</Box>
 						{currentPokemonVariantId && currentPokemonVariant && (
-							<PokemonDetails
-								pokemon={currentPokemonVariant}
-							/>
+							<PokemonDetails pokemon={currentPokemonVariant} />
 						)}
 					</Box>
 				</ShowcaseBottomContext.Provider>

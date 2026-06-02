@@ -45,6 +45,8 @@ test('showcase page renders core UX controls and details', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Latest' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Legacy' })).toBeVisible();
     await expect(page.getByRole('slider', { name: 'Volume' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Battle' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tabpanel', { name: 'Battle' })).toBeVisible();
 
     await verifyHeader(page);
     await verifyFooter(page);
