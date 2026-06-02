@@ -73,6 +73,18 @@ const pokemonTypeNames = [
     'fairy',
 ] as const;
 
+const generationNames = [
+    'generation-i',
+    'generation-ii',
+    'generation-iii',
+    'generation-iv',
+    'generation-v',
+    'generation-vi',
+    'generation-vii',
+    'generation-viii',
+    'generation-ix',
+];
+
 const typeEffectiveness: Record<string, { double?: string[]; half?: string[]; none?: string[] }> = {
     normal: { half: ['rock', 'steel'], none: ['ghost'] },
     fire: { double: ['grass', 'ice', 'bug', 'steel'], half: ['fire', 'water', 'rock', 'dragon'] },
@@ -156,7 +168,7 @@ const getPokemonTypes = (name: string) => {
     return ['grass', 'poison'];
 };
 
-const makePokemon = (name: string, index: number) => ({
+const makePokemonVariant = (name: string, index: number) => ({
     ...apiItem('pokemon', name),
     abilities: pokemonAbilities(name),
     base_experience: 64 + index,
@@ -167,6 +179,7 @@ const makePokemon = (name: string, index: number) => ({
     height: 7 + index,
     id: index + 1,
     moves: name === 'bulbasaur' ? pokemonMoves : pokemonMoves.slice(0, 2),
+    species: apiItem('pokemon-species', name),
     sprites: {
         back_default: getPokemonSprite(name, 'back-default'),
         back_female: getPokemonSprite(name, 'back-female'),
@@ -193,8 +206,22 @@ const makePokemon = (name: string, index: number) => ({
     weight: 69 + index,
 });
 
-const pokemonByName = new Map(
-    pokemonNames.map((name, index) => [name, makePokemon(name, index)])
+const pokemonVariantsByName = new Map(
+    pokemonNames.map((name, index) => [name, makePokemonVariant(name, index)])
+);
+
+const makePokemonSpecies = (name: string, index: number) => ({
+    ...apiItem('pokemon-species', name),
+    gender_rate: 4,
+    id: index + 1,
+    varieties: [{
+        is_default: true,
+        pokemon: apiItem('pokemon', name),
+    }],
+});
+
+const pokemonSpeciesByName = new Map(
+    pokemonNames.map((name, index) => [name, makePokemonSpecies(name, index)])
 );
 
 const makeMove = (move: MoveFixture, index: number) => ({
@@ -214,6 +241,8 @@ const makeMove = (move: MoveFixture, index: number) => ({
     learned_by_pokemon: [
         apiItem('pokemon', 'bulbasaur'),
         apiItem('pokemon', 'ivysaur'),
+        apiItem('pokemon', 'ivysaur'),
+        apiItem('pokemon', 'pikachu-rock-star'),
     ],
     name: move.name,
     power: move.power,
@@ -240,6 +269,8 @@ const makeAbility = (name: string) => ({
     pokemon: [
         { pokemon: apiItem('pokemon', 'bulbasaur') },
         { pokemon: apiItem('pokemon', 'ivysaur') },
+        { pokemon: apiItem('pokemon', 'ivysaur') },
+        { pokemon: apiItem('pokemon', 'pikachu-rock-star') },
     ],
 });
 
@@ -259,27 +290,34 @@ export const mockShowcaseApi = async (page: Page) => {
     await page.route(`${API_ROOT}/**`, async (route) => {
         const { pathname } = new URL(route.request().url());
 
-        if (pathname === '/api/v2/pokemon') {
+        if (pathname === '/api/v2/pokemon-species') {
             await route.fulfill({
-                json: { results: pokemonNames.map((name) => apiItem('pokemon', name)) },
+                json: { results: pokemonNames.map((name) => apiItem('pokemon-species', name)) },
             });
             return;
         }
 
-        if (pathname === '/api/v2/gender/1' || pathname === '/api/v2/gender/2') {
+        if (pathname === '/api/v2/generation') {
             await route.fulfill({
                 json: {
-                    pokemon_species_details: pokemonNames.map((name) => ({
-                        pokemon_species: { name },
+                    results: generationNames.map((name, index) => ({
+                        name,
+                        url: `${API_ROOT}/generation/${index + 1}/`,
                     })),
                 },
             });
             return;
         }
 
+        const pokemonSpeciesName = getResourceName(pathname, 'pokemon-species');
+        if (pokemonSpeciesName && pokemonSpeciesByName.has(pokemonSpeciesName)) {
+            await route.fulfill({ json: pokemonSpeciesByName.get(pokemonSpeciesName)! });
+            return;
+        }
+
         const pokemonName = getResourceName(pathname, 'pokemon');
-        if (pokemonName && pokemonByName.has(pokemonName)) {
-            await route.fulfill({ json: pokemonByName.get(pokemonName)! });
+        if (pokemonName && pokemonVariantsByName.has(pokemonName)) {
+            await route.fulfill({ json: pokemonVariantsByName.get(pokemonName)! });
             return;
         }
 
@@ -319,6 +357,7 @@ export const openMockedShowcase = async (
     await expect(getPokemonSelector(page)).toHaveValue(
         new RegExp(pokemon.replaceAll('-', '[ -]'), 'i')
     );
+    await expect(getGenerationSelector(page)).toHaveText('9');
     await expect(page.getByText('Abilities', { exact: true })).toBeVisible();
 };
 
@@ -331,6 +370,9 @@ export const expectSearchParam = async (
 };
 
 export const getMovesGrid = (page: Page) => page.getByRole('grid');
+
+export const getGenerationSelector = (page: Page) =>
+    page.locator('#pokemon-generation-select');
 
 export const getPokemonSelector = (page: Page) => page.locator('input[role="combobox"]');
 

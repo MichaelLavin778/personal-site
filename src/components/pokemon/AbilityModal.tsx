@@ -16,15 +16,17 @@ import {
 import { type Dispatch, type MouseEvent as ReactMouseEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { toTitleCase } from "../../helpers/common";
+import { getPokemonSpeciesForVariants } from "../../helpers/pokemonSpecies";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { useHorizontalSwipeNavigation } from "../../hooks/useHorizontalSwipeNavigation";
-import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
+import type { PokemonAbility, PokemonVariant } from "../../model/PokemonVariant";
 import { type AbilityFetchState, loadAbilityDetails, selectAbilityFetchStateByUrl } from "../../state/abilitySlice";
+import { getPokemonList } from "../../state/pokemonSlice";
 
 
 type AbilityModalProps = {
     displayedAbilities: PokemonAbility[];
-    pokemon: Pokemon;
+    pokemon: PokemonVariant;
     selectedAbility: PokemonAbility | null;
     setAbility: Dispatch<PokemonAbility | null>;
 }
@@ -69,6 +71,7 @@ const AbilityModal = ({
     const selectedFetchState: AbilityFetchState = useAppSelector((state) =>
         selectAbilityFetchStateByUrl(state, selectedUrl)
     );
+    const pokemonSpecies = useAppSelector(getPokemonList);
 
     useEffect(() => {
         if (!selectedAbility) return;
@@ -109,14 +112,16 @@ const AbilityModal = ({
 
     const pokemonWithAbility = useMemo(() => {
         if (selectedFetchState.status !== 'success') return [];
-        return (selectedFetchState.ability.pokemon ?? [])
-            .map((p) => p?.pokemon?.name)
-            .filter((name): name is string => !!name)
-            .map((name) => ({
-                name,
-                label: toTitleCase(name.replaceAll('-', ' ')),
+        const variants = (selectedFetchState.ability.pokemon ?? [])
+            .map((p) => p?.pokemon)
+            .filter((variant): variant is NonNullable<typeof variant> => !!variant);
+
+        return getPokemonSpeciesForVariants(variants, pokemonSpecies)
+            .map((species) => ({
+                name: species.name,
+                label: toTitleCase(species.name.replaceAll('-', ' ')),
             }));
-    }, [selectedFetchState]);
+    }, [pokemonSpecies, selectedFetchState]);
 
     const toPrevAbility = useCallback(() => {
         if (!canNavigateAbilities) return;
@@ -376,7 +381,7 @@ const AbilityModal = ({
                                 {pokemonWithAbility.length > 0 && (
                                     pokemonWithAbility.map((poke) => (
                                         <Tooltip title={poke.label} key={poke.name} placement="right" followCursor={true}>
-                                            {pokemon.name !== poke.name ? (
+                                            {(pokemon.species?.name ?? pokemon.name) !== poke.name ? (
                                                 <Link
                                                     key={poke.name}
                                                     component={RouterLink}

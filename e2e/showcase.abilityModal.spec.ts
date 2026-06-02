@@ -33,7 +33,9 @@ test('ability modal Pokemon links navigate to another showcase entry', async ({ 
     await page.getByLabel('Open ability info for Overgrow').click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByLabel('Go to Ivysaur showcase page')).toBeVisible();
+    await expect(dialog.getByLabel('Go to Ivysaur showcase page')).toHaveCount(1);
+    await expect(dialog.getByLabel('Go to Pikachu showcase page')).toBeVisible();
+    await expect(dialog.getByLabel('Go to Pikachu Rock Star showcase page')).toHaveCount(0);
     await dialog.getByLabel('Go to Ivysaur showcase page').click();
 
     await expectSearchParam(page, 'pokemon', 'ivysaur');

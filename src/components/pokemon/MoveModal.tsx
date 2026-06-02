@@ -24,9 +24,11 @@ import {
 } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { toTitleCase } from "../../helpers/common";
+import { getPokemonSpeciesForVariants } from "../../helpers/pokemonSpecies";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { useHorizontalSwipeNavigation } from "../../hooks/useHorizontalSwipeNavigation";
 import { loadMove, selectMoveByName } from "../../state/pokemonMovesSlice";
+import { getPokemonList } from "../../state/pokemonSlice";
 import Type from "./Type";
 
 export type MoveRow = {
@@ -60,6 +62,7 @@ const MoveModal = ({
     const lastWheelNavAtRef = useRef<number>(0);
 
     const selectedMove = useAppSelector((state) => selectMoveByName(state, selectedMoveRow?.rawName));
+    const pokemonSpecies = useAppSelector(getPokemonList);
     const selectedMoveIndex = useMemo(() => {
         if (!selectedMoveRow) return -1;
         return rows.findIndex((row) => row.rawName === selectedMoveRow.rawName);
@@ -177,12 +180,12 @@ const MoveModal = ({
 
     const learnedByPokemon = useMemo(() => {
         if (!selectedMove) return [];
-        return (selectedMove.learned_by_pokemon ?? [])
+        return getPokemonSpeciesForVariants(selectedMove.learned_by_pokemon ?? [], pokemonSpecies)
             .map((poke) => ({
                 name: poke.name,
                 label: toTitleCase(poke.name.replaceAll('-', ' ')),
             }));
-    }, [selectedMove]);
+    }, [pokemonSpecies, selectedMove]);
 
     return (
         <Dialog

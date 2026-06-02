@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
-import type { PokemonType } from "../../model/Pokemon";
+import type { PokemonType } from "../../model/PokemonVariant";
 import {
     type PokemonTypeDetails,
     pokemonTypeNames,

@@ -2,7 +2,7 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import { Box, ButtonBase, Grid, Stack, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useElementRect } from "../../hooks/useElementRect";
-import type { Pokemon, PokemonType } from "../../model/Pokemon";
+import type { PokemonType, PokemonVariant } from "../../model/PokemonVariant";
 import FullPaper from "../FullPaper";
 import Abilities from "./Abilities";
 import Cries from "./Cries";
@@ -13,7 +13,7 @@ import Type from "./Type";
 import TypeModal from "./TypeModal";
 
 type PokemonProps = {
-    pokemon: Pokemon;
+    pokemon: PokemonVariant;
 }
 
 const PokemonDetails = ({ pokemon }: PokemonProps) => {

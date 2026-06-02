@@ -2,7 +2,7 @@ import { Box, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from
 import type { HighlightItemData } from "@mui/x-charts";
 import { RadarChart, type RadarSeries } from '@mui/x-charts/RadarChart';
 import { memo, useState } from "react";
-import type { PokemonStat } from "../../model/Pokemon";
+import type { PokemonStat } from "../../model/PokemonVariant";
 
 
 const maxLevel = 100;

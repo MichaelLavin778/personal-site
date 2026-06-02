@@ -1,79 +1,64 @@
-export type PokemonItemSimple = {
+import type { PokemonGender, PokemonItemSimple, PokemonVariant } from "./PokemonVariant";
+
+export type PokemonSpeciesDescription = {
+	description: string
+	language: PokemonItemSimple
+}
+
+export type PokemonSpeciesFlavorText = {
+	flavor_text: string
+	language: PokemonItemSimple
+	version: PokemonItemSimple
+}
+
+export type PokemonSpeciesGenus = {
+	genus: string
+	language: PokemonItemSimple
+}
+
+export type PokemonSpeciesName = {
+	language: PokemonItemSimple
 	name: string
-	url: string
 }
 
-export type PokemonGender = 'male' | 'female' | 'both' | 'genderless' | 'unknown'
-
-export type PokemonAbility = {
-	ability: PokemonItemSimple
-	is_hidden: boolean
-	slot: number
+export type PokemonSpeciesPalParkEncounter = {
+	area: PokemonItemSimple
+	base_score: number
+	rate: number
 }
 
-export type PokemonCry = {
-	latest: string | null
-	legacy: string | null
-}
-
-export type VersionGroupDetails = {
-	level_learned_at: number
-	move_learn_method: PokemonItemSimple
-	// order
-	// version_group
-}
-
-// Pokemon's Move - from /pokemon/{pokemon}.moves
-// which is different from /moves/{move}, sadly
-export type PokemonsMove = {
-	move: PokemonItemSimple
-	version_group_details: VersionGroupDetails[]
-}
-
-export type PokemonSprites = {
-	back_default: string | null
-	back_female: string | null
-	back_shiny: string | null
-	back_shiny_female: string | null
-	front_default: string | null
-	front_female: string | null
-	front_shiny: string | null
-	front_shiny_female: string | null
-	// other
-	// versions
-}
-
-export type PokemonStat = {
-	base_stat: number
-	effort: number
-	stat: PokemonItemSimple
-}
-
-export type PokemonType = {
-	slot: number
-	type: PokemonItemSimple
+export type PokemonSpeciesPokedexNumber = {
+	entry_number: number
+	pokedex: PokemonItemSimple
 }
 
 export type Pokemon = PokemonItemSimple & {
-	abilities: PokemonAbility[] | undefined
-	base_experience: number | undefined
-	cries: PokemonCry | undefined
-	forms: PokemonItemSimple[] | undefined
-	// game_indices
-	height: number | undefined
-	// held_items
+	base_happiness: number | undefined
+	capture_rate: number | undefined
+	color: PokemonItemSimple | undefined
+	egg_groups: PokemonItemSimple[] | undefined
+	evolution_chain: { url: string } | undefined
+	evolves_from_species: PokemonItemSimple | null | undefined
+	flavor_text_entries: PokemonSpeciesFlavorText[] | undefined
+	form_descriptions: PokemonSpeciesDescription[] | undefined
+	forms_switchable: boolean | undefined
+	gender_rate: number | undefined
+	genera: PokemonSpeciesGenus[] | undefined
+	generation: PokemonItemSimple | undefined
+	growth_rate: PokemonItemSimple | undefined
+	habitat: PokemonItemSimple | null | undefined
+	has_gender_differences: boolean | undefined
+	hatch_counter: number | undefined
 	id: number | undefined
-	is_default: boolean | undefined
-	location_area_encounters: string | undefined
-	moves: PokemonsMove[] | undefined
+	is_baby: boolean | undefined
+	is_legendary: boolean | undefined
+	is_mythical: boolean | undefined
+	names: PokemonSpeciesName[] | undefined
 	order: number | undefined
-	// past_abilities
-	// past_types
-	species: PokemonItemSimple | undefined
-	sprites: PokemonSprites | undefined
-	stats: PokemonStat[] | undefined
-	types: PokemonType[] | undefined
-	weight: number | undefined
-	// derived from /gender endpoints and merged into the state list after load
+	pal_park_encounters: PokemonSpeciesPalParkEncounter[] | undefined
+	pokedex_numbers: PokemonSpeciesPokedexNumber[] | undefined
+	shape: PokemonItemSimple | null | undefined
+	varieties: PokemonVariant[] | undefined
+	// Derived from gender_rate after the species details load.
 	gender: PokemonGender | undefined
 }

@@ -6,11 +6,11 @@ import {
 import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toTitleCase } from "../../helpers/common";
-import type { Pokemon, PokemonAbility } from "../../model/Pokemon";
+import type { PokemonAbility, PokemonVariant } from "../../model/PokemonVariant";
 import AbilityModal from "./AbilityModal";
 
 interface AbilitiesProps {
-    pokemon: Pokemon;
+    pokemon: PokemonVariant;
 }
 
 const Abilities = ({ pokemon }: AbilitiesProps) => {

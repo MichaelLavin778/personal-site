@@ -23,7 +23,7 @@ import { useAppSelector } from "../../hooks/hooks";
 import { useElementRect } from "../../hooks/useElementRect";
 import { useViewportSize } from "../../hooks/useViewportSize";
 import { headerFooterPaddingPx } from "../../model/common";
-import type { PokemonsMove, VersionGroupDetails } from "../../model/Pokemon";
+import type { PokemonsMove, VersionGroupDetails } from "../../model/PokemonVariant";
 import type { EffectEntry } from "../../model/PokemonMove";
 import { makeSelectPokemonMoves } from "../../state/pokemonMovesSlice";
 import TutorialPopover from "../TutorialPopover";

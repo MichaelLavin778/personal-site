@@ -1,4 +1,4 @@
-import type { PokemonItemSimple } from "./Pokemon"
+import type { PokemonItemSimple } from "./PokemonVariant"
 
 export type PokemonItemWeak = {
     name?: string

@@ -1,11 +1,12 @@
 import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import type { Pokemon, PokemonGender, PokemonItemSimple } from '../model/Pokemon';
+import type { Pokemon } from '../model/Pokemon';
+import type { PokemonGender, PokemonItemSimple, PokemonVariant } from '../model/PokemonVariant';
 import type { RootState } from './store';
 
 const initialState: Pokemon[] = [];
 let isPokemonListRequestInFlight = false;
-let isPokemonGenderDataRequestInFlight = false;
 const pokemonRequestsInFlight = new Set<string>();
+const pokemonVariantRequestsInFlight = new Set<string>();
 
 // Async thunk to fetch pokemon list
 export const loadPokemonList = createAsyncThunk<
@@ -15,7 +16,7 @@ export const loadPokemonList = createAsyncThunk<
 >('pokemon/pokemonList', async (_: void, thunkAPI) => {
 	isPokemonListRequestInFlight = true;
 	try {
-		const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
+		const apiUrl = 'https://pokeapi.co/api/v2/pokemon-species?limit=100000';
 		const res = await fetch(apiUrl);
 		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
 
@@ -36,57 +37,40 @@ export const loadPokemonList = createAsyncThunk<
 		!isPokemonListRequestInFlight && getState().pokemon.pokemon.length === 0,
 })
 
-const readGenderNames = async (apiUrl: string): Promise<string[]> => {
-	const res = await fetch(apiUrl);
-	if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-
-	const json = (await res.json()) as {
-		pokemon_species_details?: Array<{
-			pokemon_species?: { name?: string }
-		}>
-	};
-
-	return (json.pokemon_species_details ?? [])
-		.map((d) => d.pokemon_species?.name)
-		.filter((n): n is string => typeof n === 'string' && n.length > 0)
-		.map((n) => n.trim().toLowerCase());
+const getPokemonGender = (genderRate: number | undefined): PokemonGender => {
+	if (genderRate === -1) return 'genderless';
+	if (genderRate === 0) return 'male';
+	if (genderRate === 8) return 'female';
+	if (genderRate !== undefined) return 'both';
+	return 'unknown';
 };
 
-export const loadPokemonGenderData = createAsyncThunk<
-	{ male: string[]; female: string[] },
-	void,
-	{ rejectValue: string; state: RootState }
->('pokemon/genderData', async (_: void, thunkAPI) => {
-	isPokemonGenderDataRequestInFlight = true;
-	try {
-		// PokeAPI: 1=female, 2=male, 3=genderless
-		const [female, male] = await Promise.all([
-			readGenderNames('https://pokeapi.co/api/v2/gender/1'),
-			readGenderNames('https://pokeapi.co/api/v2/gender/2'),
-		]);
+type PokemonSpeciesResponse = Omit<Pokemon, 'gender' | 'url' | 'varieties'> & {
+	varieties?: Array<{
+		is_default?: boolean
+		pokemon?: PokemonItemSimple
+	}>
+}
 
-		return {
-			male: Array.from(new Set(male)),
-			female: Array.from(new Set(female)),
-		};
-	} catch (err: unknown) {
-		const message = (err as Error)?.message ?? String(err);
-		return thunkAPI.rejectWithValue(message);
-	} finally {
-		isPokemonGenderDataRequestInFlight = false;
-	}
-}, {
-	condition: (_, { getState }) => {
-		const pokemon = getState().pokemon.pokemon;
-		return !isPokemonGenderDataRequestInFlight &&
-			pokemon.length > 0 &&
-			pokemon.some((p) => p.gender === undefined);
-	},
-});
+const readPokemonSpecies = (json: PokemonSpeciesResponse, apiUrl: string): Pokemon => {
+	const gender = getPokemonGender(json.gender_rate);
+	const varieties = (json.varieties ?? []).flatMap((variety) =>
+		variety.pokemon
+			? [{
+				...variety.pokemon,
+				is_default: variety.is_default,
+				gender,
+			} as PokemonVariant]
+			: []
+	);
 
-// Backwards-compatible export name: this no longer loads "genderless" specifically.
-// It loads male+female gender lists and merges derived gender data into pokemon state.
-export const loadGenderlessPokemonList = loadPokemonGenderData;
+	return {
+		...json,
+		url: apiUrl,
+		varieties,
+		gender,
+	};
+};
 
 export const loadPokemon = createAsyncThunk<
 	Pokemon,
@@ -98,10 +82,7 @@ export const loadPokemon = createAsyncThunk<
 		const res = await fetch(apiUrl);
 		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
 
-		const json = await res.json();
-		const results: Pokemon = json;
-
-		return results;
+		return readPokemonSpecies(await res.json(), apiUrl);
 	} catch (err: unknown) {
 		const message = (err as Error)?.message ?? String(err);
 		return thunkAPI.rejectWithValue(message);
@@ -112,6 +93,35 @@ export const loadPokemon = createAsyncThunk<
 	condition: (apiUrl, { getState }) => {
 		const cachedPokemon = getState().pokemon.pokemon.find((p) => p.url === apiUrl);
 		return !pokemonRequestsInFlight.has(apiUrl) && !cachedPokemon?.id;
+	},
+})
+
+export const loadPokemonVariant = createAsyncThunk<
+	PokemonVariant,
+	string,
+	{ rejectValue: string; state: RootState }
+>('pokemon/pokemonVariant', async (apiUrl, thunkAPI) => {
+	pokemonVariantRequestsInFlight.add(apiUrl);
+	try {
+		const res = await fetch(apiUrl);
+		if (!res.ok) throw Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+
+		return {
+			...await res.json(),
+			url: apiUrl,
+		} as PokemonVariant;
+	} catch (err: unknown) {
+		const message = (err as Error)?.message ?? String(err);
+		return thunkAPI.rejectWithValue(message);
+	} finally {
+		pokemonVariantRequestsInFlight.delete(apiUrl);
+	}
+}, {
+	condition: (apiUrl, { getState }) => {
+		const cachedVariant = getState().pokemon.pokemon
+			.flatMap((pokemon) => pokemon.varieties ?? [])
+			.find((variant) => variant.url === apiUrl);
+		return !pokemonVariantRequestsInFlight.has(apiUrl) && !cachedVariant?.id;
 	},
 })
 
@@ -129,34 +139,28 @@ export const pokemonSlice = createSlice({
 					state.push({
 						...p,
 						gender: undefined,
+						varieties: undefined,
 					} as Pokemon);
 					existingPokemonNames.add(p.name);
-				}
-			})
-			.addCase(loadPokemonGenderData.fulfilled, (state, action: PayloadAction<{
-				male: string[];
-				female: string[];
-			}>) => {
-				const maleSet = new Set(action.payload.male);
-				const femaleSet = new Set(action.payload.female);
-
-				for (const p of state) {
-					const isMale = maleSet.has(p.name);
-					const isFemale = femaleSet.has(p.name);
-
-					let gender: PokemonGender = 'unknown';
-					if (isMale && isFemale) gender = 'both';
-					else if (isMale) gender = 'male';
-					else if (isFemale) gender = 'female';
-					else gender = 'genderless';
-
-					p.gender = gender;
 				}
 			})
 			.addCase(loadPokemon.fulfilled, (state, action: PayloadAction<Pokemon>) => {
 				const index = state.findIndex(p => p.name === action.payload.name);
 				if (index >= 0) state[index] = { ...state[index], ...action.payload };
 				else state.push(action.payload);
+			})
+			.addCase(loadPokemonVariant.fulfilled, (state, action: PayloadAction<PokemonVariant>) => {
+				for (const pokemon of state) {
+					const index = pokemon.varieties?.findIndex((variant) => variant.name === action.payload.name) ?? -1;
+					if (index < 0 || !pokemon.varieties) continue;
+
+					pokemon.varieties[index] = {
+						...pokemon.varieties[index],
+						...action.payload,
+						gender: pokemon.gender,
+					};
+					return;
+				}
 			})
 	},
 })
@@ -165,6 +169,10 @@ export const pokemonSlice = createSlice({
 export const getPokemonList = (state: RootState) => state.pokemon.pokemon
 export const getPokemon = (state: RootState, pokemonName: string) =>
 	getPokemonList(state).find((p) => p.name === pokemonName)
+export const getDefaultPokemonVariant = (state: RootState, pokemonName: string) => {
+	const varieties = getPokemon(state, pokemonName)?.varieties ?? [];
+	return varieties.find((variant) => variant.is_default) ?? varieties[0];
+}
 export const getPokemonIndex = (state: RootState, pokemonName: string) =>
 	getPokemonList(state).findIndex((p) => p.name === pokemonName)
 export const getPreviousPokemon = (state: RootState, pokemonName: string) => {

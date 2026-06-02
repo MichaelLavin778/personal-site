@@ -1,5 +1,5 @@
 import { type PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import type { PokemonItemSimple } from '../model/Pokemon';
+import type { PokemonItemSimple } from '../model/PokemonVariant';
 import type { PokemonTypeDetails } from '../model/PokemonTypeDetails';
 import type { RootState } from './store';
 

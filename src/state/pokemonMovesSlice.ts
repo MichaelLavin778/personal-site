@@ -1,6 +1,6 @@
 import { type PayloadAction, createAction, createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import pLimit from 'p-limit';
-import type { PokemonsMove } from '../model/Pokemon';
+import type { PokemonsMove } from '../model/PokemonVariant';
 import type { PokemonMove } from '../model/PokemonMove';
 import type { RootState } from './store';
 

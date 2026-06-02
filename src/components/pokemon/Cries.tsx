@@ -3,7 +3,7 @@ import { Box, Slider, Stack, Typography } from "@mui/material";
 import { type RefObject, useContext, useEffect, useRef } from "react";
 import dreadnaw from "../../assets/dreadnaw_the_bite_pokemon.ogg";
 import VolumeContext from "../../context/VolumeContext";
-import type { PokemonCry } from "../../model/Pokemon";
+import type { PokemonCry } from "../../model/PokemonVariant";
 import CryAudio from "./CryAudio";
 
 const setRefVolume = (ref: RefObject<HTMLAudioElement | null>, volume: number) => {
