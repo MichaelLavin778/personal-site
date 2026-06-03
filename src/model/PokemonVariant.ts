@@ -16,6 +16,16 @@ export type PokemonCry = {
 	legacy: string | null
 }
 
+export type PokemonHeldItemVersionDetail = {
+	rarity: number
+	version: PokemonItemSimple
+}
+
+export type PokemonHeldItem = {
+	item: PokemonItemSimple
+	version_details: PokemonHeldItemVersionDetail[]
+}
+
 export type VersionGroupDetails = {
 	level_learned_at: number
 	move_learn_method: PokemonItemSimple
@@ -61,7 +71,7 @@ export type PokemonVariant = PokemonItemSimple & {
 	forms: PokemonItemSimple[] | undefined
 	// game_indices
 	height: number | undefined
-	// held_items
+	held_items: PokemonHeldItem[] | undefined
 	id: number | undefined
 	is_default: boolean | undefined
 	location_area_encounters: string | undefined
