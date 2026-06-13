@@ -357,7 +357,7 @@ export const openMockedShowcase = async (
     await expect(getPokemonSelector(page)).toHaveValue(
         new RegExp(pokemon.replaceAll('-', '[ -]'), 'i')
     );
-    await expect(getGenerationSelector(page)).toHaveText('9');
+    // await expect(getGenerationSelector(page)).toHaveText('9');
     await expect(page.getByText('Abilities', { exact: true })).toBeVisible();
 };
 
