@@ -30,21 +30,31 @@ test('showcase page renders core UX controls and details', async ({ page }) => {
         'Type',
         'Abilities',
         'Stats',
+        'Moves',
+    ])
+        await expect(page.getByRole('tabpanel', { name: 'Battle' }).getByText(label, { exact: true }).first()).toBeVisible();
+
+    await page.getByRole('tab', { name: 'Description' }).click();
+    await expect(page.getByRole('tab', { name: 'Description' })).toHaveAttribute('aria-selected', 'true');
+
+    for (const label of [
         'Base Experience',
         'Height',
         'Weight',
         'Cries',
-        'Moves',
     ])
-        await expect(page.locator('span').getByText(label, { exact: true })).toBeVisible();
+        await expect(page.getByRole('tabpanel', { name: 'Description' }).getByText(label, { exact: true }).first()).toBeVisible();
+
+    await expect(page.getByRole('tabpanel', { name: 'Description' }).getByRole('button', { name: 'Latest' })).toBeVisible();
+    await expect(page.getByRole('tabpanel', { name: 'Description' }).getByRole('button', { name: 'Legacy' })).toBeVisible();
+    await expect(page.getByRole('tabpanel', { name: 'Description' }).getByRole('slider', { name: 'Volume' })).toBeVisible();
+
+    await page.getByRole('tab', { name: 'Battle' }).click();
 
     await expect(page.getByRole('button', { name: 'series Base' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: 'series Max' }).click();
     await expect(page.getByRole('button', { name: 'series Max' })).toHaveAttribute('aria-pressed', 'true');
 
-    await expect(page.getByRole('button', { name: 'Latest' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Legacy' })).toBeVisible();
-    await expect(page.getByRole('slider', { name: 'Volume' })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Battle' })).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('tabpanel', { name: 'Battle' })).toBeVisible();
 
