@@ -20,12 +20,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -54,9 +54,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
+          fetch-depth: 0
 
       - name: Push main -> production
-        run: git push origin HEAD:production
+        run: |
+          git fetch origin production
+
+          if git merge-base --is-ancestor origin/production HEAD; then
+            git push origin HEAD:production
+          else
+            echo "::warning::Skipping promotion: origin/production is ahead of this run's main commit."
+            exit 0
+          fi
